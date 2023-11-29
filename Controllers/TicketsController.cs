@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,12 +19,15 @@ namespace TurboTicketsMVC.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ITurboTicketsService _turboTicketsService;
+        private readonly UserManager<TTUser> _userManager;
 
         public TicketsController(ApplicationDbContext context,
-                                 ITurboTicketsService turboTicketsService)
+                                 ITurboTicketsService turboTicketsService,
+                                 UserManager<TTUser> userManager)
         {
             _context = context;
             _turboTicketsService = turboTicketsService;
+            _userManager = userManager;
         }
 
         // GET: Tickets
@@ -56,11 +60,13 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // GET: Tickets/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id");
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description");
-            ViewData["SubmitterUserId"] = new SelectList(_context.Users, "Id", "Id");
+            int companyId = User.Identity!.GetCompanyId();
+            IEnumerable<Project> companyProjects = await _turboTicketsService.GetProjectsByCompanyAsync(companyId);
+            IEnumerable<TTUser> companyUsers = await _turboTicketsService.GetUsersByCompanyAsync(companyId);
+            ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
+            ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View();
         }
 
@@ -69,17 +75,22 @@ namespace TurboTicketsMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,CreatedDate,UpdatedDate,Archived,ArchivedByProject,ProjectId,TicketType,TicketStatus,TicketPriority,DeveloperUserId,SubmitterUserId")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("Title,Description,Archived,ArchivedByProject,ProjectId,TicketType,TicketStatus,TicketPriority,DeveloperUserId")] Ticket ticket)
         {
+            ModelState.Remove("SubmitterUserId");
             if (ModelState.IsValid)
             {
+                ticket.CreatedDate = DateTimeOffset.Now;
+                ticket.SubmitterUserId = _userManager.GetUserId(User);
                 _context.Add(ticket);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", ticket.ProjectId);
-            ViewData["SubmitterUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.SubmitterUserId);
+            int companyId = User.Identity!.GetCompanyId();
+            IEnumerable<Project> companyProjects = await _turboTicketsService.GetProjectsByCompanyAsync(companyId);
+            IEnumerable<TTUser> companyUsers = await _turboTicketsService.GetUsersByCompanyAsync(companyId);
+            ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
+            ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View(ticket);
         }
 
@@ -96,9 +107,11 @@ namespace TurboTicketsMVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", ticket.ProjectId);
-            ViewData["SubmitterUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.SubmitterUserId);
+            int companyId = User.Identity!.GetCompanyId();
+            IEnumerable<Project> companyProjects = await _turboTicketsService.GetProjectsByCompanyAsync(companyId);
+            IEnumerable<TTUser> companyUsers = await _turboTicketsService.GetUsersByCompanyAsync(companyId);
+            ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
+            ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View(ticket);
         }
 
@@ -107,7 +120,7 @@ namespace TurboTicketsMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,CreatedDate,UpdatedDate,Archived,ArchivedByProject,ProjectId,TicketType,TicketStatus,TicketPriority,DeveloperUserId,SubmitterUserId")] Ticket ticket)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,CreatedDate,Archived,ArchivedByProject,ProjectId,TicketType,TicketStatus,TicketPriority,DeveloperUserId,SubmitterUserId")] Ticket ticket)
         {
             if (id != ticket.Id)
             {
@@ -118,6 +131,7 @@ namespace TurboTicketsMVC.Controllers
             {
                 try
                 {
+                    ticket.UpdatedDate = DateTimeOffset.Now;
                     _context.Update(ticket);
                     await _context.SaveChangesAsync();
                 }
@@ -134,9 +148,11 @@ namespace TurboTicketsMVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DeveloperUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.DeveloperUserId);
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", ticket.ProjectId);
-            ViewData["SubmitterUserId"] = new SelectList(_context.Users, "Id", "Id", ticket.SubmitterUserId);
+            int companyId = User.Identity!.GetCompanyId();
+            IEnumerable<Project> companyProjects = await _turboTicketsService.GetProjectsByCompanyAsync(companyId);
+            IEnumerable<TTUser> companyUsers = await _turboTicketsService.GetUsersByCompanyAsync(companyId);
+            ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
+            ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View(ticket);
         }
 

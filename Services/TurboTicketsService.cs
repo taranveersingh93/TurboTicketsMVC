@@ -46,5 +46,26 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
+
+        public async Task<IEnumerable<Project>> GetProjectsByCompanyAsync(int companyId)
+        {
+            try
+            {
+                IEnumerable<Project> companyProjects = await _context.Projects
+                                                                    .Where(p => p.CompanyId == companyId).ToListAsync();
+                return companyProjects;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<IEnumerable<TTUser>> GetUsersByCompanyAsync(int companyId)
+        {
+            IEnumerable<TTUser> companyUsers = await _context.Users
+                                                             .Where(u => u.CompanyId == companyId).ToListAsync();
+            return companyUsers;
+        }
     }
 }
