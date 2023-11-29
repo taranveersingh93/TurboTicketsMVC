@@ -4,7 +4,7 @@ namespace TurboTicketsMVC.Services
 {
     public class ImageService : IImageService
     {
-        private string? _defaultImage = "/img/DefaultImage.png";
+        private string? _defaultImage = "/img/DefaultImage.jpg";
         public string? ConvertByteArrayToFile(byte[]? fileData, string? extension, string? imgEntity)
         {
             try

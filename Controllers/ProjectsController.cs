@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TurboTicketsMVC.Data;
+using TurboTicketsMVC.Extensions;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Controllers
 {
@@ -15,16 +17,21 @@ namespace TurboTicketsMVC.Controllers
     public class ProjectsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IImageService _imageService;
 
-        public ProjectsController(ApplicationDbContext context)
+        public ProjectsController(ApplicationDbContext context,
+                                  IImageService imageService)
         {
+            _imageService = imageService;
             _context = context;
         }
 
         // GET: Projects
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Projects.Include(p => p.Company);
+            int companyId = User.Identity!.GetCompanyId();
+            var applicationDbContext = _context.Projects.Include(p => p.Company)
+                                                        .Where(p => p.CompanyId == companyId);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -59,10 +66,20 @@ namespace TurboTicketsMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,CompanyId,Name,Description,CreatedDate,StartDate,EndDate,ProjectPriority,ImageFileData,ImageFileType,Archived")] Project project)
+        public async Task<IActionResult> Create([Bind("Name,Description,ProjectPriority,ImageFormFile,Archived")] Project project)
         {
             if (ModelState.IsValid)
             {
+                project.CompanyId = User.Identity!.GetCompanyId();
+                project.CreatedDate = DateTimeOffset.Now;
+                project.StartDate = DateTimeOffset.Now;
+                project.EndDate = DateTimeOffset.Now;
+
+                if (project.ImageFormFile != null)
+                {
+                    project.ImageFileData = await _imageService.ConvertFileToByteArrayAsync(project.ImageFormFile);
+                    project.ImageFileType = project.ImageFormFile.ContentType;
+                }
                 _context.Add(project);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -93,7 +110,7 @@ namespace TurboTicketsMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CompanyId,Name,Description,CreatedDate,StartDate,EndDate,ProjectPriority,ImageFileData,ImageFileType,Archived")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CompanyId,Name,Description,CreatedDate,StartDate,EndDate,ProjectPriority,ImageFormFile,Archived")] Project project)
         {
             if (id != project.Id)
             {
@@ -104,6 +121,11 @@ namespace TurboTicketsMVC.Controllers
             {
                 try
                 {
+                    if (project.ImageFormFile != null)
+                    {
+                        project.ImageFileData = await _imageService.ConvertFileToByteArrayAsync(project.ImageFormFile);
+                        project.ImageFileType = project.ImageFormFile.ContentType;
+                    }
                     _context.Update(project);
                     await _context.SaveChangesAsync();
                 }

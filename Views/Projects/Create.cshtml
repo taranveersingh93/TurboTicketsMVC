@@ -1,4 +1,7 @@
-﻿@model TurboTicketsMVC.Models.Project
+﻿@using TurboTicketsMVC.Models.Enums;
+@using TurboTicketsMVC.Services.Interfaces;
+@model TurboTicketsMVC.Models.Project
+@inject IImageService _ImageService
 
 @{
     ViewData["Title"] = "Create";
@@ -10,11 +13,13 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="CompanyId" class="control-label"></label>
-                <select asp-for="CompanyId" class ="form-control" asp-items="ViewBag.CompanyId"></select>
+                <label asp-for="ImageFormFile" class="control-label">Project Image</label>
+                <img class="img-fluid border rounded-3 mb-2" style="max-height: 350px;" src="@_ImageService.ConvertByteArrayToFile(Model?.ImageFileData, Model?.ImageFileType, "Project")" id="projectImage">
+                <input asp-for="ImageFormFile" type="file" class="form-control mt-3 pt-2" accept=".png,.jpg,.jpeg,.gif"
+                       onchange="document.getElementById('projectImage').src = window.URL.createObjectURL(this.files[0])" />
             </div>
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
@@ -26,36 +31,13 @@
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="CreatedDate" class="control-label"></label>
-                <input asp-for="CreatedDate" class="form-control" />
-                <span asp-validation-for="CreatedDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StartDate" class="control-label"></label>
-                <input asp-for="StartDate" class="form-control" />
-                <span asp-validation-for="StartDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EndDate" class="control-label"></label>
-                <input asp-for="EndDate" class="form-control" />
-                <span asp-validation-for="EndDate" class="text-danger"></span>
-            </div>
+
             <div class="form-group">
                 <label asp-for="ProjectPriority" class="control-label"></label>
-                <select asp-for="ProjectPriority" class="form-control"></select>
+                <select asp-for="ProjectPriority" class="form-select" asp-items="@Html.GetEnumSelectList<TTProjectPriorities>()"></select>
                 <span asp-validation-for="ProjectPriority" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ImageFileData" class="control-label"></label>
-                <input asp-for="ImageFileData" class="form-control" />
-                <span asp-validation-for="ImageFileData" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageFileType" class="control-label"></label>
-                <input asp-for="ImageFileType" class="form-control" />
-                <span asp-validation-for="ImageFileType" class="text-danger"></span>
-            </div>
+
             <div class="form-group form-check">
                 <label class="form-check-label">
                     <input class="form-check-input" asp-for="Archived" /> @Html.DisplayNameFor(model => model.Archived)
