@@ -24,7 +24,15 @@ builder.Services.AddIdentity<TTUser, IdentityRole>(options => options.SignIn.Req
 builder.Services.AddControllersWithViews();
 
 //Custom service section
-builder.Services.AddScoped<IImageService, ImageService>();
+//builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<ITTCompanyService, TTCompanyService>();
+builder.Services.AddScoped<ITTFileService, TTFileService>();
+builder.Services.AddScoped<ITTInviteService, TTInviteService>();
+builder.Services.AddScoped<ITTNotificationService, TTNotificationService>();
+builder.Services.AddScoped<ITTProjectService, TTProjectService>();
+builder.Services.AddScoped<ITTRolesService, TTRolesService>();
+builder.Services.AddScoped<ITTTicketHistoryService, TTTicketHistoryService>();
+builder.Services.AddScoped<ITTTicketService, TTTicketService>();
 builder.Services.AddScoped<IEmailSender, EmailService>();
 builder.Services.AddScoped<ITurboTicketsService, TurboTicketsService>();
 

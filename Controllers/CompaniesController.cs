@@ -2,29 +2,68 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TurboTicketsMVC.Data;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Models.Enums;
+using TurboTicketsMVC.Models.ViewModels;
+using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Controllers
 {
-    public class CompaniesController : Controller
+    public class CompaniesController : TTBaseController
     {
         private readonly ApplicationDbContext _context;
+        private readonly ITTCompanyService _companyService;
+        private readonly ITTRolesService _rolesService;
 
-        public CompaniesController(ApplicationDbContext context)
+        public CompaniesController(ApplicationDbContext context,
+                                   ITTCompanyService companyService,
+                                   ITTRolesService rolesService)
         {
             _context = context;
+            _companyService = companyService;
+            _rolesService = rolesService;
         }
 
-        // GET: Companies
-        public async Task<IActionResult> Index()
+        //// GET: Companies
+        //public async Task<IActionResult> Index()
+        //{
+        //      return _context.Companies != null ? 
+        //                  View(await _context.Companies.ToListAsync()) :
+        //                  Problem("Entity set 'ApplicationDbContext.Companies'  is null.");
+        //}
+
+        [HttpGet]
+        [Authorize(Roles ="Admin")]
+        public async Task<IActionResult> ManageUserRoles()
         {
-              return _context.Companies != null ? 
-                          View(await _context.Companies.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.Companies'  is null.");
+            //add an inst of viewModel as a list(model)
+            List<ManageUserRolesViewModel> model = new List<ManageUserRolesViewModel>();
+            //get companyId
+            int? companyId = _companyId;
+            //get all companyUsers
+            IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
+
+            //loop over users to populate the model.
+            foreach(TTUser user in companyUsers)
+            {
+                //more comprehensive than user.Id == _userId
+                if (string.Compare(user.Id, _userId) != 0)
+                {
+                    ManageUserRolesViewModel viewModel = new ManageUserRolesViewModel();
+                    IEnumerable<string>? currentRoles = await _rolesService.GetUserRolesAsync(user);
+                    viewModel.TTUser = user;
+                    viewModel.Roles = new MultiSelectList(await _rolesService.GetRolesAsync(), "Name", "Name", currentRoles);
+                    model.Add(viewModel);
+                }
+            }
+
+    // loop over users to populate 
+            return View();
         }
 
         // GET: Companies/Details/5
