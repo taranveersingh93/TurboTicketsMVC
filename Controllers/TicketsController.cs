@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TurboTicketsMVC.Data;
+using TurboTicketsMVC.Extensions;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Controllers
 {
@@ -15,17 +17,21 @@ namespace TurboTicketsMVC.Controllers
     public class TicketsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ITurboTicketsService _turboTicketsService;
 
-        public TicketsController(ApplicationDbContext context)
+        public TicketsController(ApplicationDbContext context,
+                                 ITurboTicketsService turboTicketsService)
         {
             _context = context;
+            _turboTicketsService = turboTicketsService;
         }
 
         // GET: Tickets
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Tickets.Include(t => t.DeveloperUser).Include(t => t.Project).Include(t => t.SubmitterUser);
-            return View(await applicationDbContext.ToListAsync());
+            int companyId = User.Identity!.GetCompanyId();
+            IEnumerable<Ticket> companyTickets = await _turboTicketsService.GetTicketsByCompanyAsync(companyId);
+            return View(companyTickets);
         }
 
         // GET: Tickets/Details/5
