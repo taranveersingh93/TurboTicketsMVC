@@ -1,7 +1,10 @@
 ﻿@page
+@using TurboTicketsMVC.Services.Interfaces;
 @model RegisterModel
+@inject ITurboTicketsService _TurboTicketsService;
 @{
     ViewData["Title"] = "Register";
+    IEnumerable<Company> allCompanies = await _TurboTicketsService.GetAllCompaniesAsync();
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -21,6 +24,16 @@
                 <input asp-for="Input.LastName" class="form-control" autocomplete="lastname" aria-required="true" placeholder="Last Name" />
                 <label asp-for="Input.LastName">Last Name</label>
                 <span asp-validation-for="Input.LastName" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <label asp-for="Input.CompanyId"></label>
+                <select asp-for="Input.CompanyId" class="form-control" aria-required="true">
+                @foreach(Company company in allCompanies)
+                {
+                    <option value="@company.Id">@company.Name</option>
+                }
+                </select>
+                <span asp-validation-for="Input.CompanyId" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />

@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using TurboTicketsMVC.Data;
+using TurboTicketsMVC.Extensions;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Services;
+using TurboTicketsMVC.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,10 +17,20 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 //change adddefaultid to addidentity abd add IdentityRole
 builder.Services.AddIdentity<TTUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+                 .AddClaimsPrincipalFactory<TTUserClaimsPrincipalFactory>()
                 .AddDefaultUI() // lines added
                 .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+
+//Custom service section
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IEmailSender, EmailService>();
+builder.Services.AddScoped<ITurboTicketsService, TurboTicketsService>();
+
+
+//email config
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 builder.Services.AddMvc();
 var app = builder.Build();
