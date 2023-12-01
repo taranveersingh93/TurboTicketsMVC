@@ -499,6 +499,37 @@ namespace TurboTicketsMVC.Data
                 throw;
             }
 
+            //Seed Demo Admin User
+            defaultUser = new TTUser
+            {
+                UserName = "admtaranveersingh93@gmail.com",
+                Email = "admtaranveersingh93@gmail.com",
+                FirstName = "Taranveer",
+                LastName = "Singh",
+                EmailConfirmed = true,
+                CompanyId = company1Id
+            };
+            try
+            {
+                //Test database to see if user already exists
+                var user = await userManager.FindByEmailAsync(defaultUser.Email);
+
+                if (user == null)
+                {
+                    await userManager.CreateAsync(defaultUser, "AppAdmin@1");
+                    await userManager.AddToRoleAsync(defaultUser, nameof(TTRoles.Admin));
+                    await userManager.AddToRoleAsync(defaultUser, nameof(TTRoles.DemoUser));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("*************  ERROR  *************");
+                Console.WriteLine("Error Seeding Demo Admin User.");
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("***********************************");
+                throw;
+            }
+
 
             //Seed Demo ProjectManager User
             defaultUser = new TTUser

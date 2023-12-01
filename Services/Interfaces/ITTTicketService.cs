@@ -10,7 +10,7 @@ namespace TurboTicketsMVC.Services.Interfaces
         public Task AddTicketCommentAsync(TicketComment? ticketComment);
 
         public Task UpdateTicketAsync(Ticket? ticket);
-        public Task<List<Ticket>> GetAllTicketsByCompanyIdAsync(int? companyId);
+        public Task<IEnumerable<Ticket>> GetAllTicketsByCompanyIdAsync(int? companyId);
         public Task<Ticket> GetTicketAsNoTrackingAsync(int? ticketId, int? companyId);
         public Task<Ticket> GetTicketByIdAsync(int? ticketId, int? companyId);
         public Task<TicketAttachment?> GetTicketAttachmentByIdAsync(int? ticketAttachmentId);

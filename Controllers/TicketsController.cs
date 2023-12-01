@@ -15,26 +15,32 @@ using TurboTicketsMVC.Services.Interfaces;
 namespace TurboTicketsMVC.Controllers
 {
     [Authorize]
-    public class TicketsController : Controller
+    public class TicketsController : TTBaseController
     {
         private readonly ApplicationDbContext _context;
-        private readonly ITurboTicketsService _turboTicketsService;
         private readonly UserManager<TTUser> _userManager;
+        private readonly ITTTicketService _ticketService;
+        private readonly ITTProjectService _projectService;
+        private readonly ITTCompanyService _companyService;
 
         public TicketsController(ApplicationDbContext context,
-                                 ITurboTicketsService turboTicketsService,
-                                 UserManager<TTUser> userManager)
+                                 UserManager<TTUser> userManager,
+                                 ITTTicketService ticketService,
+                                 ITTCompanyService companyService,
+                                 ITTProjectService projectService)
         {
             _context = context;
-            _turboTicketsService = turboTicketsService;
             _userManager = userManager;
+            _ticketService = ticketService;
+            _companyService = companyService;
+            _projectService = projectService;
         }
 
         // GET: Tickets
         public async Task<IActionResult> Index()
         {
             int companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Ticket> companyTickets = await _turboTicketsService.GetTicketsByCompanyAsync(companyId);
+            IEnumerable<Ticket> companyTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(companyId);
             return View(companyTickets);
         }
 
@@ -45,12 +51,8 @@ namespace TurboTicketsMVC.Controllers
             {
                 return NotFound();
             }
+            Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
 
-            var ticket = await _context.Tickets
-                .Include(t => t.DeveloperUser)
-                .Include(t => t.Project)
-                .Include(t => t.SubmitterUser)
-                .FirstOrDefaultAsync(m => m.Id == id);
             if (ticket == null)
             {
                 return NotFound();
@@ -63,8 +65,8 @@ namespace TurboTicketsMVC.Controllers
         public async Task<IActionResult> Create()
         {
             int companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Project> companyProjects = await _turboTicketsService.GetProjectsByCompanyAsync(companyId);
-            IEnumerable<TTUser> companyUsers = await _turboTicketsService.GetUsersByCompanyAsync(companyId);
+            IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
+            IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
             ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
             ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View();
@@ -87,8 +89,8 @@ namespace TurboTicketsMVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
             int companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Project> companyProjects = await _turboTicketsService.GetProjectsByCompanyAsync(companyId);
-            IEnumerable<TTUser> companyUsers = await _turboTicketsService.GetUsersByCompanyAsync(companyId);
+            IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
+            IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
             ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
             ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View(ticket);
@@ -108,8 +110,8 @@ namespace TurboTicketsMVC.Controllers
                 return NotFound();
             }
             int companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Project> companyProjects = await _turboTicketsService.GetProjectsByCompanyAsync(companyId);
-            IEnumerable<TTUser> companyUsers = await _turboTicketsService.GetUsersByCompanyAsync(companyId);
+            IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
+            IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
             ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
             ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View(ticket);
@@ -149,8 +151,8 @@ namespace TurboTicketsMVC.Controllers
                 return RedirectToAction(nameof(Index));
             }
             int companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Project> companyProjects = await _turboTicketsService.GetProjectsByCompanyAsync(companyId);
-            IEnumerable<TTUser> companyUsers = await _turboTicketsService.GetUsersByCompanyAsync(companyId);
+            IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
+            IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
             ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
             ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View(ticket);
@@ -196,7 +198,23 @@ namespace TurboTicketsMVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool TicketExists(int id)
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> AddTicketComment([Bind("Id, Comment,TicketId,UserId")] TicketComment ticketComment)
+		{
+			if (ModelState.IsValid)
+			{
+                ticketComment.CreatedDate = DateTimeOffset.Now;
+				_context.Add(ticketComment);
+				await _context.SaveChangesAsync();
+				return RedirectToAction(nameof(Details), new {id = ticketComment.TicketId});
+			}
+			ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
+			ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketComment.UserId);
+			return RedirectToAction(nameof(Details), new {id = ticketComment.TicketId});
+		}
+
+		private bool TicketExists(int id)
         {
           return (_context.Tickets?.Any(e => e.Id == id)).GetValueOrDefault();
         }

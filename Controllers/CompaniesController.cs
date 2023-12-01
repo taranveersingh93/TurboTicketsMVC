@@ -63,9 +63,32 @@ namespace TurboTicketsMVC.Controllers
             }
 
     // loop over users to populate 
-            return View();
+            return View(model);
         }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ManageUserRoles(ManageUserRolesViewModel viewModel)
+        {
+            //get companyid
+            //instantiate user
+            TTUser? ttUser = (await _companyService.GetMembersAsync(_companyId)).FirstOrDefault(u => u.Id == viewModel.TTUser?.Id);
+            //get roles of user
+            IEnumerable<string>? currentRoles = await _rolesService.GetUserRolesAsync(ttUser);
+            //get selected roles of user
+            string? selectedRole = viewModel.SelectedRoles?.FirstOrDefault();
+            //remove curent roles and add new roles
+            if (!string.IsNullOrEmpty(selectedRole))
+            {
+                if (await _rolesService.RemoveUserFromRolesAsync(ttUser, currentRoles)) //boolean return
+                {
+                    await _rolesService.AddUserToRoleAsync(ttUser, selectedRole);
+                }
+            }
+            return RedirectToAction(nameof(ManageUserRoles));
+            //save changes
+            //navigate
+        }
         // GET: Companies/Details/5
         public async Task<IActionResult> Details(int? id)
         {

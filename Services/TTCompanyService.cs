@@ -34,8 +34,7 @@ namespace TurboTicketsMVC.Services
                 
                 if (companyId != null)
                 {
-                    companyMembers = await _context.Users.Where(u => u.CompanyId == companyId)
-                                                          .AsNoTracking()
+                    companyMembers = await _context.Users.Where(u => u.CompanyId == companyId)                                                       
                                                           .ToListAsync();
                 }
 

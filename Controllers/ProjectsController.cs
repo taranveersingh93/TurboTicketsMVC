@@ -9,21 +9,29 @@ using Microsoft.EntityFrameworkCore;
 using TurboTicketsMVC.Data;
 using TurboTicketsMVC.Extensions;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Models.Enums;
+using TurboTicketsMVC.Models.ViewModels;
 using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Controllers
 {
     [Authorize]
-    public class ProjectsController : Controller
+    public class ProjectsController : TTBaseController
     {
         private readonly ApplicationDbContext _context;
-        private readonly IImageService _imageService;
+        private readonly ITTFileService _fileService;
+        private readonly ITTProjectService _projectService;
+        private readonly ITTRolesService _roleService;
 
         public ProjectsController(ApplicationDbContext context,
-                                  IImageService imageService)
+                                  ITTFileService fileService,
+                                  ITTProjectService projectService,
+                                  ITTRolesService roleService)
         {
-            _imageService = imageService;
+            _fileService = fileService;
             _context = context;
+            _projectService = projectService;
+            _roleService = roleService;
         }
 
         // GET: Projects
@@ -38,14 +46,21 @@ namespace TurboTicketsMVC.Controllers
         // GET: Projects/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Projects == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var project = await _context.Projects
-                .Include(p => p.Company)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            // Remember that the _context should not be used directly in the controller so....     
+
+            // Edit the following code to use the service layer. 
+            // Your goal is to return the 'project' from the databse
+            // with the Id equal to the parameter passed in.               
+            // This is the only modification necessary for this method/action.     
+
+            Project? project = await _projectService.GetProjectByIdAsync(id, _companyId);
+
+
             if (project == null)
             {
                 return NotFound();
@@ -53,6 +68,7 @@ namespace TurboTicketsMVC.Controllers
 
             return View(project);
         }
+        [Authorize(Roles = "Admin, ProjectManager")]
 
         // GET: Projects/Create
         public IActionResult Create()
@@ -66,7 +82,9 @@ namespace TurboTicketsMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,ProjectPriority,ImageFormFile,Archived")] Project project)
+        [Authorize(Roles = "Admin, ProjectManager")]
+
+        public async Task<IActionResult> Create([Bind("Id, Name,Description,ProjectPriority,ImageFormFile,Archived")] Project project)
         {
             if (ModelState.IsValid)
             {
@@ -74,21 +92,25 @@ namespace TurboTicketsMVC.Controllers
                 project.CreatedDate = DateTimeOffset.Now;
                 project.StartDate = DateTimeOffset.Now;
                 project.EndDate = DateTimeOffset.Now;
-
                 if (project.ImageFormFile != null)
                 {
-                    project.ImageFileData = await _imageService.ConvertFileToByteArrayAsync(project.ImageFormFile);
+                    project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
                     project.ImageFileType = project.ImageFormFile.ContentType;
                 }
-                _context.Add(project);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                await _projectService.AddProjectAsync(project);
+                bool pmAdded = await _projectService.AddProjectManagerAsync(_userId, project.Id);
+                if (pmAdded)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
             }
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", project.CompanyId);
             return View(project);
         }
 
         // GET: Projects/Edit/5
+        [Authorize(Roles = "Admin, ProjectManager")]
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Projects == null)
@@ -110,6 +132,8 @@ namespace TurboTicketsMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin, ProjectManager")]
+
         public async Task<IActionResult> Edit(int id, [Bind("Id,CompanyId,Name,Description,CreatedDate,StartDate,EndDate,ProjectPriority,ImageFormFile,Archived")] Project project)
         {
             if (id != project.Id)
@@ -123,7 +147,7 @@ namespace TurboTicketsMVC.Controllers
                 {
                     if (project.ImageFormFile != null)
                     {
-                        project.ImageFileData = await _imageService.ConvertFileToByteArrayAsync(project.ImageFormFile);
+                        project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
                         project.ImageFileType = project.ImageFormFile.ContentType;
                     }
                     _context.Update(project);
@@ -146,7 +170,62 @@ namespace TurboTicketsMVC.Controllers
             return View(project);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> AssignPM(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Project? project = await _projectService.GetProjectByIdAsync(id, _companyId);
+
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            //list of PMs for company
+            IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
+            //current pm if exists
+            TTUser? currentPM = await _projectService.GetProjectManagerAsync(id);
+            AssignPMViewModel viewModel = new()
+            {
+                ProjectId = project.Id,
+                ProjectName = project.Name,
+                PMList = new SelectList(projectManagers, "Id", "FullName", currentPM?.Id),
+                PMId = currentPM?.Id
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignPM(AssignPMViewModel viewModel)
+        {
+            if (!string.IsNullOrEmpty(viewModel.PMId))
+            {
+                if (await _projectService.AddProjectManagerAsync(viewModel.PMId, viewModel.ProjectId))
+                {
+                    return RedirectToAction(nameof(Details), new { id = viewModel.ProjectId });
+                }
+                else
+                {
+                    ModelState.AddModelError("PMId", "Error assigning PM.");
+                    return View(viewModel);
+                }
+            }
+
+            ModelState.AddModelError("PMId", "No Project Manager chosen. Please select a PM.");
+            IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
+            TTUser? currentPM = await _projectService.GetProjectManagerAsync(viewModel.ProjectId);
+            viewModel.PMList = new SelectList(projectManagers, "Id", "FullName", currentPM?.Id);
+            return View(viewModel);
+        }
         // GET: Projects/Delete/5
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Projects == null)
@@ -167,6 +246,8 @@ namespace TurboTicketsMVC.Controllers
 
         // POST: Projects/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")]
+
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -179,14 +260,14 @@ namespace TurboTicketsMVC.Controllers
             {
                 _context.Projects.Remove(project);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProjectExists(int id)
         {
-          return (_context.Projects?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Projects?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

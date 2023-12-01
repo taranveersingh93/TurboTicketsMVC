@@ -1,0 +1,31 @@
+﻿@model TurboTicketsMVC.Models.ViewModels.AssignPMViewModel
+
+@{
+    ViewData["Title"] = "Assign Project Manager";
+}
+
+<div class="d-flex justify-content-center mt-5 flex-column align-items-center">
+    <h3 class="my-5">Assign Project Manager</h3>
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">@Model.ProjectName</div>
+        </div>
+        <div class="card-body">
+            <form asp-action="AssignPM" asp-controller="Projects" method="post" class="d-flex flex-column">
+                <div asp-validation-summary="ModelOnly" class="text-danger" enctype="multipart/form-data"></div>
+                <input type="hidden" asp-for="ProjectId" />
+                <div class="form-group">
+                    <label asp-for="PMId" class="control-label"></label>
+                    <select asp-items="Model.PMList" asp-for="PMId">
+                        <option value="">Unassigned</option>
+                    </select>
+                    <span asp-validation-for="PMId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary my-3">Save</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
