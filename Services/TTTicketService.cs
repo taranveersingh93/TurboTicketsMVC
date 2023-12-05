@@ -248,13 +248,15 @@ namespace TurboTicketsMVC.Services
 
         }
 
-        public Task ArchiveTicketAsync(Ticket? ticket) {
+        public async Task ArchiveTicketAsync(Ticket? ticket) {
 
             try
             {
-                                throw new NotImplementedException();
-
-
+                if (ticket != null)
+                {
+                    ticket.Archived = true;
+                    await UpdateTicketAsync(ticket);
+                }
             }
             catch (Exception)
             {
@@ -262,10 +264,14 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task RestoreTicketAsync(Ticket? ticket) {
+        public async Task RestoreTicketAsync(Ticket? ticket) {
             try
             {
-                                throw new NotImplementedException();
+                if (ticket != null)
+                {
+                    ticket.Archived = false;
+                    await UpdateTicketAsync(ticket);
+                }
 
 
             }

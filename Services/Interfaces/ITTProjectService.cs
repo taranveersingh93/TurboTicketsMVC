@@ -10,7 +10,9 @@ namespace TurboTicketsMVC.Services.Interfaces
 
         public Task<bool> AddProjectManagerAsync(string? userId, int? projectId);
         public Task ArchiveProjectAsync(Project? project, int? companyId);
+        public Task RestoreProjectAsync(Project? project, int? companyId);
         public Task<IEnumerable<Project>> GetAllProjectsByCompanyIdAsync(int? companyId);
+        public Task<IEnumerable<Project>> GetProjectsByCompanyIdAsync(int? companyId);
         public Task<IEnumerable<Project>> GetArchivedProjectsByCompanyIdAsync(int? companyId);
         public Task<Project> GetProjectByIdAsync(int? projectId, int? companyId);
         public Task<TTUser> GetProjectManagerAsync(int? projectId);
@@ -22,7 +24,6 @@ namespace TurboTicketsMVC.Services.Interfaces
 
         public Task RemoveProjectManagerAsync(int? projectId);
         public Task<bool> RemoveMemberFromProjectAsync(TTUser? member, int? projectId);
-        public Task RestoreProjectAsync(Project? project, int? companyId);
         public Task UpdateProjectAsync(Project? project);
     }
 }

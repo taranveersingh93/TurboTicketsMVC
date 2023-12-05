@@ -136,11 +136,40 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task ArchiveProjectAsync(Project? project, int? companyId)
+        public async Task ArchiveProjectAsync(Project? project, int? companyId)
         {
             try
             {
-                throw new NotImplementedException();
+                if (project != null && companyId != null && project.CompanyId == companyId)
+                {
+                    project.Archived = true;
+                    foreach(Ticket ticket in project.Tickets)
+                    {
+                        ticket.ArchivedByProject = true;
+                    }
+                    await UpdateProjectAsync(project);
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task RestoreProjectAsync(Project? project, int? companyId)
+        {
+            try
+            {
+                if (project != null && companyId != null && project.CompanyId == companyId)
+                {
+                    project.Archived = false;
+                    foreach (Ticket ticket in project.Tickets)
+                    {
+                        ticket.ArchivedByProject = false;
+                    }
+                    await UpdateProjectAsync(project);
+                }
 
             }
             catch (Exception)
@@ -166,6 +195,25 @@ namespace TurboTicketsMVC.Services
             }
         }
 
+        public async Task<IEnumerable<Project>> GetProjectsByCompanyIdAsync(int? companyId)
+        {
+            try
+            {
+                IEnumerable<Project> companyProjects = Enumerable.Empty<Project>();
+                if (companyId != null)
+                {
+                    companyProjects = await _context.Projects.Include(p => p.Tickets)
+                                                          .Where(p => p.CompanyId == companyId && p.Archived == false).ToListAsync();
+
+                }
+                return companyProjects;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public Task<IEnumerable<Project>> GetArchivedProjectsByCompanyIdAsync(int? companyId)
         {
             try
@@ -192,6 +240,7 @@ namespace TurboTicketsMVC.Services
                     .Include(p => p.Tickets)
                         .ThenInclude(t => t.SubmitterUser)
                     .Include(p => p.Members)
+                    .Include(p => p.Company)
                     .FirstOrDefaultAsync(project => project.Id == projectId && project.CompanyId == companyId);
                 }
                 return project!;
@@ -279,9 +328,9 @@ namespace TurboTicketsMVC.Services
             {
                 if (projectId != null && companyId != null)
                 {
-                    Project project = await GetProjectByIdAsync(projectId, companyId);                  
+                    Project project = await GetProjectByIdAsync(projectId, companyId);
                     project.Members = new Collection<TTUser>();
-                    await UpdateProjectAsync(project);                 
+                    await UpdateProjectAsync(project);
                 }
 
             }
@@ -347,27 +396,14 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task RestoreProjectAsync(Project? project, int? companyId)
-        {
-            try
-            {
-                throw new NotImplementedException();
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
         public async Task UpdateProjectAsync(Project? project)
         {
             try
             {
                 if (project != null)
                 {
-                _context.Update(project);
-                await _context.SaveChangesAsync();
+                    _context.Update(project);
+                    await _context.SaveChangesAsync();
 
                 }
 

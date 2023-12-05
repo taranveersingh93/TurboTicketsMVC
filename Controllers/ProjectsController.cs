@@ -37,10 +37,8 @@ namespace TurboTicketsMVC.Controllers
         // GET: Projects
         public async Task<IActionResult> Index()
         {
-            int companyId = User.Identity!.GetCompanyId();
-            var applicationDbContext = _context.Projects.Include(p => p.Company)
-                                                        .Where(p => p.CompanyId == companyId);
-            return View(await applicationDbContext.ToListAsync());
+            IEnumerable<Project> projects = await _projectService.GetAllProjectsByCompanyIdAsync(_companyId);
+            return View(projects);
         }
 
         
@@ -257,19 +255,17 @@ namespace TurboTicketsMVC.Controllers
             viewModel.PMList = new SelectList(projectManagers, "Id", "FullName", currentPM?.Id);
             return View(viewModel);
         }
-        // GET: Projects/Delete/5
+        // GET: Projects/Archive/5
         [Authorize(Roles = "Admin")]
 
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Archive(int? id)
         {
             if (id == null || _context.Projects == null)
             {
                 return NotFound();
             }
 
-            var project = await _context.Projects
-                .Include(p => p.Company)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
             if (project == null)
             {
                 return NotFound();
@@ -279,23 +275,62 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // POST: Projects/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("ArchiveConfirmed")]
         [Authorize(Roles = "Admin")]
 
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> ArchiveConfirmed(int id)
         {
             if (_context.Projects == null)
             {
                 return Problem("Entity set 'ApplicationDbContext.Projects'  is null.");
             }
-            var project = await _context.Projects.FindAsync(id);
+            Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
             if (project != null)
             {
-                _context.Projects.Remove(project);
+                await _projectService.ArchiveProjectAsync(project, _companyId);
             }
 
-            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        // GET: Projects/Restore/5
+        [Authorize(Roles = "Admin")]
+
+        public async Task<IActionResult> Restore(int? id)
+        {
+            if (id == null || _context.Projects == null)
+            {
+                return NotFound();
+            }
+
+            Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            return View(project);
+        }
+
+        // POST: Projects/Delete/5
+        [HttpPost, ActionName("RestoreConfirmed")]
+        [Authorize(Roles = "Admin")]
+
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestoreConfirmed(int id)
+        {
+            if (_context.Projects == null)
+            {
+                return Problem("Entity set 'ApplicationDbContext.Projects'  is null.");
+            }
+            Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
+            if (project != null)
+            {
+                await _projectService.RestoreProjectAsync(project, _companyId);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

@@ -195,18 +195,49 @@ namespace TurboTicketsMVC.Controllers
 
 
         // GET: Tickets/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Archive(int? id)
         {
             if (id == null || _context.Tickets == null)
             {
                 return NotFound();
             }
 
-            var ticket = await _context.Tickets
-                .Include(t => t.DeveloperUser)
-                .Include(t => t.Project)
-                .Include(t => t.SubmitterUser)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            return View(ticket);
+        }
+
+        // POST: Tickets/Archive/5
+        [HttpPost, ActionName("ArchiveConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ArchiveConfirmed(int id)
+        {
+            if (_context.Tickets == null)
+            {
+                return Problem("Entity set 'ApplicationDbContext.Tickets'  is null.");
+            }
+            Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+            if (ticket != null)
+            {
+                await _ticketService.ArchiveTicketAsync(ticket);
+            }
+            
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Tickets/Restore/5
+        public async Task<IActionResult> Restore(int? id)
+        {
+            if (id == null || _context.Tickets == null)
+            {
+                return NotFound();
+            }
+
+            Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
             if (ticket == null)
             {
                 return NotFound();
@@ -216,25 +247,24 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // POST: Tickets/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("RestoreConfirmed")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> RestoreConfirmed(int id)
         {
             if (_context.Tickets == null)
             {
                 return Problem("Entity set 'ApplicationDbContext.Tickets'  is null.");
             }
-            var ticket = await _context.Tickets.FindAsync(id);
+            Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
             if (ticket != null)
             {
-                _context.Tickets.Remove(ticket);
+                await _ticketService.RestoreTicketAsync(ticket);
             }
-            
-            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
-		[HttpPost]
+        [HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddTicketComment([Bind("Id, Comment,TicketId,UserId")] TicketComment ticketComment)
 		{
