@@ -20,7 +20,7 @@ namespace TurboTicketsMVC.Services
             {
                 if (ticket != null)
                 {
-                    _context.Update(ticket);
+                    _context.Add(ticket);
                     await _context.SaveChangesAsync();
                 }
 
@@ -114,6 +114,7 @@ namespace TurboTicketsMVC.Services
             {
                 IEnumerable<Ticket> companyTickets = await _context.Tickets
                             .Include(t => t.DeveloperUser)
+                            .Include(t => t.History)
                             .Include(t => t.Project)
                             .Include(t => t.SubmitterUser)
                             .Where(t => t.Project!.CompanyId == companyId).ToListAsync();
@@ -127,13 +128,25 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task<Ticket> GetTicketAsNoTrackingAsync(int? ticketId, int? companyId) {
+        public async Task<Ticket> GetTicketAsNoTrackingAsync(int? ticketId, int? companyId) {
 
             try
             {
-                                throw new NotImplementedException();
+                Ticket? ticket = new Ticket();
+                if (ticketId != null && companyId != null)
+                {
+                ticket = await _context.Tickets
+                                  .Include(t => t.DeveloperUser)
+                                  .Include(t => t.Project)
+                                  .Include(t => t.SubmitterUser)
+                                  .Include(t => t.Attachments)
+                                  .Include(t => t.Comments)
+                                      .ThenInclude(c => c.User)
+                                  .AsNoTracking()
+                                  .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
 
-
+                }
+                return ticket!;
             }
             catch (Exception)
             {
@@ -151,7 +164,9 @@ namespace TurboTicketsMVC.Services
 				ticket = await _context.Tickets
 	                            .Include(t => t.DeveloperUser)
 	                            .Include(t => t.Project)
-	                            .Include(t => t.SubmitterUser)
+								.Include(t => t.History)
+                                    .ThenInclude(h => h.User)
+								.Include(t => t.SubmitterUser)
                                 .Include(t => t.Attachments)
                                 .Include(t => t.Comments)
                                     .ThenInclude(c => c.User)

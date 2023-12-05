@@ -239,6 +239,9 @@ namespace TurboTicketsMVC.Services
                         .ThenInclude(t => t.DeveloperUser)
                     .Include(p => p.Tickets)
                         .ThenInclude(t => t.SubmitterUser)
+                    .Include(p => p.Tickets)
+                        .ThenInclude(t => t.History)
+                            .ThenInclude(h => h.User)
                     .Include(p => p.Members)
                     .Include(p => p.Company)
                     .FirstOrDefaultAsync(project => project.Id == projectId && project.CompanyId == companyId);

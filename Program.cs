@@ -25,13 +25,14 @@ builder.Services.AddIdentity<TTUser, IdentityRole>(options => options.SignIn.Req
 builder.Services.AddControllersWithViews();
 
 //policy config
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("Admin|PM", policy =>
-    {
-        policy.RequireRole(nameof(TTRoles.Admin), nameof(TTRoles.ProjectManager));
-    });
-});
+//IAuthorization int
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("Admin|PM", policy =>
+//    {
+//        policy.RequireRole(nameof(TTRoles.Admin), nameof(TTRoles.ProjectManager));
+//    });
+//});
 
 //Custom service section
 builder.Services.AddScoped<ITTCompanyService, TTCompanyService>();

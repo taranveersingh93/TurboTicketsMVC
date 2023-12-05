@@ -26,13 +26,15 @@ namespace TurboTicketsMVC.Controllers
         private readonly ITTProjectService _projectService;
         private readonly ITTCompanyService _companyService;
         private readonly ITTFileService _fileService;
+        private readonly ITTTicketHistoryService _ticketHistoryService;
 
         public TicketsController(ApplicationDbContext context,
                                  UserManager<TTUser> userManager,
                                  ITTTicketService ticketService,
                                  ITTCompanyService companyService,
                                  ITTProjectService projectService,
-                                 ITTFileService fileService)
+                                 ITTFileService fileService,
+                                 ITTTicketHistoryService ticketHistoryService)
         {
             _context = context;
             _userManager = userManager;
@@ -40,6 +42,7 @@ namespace TurboTicketsMVC.Controllers
             _companyService = companyService;
             _projectService = projectService;
             _fileService = fileService;
+            _ticketHistoryService = ticketHistoryService;
         }
 
         // GET: Tickets
@@ -90,8 +93,12 @@ namespace TurboTicketsMVC.Controllers
             {
                 ticket.CreatedDate = DateTimeOffset.Now;
                 ticket.SubmitterUserId = _userManager.GetUserId(User);
-                _context.Add(ticket);
-                await _context.SaveChangesAsync();
+                await _ticketService.AddTicketAsync(ticket);
+
+                //add history
+                Ticket newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
+                await _ticketHistoryService.AddHistoryAsync(null!, newTicket, _userId);
+
                 return RedirectToAction(nameof(Index));
             }
             int companyId = User.Identity!.GetCompanyId();
@@ -137,11 +144,14 @@ namespace TurboTicketsMVC.Controllers
 
             if (ModelState.IsValid)
             {
+                Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
                 try
                 {
                     ticket.UpdatedDate = DateTimeOffset.Now;
-                    _context.Update(ticket);
-                    await _context.SaveChangesAsync();
+
+                    await _ticketService.UpdateTicketAsync(ticket);
+                    Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
+                    await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -163,7 +173,7 @@ namespace TurboTicketsMVC.Controllers
             ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View(ticket);
         }
-
+        //authorize PMs and devs
         //GET: Tickets/AssignTicketView
         public async Task<IActionResult> AssignTicket(int? id)
         {
@@ -177,7 +187,7 @@ namespace TurboTicketsMVC.Controllers
             {
                 Ticket = ticket,
                 DeveloperId = String.Empty,
-                Developers = new SelectList (await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId), "Id", "FullName", ticket.DeveloperUserId)
+                Developers = new SelectList(await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId), "Id", "FullName", ticket.DeveloperUserId)
             };
             return View(assignTicketViewModel);
         }
@@ -186,14 +196,34 @@ namespace TurboTicketsMVC.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignTicket(AssignTicketViewModel assignTicketViewModel)
-        {
-            if (assignTicketViewModel != null && assignTicketViewModel.Ticket != null && assignTicketViewModel.DeveloperId != null)
+        {//OldTicket is a snapshot of the Ticket data before updating
+         //and NewTicket is a snapshot of the Ticket data after the update.
+         //They are used for comparison in the TicketHistoryService.
+         //AsNoTracking allows for this by telling EntityFramework
+         //not to track the queried data.  This avoids the error of
+         //multiple active result sets
+
+            Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(assignTicketViewModel.Ticket!.Id, _companyId);
+            try
             {
-                Ticket ticket = assignTicketViewModel.Ticket;
-                ticket.DeveloperUserId = assignTicketViewModel.DeveloperId;
-                await _ticketService.AssignTicketAsync(ticket.Id, ticket.DeveloperUserId);
+                if (assignTicketViewModel != null && assignTicketViewModel.Ticket != null && assignTicketViewModel.DeveloperId != null)
+                {
+                    Ticket ticket = assignTicketViewModel.Ticket;
+                    ticket.DeveloperUserId = assignTicketViewModel.DeveloperId;
+                    await _ticketService.AssignTicketAsync(ticket.Id, ticket.DeveloperUserId);
+
+                    //Add History
+                    Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
+                    await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+                }
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            catch (Exception)
+            {
+
+                throw;
+            }
+
         }
 
 
@@ -229,7 +259,7 @@ namespace TurboTicketsMVC.Controllers
             {
                 await _ticketService.ArchiveTicketAsync(ticket);
             }
-            
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -268,66 +298,66 @@ namespace TurboTicketsMVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> AddTicketAttachment([Bind("Id,ImageFormFile,Description,TicketId")] TicketAttachment ticketAttachment)
-		{
-			string statusMessage;
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddTicketAttachment([Bind("Id,ImageFormFile,Description,TicketId")] TicketAttachment ticketAttachment)
+        {
+            string statusMessage;
             ModelState.Remove("TTUserId");
-			if (ModelState.IsValid && ticketAttachment.ImageFormFile != null)
+            if (ModelState.IsValid && ticketAttachment.ImageFormFile != null)
 
-			{
-				ticketAttachment.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(ticketAttachment.ImageFormFile);
-				ticketAttachment.ImageFileName = ticketAttachment.ImageFormFile.FileName;
-				ticketAttachment.ImageFileType = ticketAttachment.ImageFormFile.ContentType;
-			    ticketAttachment.TTUserId = _userId;
-				ticketAttachment.CreatedDate = DateTimeOffset.Now;
+            {
+                ticketAttachment.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(ticketAttachment.ImageFormFile);
+                ticketAttachment.ImageFileName = ticketAttachment.ImageFormFile.FileName;
+                ticketAttachment.ImageFileType = ticketAttachment.ImageFormFile.ContentType;
+                ticketAttachment.TTUserId = _userId;
+                ticketAttachment.CreatedDate = DateTimeOffset.Now;
 
-				await _ticketService.AddTicketAttachmentAsync(ticketAttachment);
-				statusMessage = "Success: New attachment added to Ticket.";
-			}
-			else
-			{
-				statusMessage = "Error: Invalid data.";
+                await _ticketService.AddTicketAttachmentAsync(ticketAttachment);
+                statusMessage = "Success: New attachment added to Ticket.";
+            }
+            else
+            {
+                statusMessage = "Error: Invalid data.";
 
-			}
+            }
 
-			return RedirectToAction("Details", new { id = ticketAttachment.TicketId, message = statusMessage });
-		}
+            return RedirectToAction("Details", new { id = ticketAttachment.TicketId, message = statusMessage });
+        }
 
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> AddTicketComment([Bind("Id, Comment,TicketId,UserId")] TicketComment ticketComment)
-		{
-			if (ModelState.IsValid)
-			{
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddTicketComment([Bind("Id, Comment,TicketId,UserId")] TicketComment ticketComment)
+        {
+            if (ModelState.IsValid)
+            {
                 ticketComment.CreatedDate = DateTimeOffset.Now;
                 await _ticketService.AddTicketCommentAsync(ticketComment);
-				return RedirectToAction(nameof(Details), new {id = ticketComment.TicketId});
-			}
-			ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
-			ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketComment.UserId);
-			return RedirectToAction(nameof(Details), new {id = ticketComment.TicketId});
-		}
+                return RedirectToAction(nameof(Details), new { id = ticketComment.TicketId });
+            }
+            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
+            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketComment.UserId);
+            return RedirectToAction(nameof(Details), new { id = ticketComment.TicketId });
+        }
 
 
-		public async Task<IActionResult> ShowFile(int id)
-		{
-			TicketAttachment? ticketAttachment = await _ticketService.GetTicketAttachmentByIdAsync(id);
+        public async Task<IActionResult> ShowFile(int id)
+        {
+            TicketAttachment? ticketAttachment = await _ticketService.GetTicketAttachmentByIdAsync(id);
             if (ticketAttachment != null)
             {
-			string? fileName = ticketAttachment.ImageFileName;
-			byte[] fileData = ticketAttachment.ImageFileData!;
-			string ext = Path.GetExtension(fileName!).Replace(".", "");
-			Response.Headers.Add("Content-Disposition", $"inline; filename={fileName}");
-			return File(fileData, $"application/{ext}");
+                string? fileName = ticketAttachment.ImageFileName;
+                byte[] fileData = ticketAttachment.ImageFileData!;
+                string ext = Path.GetExtension(fileName!).Replace(".", "");
+                Response.Headers.Add("Content-Disposition", $"inline; filename={fileName}");
+                return File(fileData, $"application/{ext}");
             }
             return RedirectToAction(nameof(Details), new { id });
-		}
+        }
 
-		private bool TicketExists(int id)
+        private bool TicketExists(int id)
         {
-          return (_context.Tickets?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Tickets?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
