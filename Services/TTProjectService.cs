@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.ObjectModel;
 using TurboTicketsMVC.Data;
 using TurboTicketsMVC.Models;
 using TurboTicketsMVC.Models.Enums;
@@ -10,17 +12,21 @@ namespace TurboTicketsMVC.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly ITTRolesService _roleService;
+        private readonly UserManager<TTUser> _userManager;
+
         public TTProjectService(ApplicationDbContext context,
-                                ITTRolesService roleService)
+                                ITTRolesService roleService,
+                                UserManager<TTUser> userManager)
         {
             _roleService = roleService;
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task AddProjectAsync(Project project)
         {
             try
-            {             
+            {
                 _context.Add(project);
                 await _context.SaveChangesAsync();
             }
@@ -60,11 +66,30 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task AddMembersToProjectAsync(IEnumerable<string>? userIds, int? projectId, int? companyId)
+        public async Task AddMembersToProjectAsync(IEnumerable<string>? userIds, int? projectId, int? companyId)
         {
             try
             {
-                throw new NotImplementedException();
+                if (userIds != null && projectId != null && companyId != null)
+                {
+                    Project? project = await GetProjectByIdAsync(projectId, companyId);
+
+                    if (project != null)
+                    {
+                        foreach (string userId in userIds)
+                        {
+                            bool isOnProject = project.Members.Any(m => m.Id == userId);
+                            TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                            if (!isOnProject && user != null)
+                            {
+                                project.Members.Add(user);
+                                await _context.SaveChangesAsync();
+                            }
+                        }
+
+                    }
+                }
 
             }
             catch (Exception)
@@ -140,7 +165,8 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task<List<Project>> GetArchivedProjectsByCompanyIdAsync(int? companyId)
+
+        public Task<IEnumerable<Project>> GetArchivedProjectsByCompanyIdAsync(int? companyId)
         {
             try
             {
@@ -201,12 +227,18 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task<List<TTUser>> GetProjectMembersByRoleAsync(int? projectId, string? roleName, int? companyId)
+        public async Task<IEnumerable<TTUser>> GetProjectMembersByRoleAsync(int? projectId, string? roleName, int? companyId)
         {
             try
             {
-                throw new NotImplementedException();
-
+                IEnumerable<TTUser> users = Enumerable.Empty<TTUser>();
+                Project project = await GetProjectByIdAsync(projectId, companyId);
+                if (project != null && roleName != null && companyId != null)
+                {
+                    IEnumerable<TTUser> allUsers = await _roleService.GetUsersInRoleAsync(roleName, companyId);
+                    users = allUsers.Where(u => project.Members.Contains(u)).ToList();
+                }
+                return users;
             }
             catch (Exception)
             {
@@ -228,7 +260,7 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task<List<Project>?> GetUserProjectsAsync(string? userId)
+        public Task<IEnumerable<Project>?> GetUserProjectsAsync(string? userId)
         {
             try
             {
@@ -241,11 +273,16 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task RemoveMembersFromProjectAsync(int? projectId, int? companyId)
+        public async Task RemoveMembersFromProjectAsync(int? projectId, int? companyId)
         {
             try
             {
-                throw new NotImplementedException();
+                if (projectId != null && companyId != null)
+                {
+                    Project project = await GetProjectByIdAsync(projectId, companyId);                  
+                    project.Members = new Collection<TTUser>();
+                    await UpdateProjectAsync(project);                 
+                }
 
             }
             catch (Exception)
@@ -323,11 +360,16 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task UpdateProjectAsync(Project? project)
+        public async Task UpdateProjectAsync(Project? project)
         {
             try
             {
-                throw new NotImplementedException();
+                if (project != null)
+                {
+                _context.Update(project);
+                await _context.SaveChangesAsync();
+
+                }
 
             }
             catch (Exception)

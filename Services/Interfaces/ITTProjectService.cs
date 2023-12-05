@@ -11,13 +11,13 @@ namespace TurboTicketsMVC.Services.Interfaces
         public Task<bool> AddProjectManagerAsync(string? userId, int? projectId);
         public Task ArchiveProjectAsync(Project? project, int? companyId);
         public Task<IEnumerable<Project>> GetAllProjectsByCompanyIdAsync(int? companyId);
-        public Task<List<Project>> GetArchivedProjectsByCompanyIdAsync(int? companyId);
+        public Task<IEnumerable<Project>> GetArchivedProjectsByCompanyIdAsync(int? companyId);
         public Task<Project> GetProjectByIdAsync(int? projectId, int? companyId);
         public Task<TTUser> GetProjectManagerAsync(int? projectId);
-        public Task<List<TTUser>> GetProjectMembersByRoleAsync(int? projectId, string? roleName, int? companyId);
+        public Task<IEnumerable<TTUser>> GetProjectMembersByRoleAsync(int? projectId, string? roleName, int? companyId);
 
         public Task<IEnumerable<ProjectPriority>> GetProjectPrioritiesAsync();
-        public Task<List<Project>?> GetUserProjectsAsync(string? userId);
+        public Task<IEnumerable<Project>?> GetUserProjectsAsync(string? userId);
         public Task RemoveMembersFromProjectAsync(int? projectId, int? companyId);
 
         public Task RemoveProjectManagerAsync(int? projectId);

@@ -43,6 +43,8 @@ namespace TurboTicketsMVC.Controllers
             return View(await applicationDbContext.ToListAsync());
         }
 
+        
+
         // GET: Projects/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -65,10 +67,24 @@ namespace TurboTicketsMVC.Controllers
             {
                 return NotFound();
             }
+            IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
+            IEnumerable<TTUser> developers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+            IEnumerable<TTUser> submitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
+            IEnumerable<TTUser> selectedDevelopers = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Developer), _companyId);
+            IEnumerable<TTUser> selectedSubmitters = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Submitter), _companyId);
+            TTUser projectManager = await _projectService.GetProjectManagerAsync(project.Id);
+            string projectManagerId = projectManager.Id;
+            IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
+            IEnumerable<string> submitterIds = selectedDevelopers.Select(d => d.Id);
+            
 
+            ViewData["ProjectManagers"] = new SelectList(projectManagers, "Id", "FullName", projectManagerId);
+            ViewData["Developers"] = new MultiSelectList(developers, "Id", "FullName", developerIds);
+            ViewData["Submitters"] = new MultiSelectList(submitters, "Id", "FullName", submitterIds);
             return View(project);
         }
         [Authorize(Roles = "Admin, ProjectManager")]
+
 
         // GET: Projects/Create
         public IActionResult Create()
@@ -106,6 +122,24 @@ namespace TurboTicketsMVC.Controllers
             }
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", project.CompanyId);
             return View(project);
+        }
+
+
+        //POST: EditTeam
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles ="Admin,ProjectManager")]
+        public async Task<IActionResult> EditTeam(
+            IEnumerable<string> DeveloperIds,
+            IEnumerable<string> SubmitterIds,
+            string ProjectManagerId,
+            int? projectId)
+        {
+            await _projectService.RemoveMembersFromProjectAsync(projectId, _companyId);
+            await _projectService.AddProjectManagerAsync(ProjectManagerId, projectId);
+            await _projectService.AddMembersToProjectAsync(DeveloperIds, projectId, _companyId);
+            await _projectService.AddMembersToProjectAsync(SubmitterIds, projectId, _companyId);
+            return RedirectToAction(nameof(Details), new {id = projectId});
         }
 
         // GET: Projects/Edit/5

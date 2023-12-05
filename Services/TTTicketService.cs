@@ -14,11 +14,15 @@ namespace TurboTicketsMVC.Services
             _context = context;
         }
 
-        public Task AddTicketAsync(Ticket? ticket) {
+        public async Task AddTicketAsync(Ticket? ticket) {
 
             try
             {
-                throw new NotImplementedException();
+                if (ticket != null)
+                {
+                    _context.Update(ticket);
+                    await _context.SaveChangesAsync();
+                }
 
 
             }
@@ -28,10 +32,21 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task AssignTicketAsync(int? ticketId, string? userId) {
+        public async Task AssignTicketAsync(int? ticketId, string? userId) {
             try
             {
-                                throw new NotImplementedException();
+               if (ticketId != null && !string.IsNullOrEmpty(userId))
+                {
+                    TTUser? developer = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                    Ticket ticket = await GetTicketByIdAsync(ticketId, developer!.CompanyId);
+
+                    if (ticket != null)
+                    {
+                        ticket.DeveloperUserId = userId;
+                        await UpdateTicketAsync(ticket);
+                    }
+                }
 
 
             }
@@ -56,12 +71,14 @@ namespace TurboTicketsMVC.Services
             }
 
         }
-        public Task AddTicketCommentAsync(TicketComment? ticketComment) {
+        public async Task AddTicketCommentAsync(TicketComment? ticketComment) {
             try
             {
-                                throw new NotImplementedException();
-
-
+                if (ticketComment != null)
+                {
+                    _context.Add(ticketComment);
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (Exception)
             {
@@ -71,11 +88,15 @@ namespace TurboTicketsMVC.Services
 
         }
 
-        public Task UpdateTicketAsync(Ticket? ticket) {
+        public async Task UpdateTicketAsync(Ticket? ticket) {
 
             try
             {
-                                throw new NotImplementedException();
+               if (ticket != null)
+                {
+                    _context.Update(ticket);
+                    await _context.SaveChangesAsync();
+                }
 
 
             }

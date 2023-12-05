@@ -1,10 +1,13 @@
-﻿@using TurboTicketsMVC.Services.Interfaces;
+﻿@using Microsoft.AspNetCore.Identity;
+@using TurboTicketsMVC.Services.Interfaces;
 @model TurboTicketsMVC.Models.Project
 @inject ITTProjectService _projectService;
+@inject UserManager<TTUser> _UserManager;
 
 @{
     ViewData["Title"] = "Details";
     TTUser projectManager = await _projectService.GetProjectManagerAsync(Model.Id);
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <h1>Details</h1>
@@ -40,10 +43,11 @@
                                 <li>Deadline: <span class="">@Model.EndDate</span></li>
                                 <li>Priority: <span class="">@Model.ProjectPriority</span></li>
                                 @* if() logic *@
-                                @if(Model.Archived)
+                                @if (Model.Archived)
                                 {
                                     <li>Project: Inactive</li>
-                                } else
+                                }
+                                else
                                 {
                                     <li>Project: Active</li>
                                 }
@@ -70,13 +74,14 @@
             <div class="col-md-4 col mt-5 ">
                 <div class="bg-secondary">
                     <div class="card m-1 p-2">
-                        <div class="header">
+                        <div class="header d-flex justify-content-between">
                             <h2>Project Team</h2>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editTeamModal">Edit Team</button>
                             <hr />
                         </div>
                         <div class="body" style="overflow-y:auto;height:300px;">
                             <ul class="right_chat list-unstyled mb-0">
-                                @foreach(TTUser member in Model.Members)
+                                @foreach (TTUser member in Model.Members)
                                 {
                                     <li>@member.FullName</li>
                                 }
@@ -123,7 +128,7 @@
                                     </thead>
                                     <tbody>
                                         @* Table body *@
-                                        @foreach(Ticket ticket in Model.Tickets)
+                                        @foreach (Ticket ticket in Model.Tickets)
                                         {
                                             <tr>
                                                 <td>@ticket.Title</td>
@@ -131,7 +136,8 @@
                                                 @if (string.IsNullOrEmpty(ticket.DeveloperUser?.FullName))
                                                 {
                                                     <td>Unassigned</td>
-                                                } else
+                                                }
+                                                else
                                                 {
                                                     <td>@ticket.DeveloperUser?.FullName</td>
                                                 }
@@ -148,6 +154,45 @@
 
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editTeamModal" tabindex="-1" aria-labelledby="editTeamModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="EditTeam" asp-controller="Projects" method="Post">
+                <input type="hidden" value="@Model.Id" name="ProjectId" />
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Team</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if (isAdmin)
+                    {
+                        <div class="form-group">
+                            <label for="projectManagerSelect" class="control-label">Project Manager</label>
+                            <select name="projectManagerId" id="projectManagerSelect" class="form-control dropdown-toggle" asp-items="ViewBag.ProjectManagers"></select>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="ProjectManagerId" value="@projectManager.Id"/>
+                    }
+                    <div class="form-group">
+                        <label for="developerTeamSelect" class="control-label">Developers</label>
+                        <select name="DeveloperIds" id="developerTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Developers" multiple></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="submitterTeamSelect" class="control-label">Submitters</label>
+                        <select name="SubmitterIds" id="submitterTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Submitters" multiple></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

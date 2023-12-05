@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using TurboTicketsMVC.Data;
 using TurboTicketsMVC.Extensions;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Models.Enums;
+using TurboTicketsMVC.Models.ViewModels;
 using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Controllers
@@ -158,6 +160,40 @@ namespace TurboTicketsMVC.Controllers
             return View(ticket);
         }
 
+        //GET: Tickets/AssignTicketView
+        public async Task<IActionResult> AssignTicket(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+            AssignTicketViewModel assignTicketViewModel = new AssignTicketViewModel()
+            {
+                Ticket = ticket,
+                DeveloperId = String.Empty,
+                Developers = new SelectList (await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId), "Id", "FullName", ticket.DeveloperUserId)
+            };
+            return View(assignTicketViewModel);
+        }
+
+        // POST: Tickets/AssignTicketView/
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignTicket(AssignTicketViewModel assignTicketViewModel)
+        {
+            if (assignTicketViewModel != null && assignTicketViewModel.Ticket != null && assignTicketViewModel.DeveloperId != null)
+            {
+                Ticket ticket = assignTicketViewModel.Ticket;
+                ticket.DeveloperUserId = assignTicketViewModel.DeveloperId;
+                await _ticketService.AssignTicketAsync(ticket.Id, ticket.DeveloperUserId);
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
         // GET: Tickets/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -205,8 +241,7 @@ namespace TurboTicketsMVC.Controllers
 			if (ModelState.IsValid)
 			{
                 ticketComment.CreatedDate = DateTimeOffset.Now;
-				_context.Add(ticketComment);
-				await _context.SaveChangesAsync();
+                await _ticketService.AddTicketCommentAsync(ticketComment);
 				return RedirectToAction(nameof(Details), new {id = ticketComment.TicketId});
 			}
 			ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
