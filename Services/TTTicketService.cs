@@ -57,13 +57,15 @@ namespace TurboTicketsMVC.Services
             }
 
         }
-        public Task AddTicketAttachmentAsync(TicketAttachment? ticketAttachment) {
+        public async Task AddTicketAttachmentAsync(TicketAttachment? ticketAttachment) {
             try
             {
-                                throw new NotImplementedException();
-
-
-            }
+                if (ticketAttachment != null)
+                {
+				await _context.AddAsync(ticketAttachment);
+				await _context.SaveChangesAsync();
+                }
+			}
             catch (Exception)
             {
 
@@ -150,6 +152,7 @@ namespace TurboTicketsMVC.Services
 	                            .Include(t => t.DeveloperUser)
 	                            .Include(t => t.Project)
 	                            .Include(t => t.SubmitterUser)
+                                .Include(t => t.Attachments)
                                 .Include(t => t.Comments)
                                     .ThenInclude(c => c.User)
 	                            .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
@@ -162,13 +165,15 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task<TicketAttachment?> GetTicketAttachmentByIdAsync(int? ticketAttachmentId) {
+        public async Task<TicketAttachment?> GetTicketAttachmentByIdAsync(int? ticketAttachmentId) {
             try
             {
-                                throw new NotImplementedException();
+				TicketAttachment? ticketAttachment = await _context.TicketAttachments
+													  .Include(t => t.TTUser)
+													  .FirstOrDefaultAsync(t => t.Id == ticketAttachmentId);
+				return ticketAttachment;
 
-
-            }
+			}
             catch (Exception)
             {
 

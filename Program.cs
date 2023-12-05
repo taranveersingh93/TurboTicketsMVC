@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TurboTicketsMVC.Data;
 using TurboTicketsMVC.Extensions;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Models.Enums;
 using TurboTicketsMVC.Services;
 using TurboTicketsMVC.Services.Interfaces;
 
@@ -22,6 +23,15 @@ builder.Services.AddIdentity<TTUser, IdentityRole>(options => options.SignIn.Req
                 .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+
+//policy config
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin|PM", policy =>
+    {
+        policy.RequireRole(nameof(TTRoles.Admin), nameof(TTRoles.ProjectManager));
+    });
+});
 
 //Custom service section
 builder.Services.AddScoped<ITTCompanyService, TTCompanyService>();

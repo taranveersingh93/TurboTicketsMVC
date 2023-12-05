@@ -21,7 +21,7 @@ namespace TurboTicketsMVC.Services.Interfaces
         public Task<IEnumerable<TicketStatus>> GetTicketStatusesAsync();
         public Task<IEnumerable<TicketType>> GetTicketTypesAsync();
 
-        public Task ArchiveTicketAsync(Ticket? ticket);
+		public Task ArchiveTicketAsync(Ticket? ticket);
         public Task RestoreTicketAsync(Ticket? ticket);
     }
 }

@@ -12,6 +12,7 @@ using TurboTicketsMVC.Extensions;
 using TurboTicketsMVC.Models;
 using TurboTicketsMVC.Models.Enums;
 using TurboTicketsMVC.Models.ViewModels;
+using TurboTicketsMVC.Services;
 using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Controllers
@@ -24,18 +25,21 @@ namespace TurboTicketsMVC.Controllers
         private readonly ITTTicketService _ticketService;
         private readonly ITTProjectService _projectService;
         private readonly ITTCompanyService _companyService;
+        private readonly ITTFileService _fileService;
 
         public TicketsController(ApplicationDbContext context,
                                  UserManager<TTUser> userManager,
                                  ITTTicketService ticketService,
                                  ITTCompanyService companyService,
-                                 ITTProjectService projectService)
+                                 ITTProjectService projectService,
+                                 ITTFileService fileService)
         {
             _context = context;
             _userManager = userManager;
             _ticketService = ticketService;
             _companyService = companyService;
             _projectService = projectService;
+            _fileService = fileService;
         }
 
         // GET: Tickets
@@ -264,7 +268,34 @@ namespace TurboTicketsMVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> AddTicketAttachment([Bind("Id,ImageFormFile,Description,TicketId")] TicketAttachment ticketAttachment)
+		{
+			string statusMessage;
+            ModelState.Remove("TTUserId");
+			if (ModelState.IsValid && ticketAttachment.ImageFormFile != null)
+
+			{
+				ticketAttachment.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(ticketAttachment.ImageFormFile);
+				ticketAttachment.ImageFileName = ticketAttachment.ImageFormFile.FileName;
+				ticketAttachment.ImageFileType = ticketAttachment.ImageFormFile.ContentType;
+			    ticketAttachment.TTUserId = _userId;
+				ticketAttachment.CreatedDate = DateTimeOffset.Now;
+
+				await _ticketService.AddTicketAttachmentAsync(ticketAttachment);
+				statusMessage = "Success: New attachment added to Ticket.";
+			}
+			else
+			{
+				statusMessage = "Error: Invalid data.";
+
+			}
+
+			return RedirectToAction("Details", new { id = ticketAttachment.TicketId, message = statusMessage });
+		}
+
+		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> AddTicketComment([Bind("Id, Comment,TicketId,UserId")] TicketComment ticketComment)
 		{
@@ -277,6 +308,21 @@ namespace TurboTicketsMVC.Controllers
 			ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
 			ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketComment.UserId);
 			return RedirectToAction(nameof(Details), new {id = ticketComment.TicketId});
+		}
+
+
+		public async Task<IActionResult> ShowFile(int id)
+		{
+			TicketAttachment? ticketAttachment = await _ticketService.GetTicketAttachmentByIdAsync(id);
+            if (ticketAttachment != null)
+            {
+			string? fileName = ticketAttachment.ImageFileName;
+			byte[] fileData = ticketAttachment.ImageFileData!;
+			string ext = Path.GetExtension(fileName!).Replace(".", "");
+			Response.Headers.Add("Content-Disposition", $"inline; filename={fileName}");
+			return File(fileData, $"application/{ext}");
+            }
+            return RedirectToAction(nameof(Details), new { id });
 		}
 
 		private bool TicketExists(int id)

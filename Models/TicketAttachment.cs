@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TurboTicketsMVC.Extensions;
 
 namespace TurboTicketsMVC.Models
 {
@@ -20,9 +22,15 @@ namespace TurboTicketsMVC.Models
         public string? TTUserId { get; set; }
 
         [NotMapped]
+        [DisplayName("Select a file")]
+        [DataType(DataType.Upload)]
+        [MaxFileSize(1024*1024)]
+        [AllowedExtensions(new string[] {".jpg", ".png", ".doc", ".docx", ".xls", ".xlsx", ".pdf"})]
         public IFormFile? ImageFormFile { get; set; }
         public byte[]? ImageFileData { get; set; }
         public string? ImageFileType { get; set; }
+
+        public string? ImageFileName { get; set; }
 
         //navigation
         public virtual Ticket? Ticket { get; set; }
