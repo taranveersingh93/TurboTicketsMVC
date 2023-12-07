@@ -21,7 +21,7 @@ namespace TurboTicketsMVC.Models
         public string? RecipientId { get; set; }
 
         //public int NotificationTypeId { get; set; }
-        public TTNotificationType NotificationType { get; set; }
+        public TTNotificationTypes NotificationType { get; set; }
         //foreign keys end
 
         [Required]

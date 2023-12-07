@@ -2,16 +2,26 @@
 using TurboTicketsMVC.Models;
 using TurboTicketsMVC.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Identity;
+using TurboTicketsMVC.Models.Enums;
 
 namespace TurboTicketsMVC.Services
 {
     public class TTTicketService:ITTTicketService
     {
         private readonly ApplicationDbContext _context; 
-        public TTTicketService(ApplicationDbContext context)
+        private readonly ITTProjectService _projectService;
+        private readonly UserManager<TTUser> _userManager;
+        private readonly ITTRolesService _roleService;
+        public TTTicketService(ApplicationDbContext context,
+                                ITTProjectService projectService,
+                                UserManager<TTUser> userManager,
+                                ITTRolesService roleService)
         {
             _context = context;
+            _projectService = projectService;
+            _userManager = userManager;
+            _roleService = roleService;
         }
 
         public async Task AddTicketAsync(Ticket? ticket) {
@@ -117,7 +127,7 @@ namespace TurboTicketsMVC.Services
                             .Include(t => t.History)
                             .Include(t => t.Project)
                             .Include(t => t.SubmitterUser)
-                            .Where(t => t.Project!.CompanyId == companyId).ToListAsync();
+                            .Where(t => t.Project!.CompanyId == companyId && t.ArchivedByProject == false && t.Archived == false ).ToListAsync();
                 return companyTickets;
 
 
@@ -301,6 +311,30 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
 
+        }
+
+        public async Task<bool> IsUserAuthorized(string? userId, int? ticketId, int? companyId)
+        {
+            try
+            {
+                bool isUserAuthorized = false;
+                TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                Ticket? ticket = await GetTicketByIdAsync(ticketId, companyId);
+                TTUser? projectManager = await _projectService.GetProjectManagerAsync(ticket.ProjectId);
+                bool isProjectManager = user?.Id == projectManager.Id;
+                bool isAdmin = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin));
+
+				if ( isProjectManager|| isAdmin)
+                {
+                    isUserAuthorized = true;
+                }
+                return isUserAuthorized;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

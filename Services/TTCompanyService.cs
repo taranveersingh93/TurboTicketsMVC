@@ -8,16 +8,27 @@ namespace TurboTicketsMVC.Services
     public class TTCompanyService : ITTCompanyService
     {
         private readonly ApplicationDbContext _context;
+        private readonly ITTProjectService _projectService;
+        private readonly ITTInviteService _inviteService;
 
-        public TTCompanyService(ApplicationDbContext context)
+        public TTCompanyService(ApplicationDbContext context,
+                                ITTProjectService projectService,
+                                ITTInviteService inviteService)
         {
+            _inviteService = inviteService;
+            _projectService = projectService;
             _context = context;
         }
-        public Task<Company> GetCompanyInfoAsync(int? companyId)
+        public async Task<Company> GetCompanyInfoAsync(int? companyId)
         {
             try
             {
-                throw new NotImplementedException();
+                Company? company = new Company();
+                if (companyId != null)
+                {
+                    company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == companyId);
+                }
+                return company!;
             }
             catch (Exception)
             {
@@ -47,11 +58,17 @@ namespace TurboTicketsMVC.Services
             }
         }
 
-        public Task<IEnumerable<Project>> GetProjectsAsync(int? companyId)
+        public async Task<IEnumerable<Project>> GetProjectsAsync(int? companyId)
         {
             try
             {
-                throw new NotImplementedException();
+                IEnumerable<Project> projects = Enumerable.Empty<Project>();
+                if (companyId != null)
+                {
+                    projects = await _projectService.GetProjectsByCompanyIdAsync(companyId);
+                }
+                return projects;
+
             }
             catch (Exception)
             {
@@ -60,12 +77,19 @@ namespace TurboTicketsMVC.Services
             }
         }
 
-        public Task<IEnumerable<Invite>> GetInvitesAsync(int? companyId)
+        public async Task<IEnumerable<Invite>> GetInvitesAsync(int? companyId)
         {
             try
             {
-                throw new NotImplementedException();
-            }
+				IEnumerable<Invite> invites = Enumerable.Empty<Invite>();
+				if (companyId != null)
+				{
+					invites = await _context.Invites
+										.Where(i => i.CompanyId == companyId)
+										.ToListAsync();
+				}
+				return invites;
+			}
             catch (Exception)
             {
 

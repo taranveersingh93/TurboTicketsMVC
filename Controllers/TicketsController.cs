@@ -27,6 +27,7 @@ namespace TurboTicketsMVC.Controllers
         private readonly ITTCompanyService _companyService;
         private readonly ITTFileService _fileService;
         private readonly ITTTicketHistoryService _ticketHistoryService;
+        private readonly ITTNotificationService _notificationService;
 
         public TicketsController(ApplicationDbContext context,
                                  UserManager<TTUser> userManager,
@@ -34,7 +35,8 @@ namespace TurboTicketsMVC.Controllers
                                  ITTCompanyService companyService,
                                  ITTProjectService projectService,
                                  ITTFileService fileService,
-                                 ITTTicketHistoryService ticketHistoryService)
+                                 ITTTicketHistoryService ticketHistoryService,
+                                 ITTNotificationService notificationService)
         {
             _context = context;
             _userManager = userManager;
@@ -43,6 +45,7 @@ namespace TurboTicketsMVC.Controllers
             _projectService = projectService;
             _fileService = fileService;
             _ticketHistoryService = ticketHistoryService;
+            _notificationService = notificationService; 
         }
 
         // GET: Tickets
@@ -66,6 +69,8 @@ namespace TurboTicketsMVC.Controllers
             {
                 return NotFound();
             }
+            IEnumerable<TTUser> projectDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
+            ViewData["Developers"] = new SelectList(projectDevelopers, "Id", "FullName", ticket.DeveloperUserId);
 
             return View(ticket);
         }
@@ -98,6 +103,9 @@ namespace TurboTicketsMVC.Controllers
                 //add history
                 Ticket newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
                 await _ticketHistoryService.AddHistoryAsync(null!, newTicket, _userId);
+
+                //notify
+                await _notificationService.NewTicketNotificationAsync(ticket.Id, _userId);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -189,6 +197,11 @@ namespace TurboTicketsMVC.Controllers
                 DeveloperId = String.Empty,
                 Developers = new SelectList(await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId), "Id", "FullName", ticket.DeveloperUserId)
             };
+
+            if (ticket.DeveloperUserId != null)
+            {
+                assignTicketViewModel.DeveloperId = ticket.DeveloperUserId;
+            }
             return View(assignTicketViewModel);
         }
 
@@ -215,6 +228,9 @@ namespace TurboTicketsMVC.Controllers
                     //Add History
                     Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
                     await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+
+                    //Notify
+                    await _notificationService.NewDeveloperNotificationAsync(ticket.Id, assignTicketViewModel.DeveloperId, _userId);
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -226,7 +242,43 @@ namespace TurboTicketsMVC.Controllers
 
         }
 
+        // POST: Tickets/AssignTicketView/
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignTicketFromDetails(int? ticketId, string? developerId)
+        {//OldTicket is a snapshot of the Ticket data before updating
+         //and NewTicket is a snapshot of the Ticket data after the update.
+         //They are used for comparison in the TicketHistoryService.
+         //AsNoTracking allows for this by telling EntityFramework
+         //not to track the queried data.  This avoids the error of
+         //multiple active result sets
 
+            Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketId, _companyId);
+            try
+            {
+                if (ticketId != null && developerId != null)
+                {
+                    await _ticketService.AssignTicketAsync(ticketId, developerId);
+
+                    //Add History
+                    Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketId, _companyId);
+                    await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+
+                    //Notify
+                    await _notificationService.NewDeveloperNotificationAsync(ticketId, developerId, _userId);
+                }
+
+
+                return RedirectToAction(nameof(Details), new { id = ticketId });
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
 
         // GET: Tickets/Delete/5
         public async Task<IActionResult> Archive(int? id)

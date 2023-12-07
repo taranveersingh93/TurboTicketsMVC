@@ -1,6 +1,6 @@
 ﻿namespace TurboTicketsMVC.Models.Enums
 {
-    public enum TTNotificationType
+    public enum TTNotificationTypes
     {
         Project,
         Ticket

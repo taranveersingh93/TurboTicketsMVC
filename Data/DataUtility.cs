@@ -995,8 +995,8 @@ namespace TurboTicketsMVC.Data
             try
             {
                 IList<NotificationType> notificationTypes = new List<NotificationType>() {
-                     new NotificationType() { Name = TTNotificationType.Project.ToString() },
-                     new NotificationType() { Name = TTNotificationType.Ticket.ToString() }
+                     new NotificationType() { Name = TTNotificationTypes.Project.ToString() },
+                     new NotificationType() { Name = TTNotificationTypes.Ticket.ToString() }
                 };
 
                 var dbNotificationTypes = context.NotificationTypes.Select(c => c.Name).ToList();
@@ -1013,5 +1013,10 @@ namespace TurboTicketsMVC.Data
                 throw;
             }
         }
-    }
+
+		internal static DateTimeOffset GetPostGresDate(DateTimeOffset now)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

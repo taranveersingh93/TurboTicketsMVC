@@ -108,7 +108,6 @@
                             @* Project Activity loop *@
                             @foreach(TicketHistory history in Model.Tickets.SelectMany(t => t.History).OrderBy(h => h.CreatedDate))
                             {
-                                Console.WriteLine("here");
                                 <div class="">
                                     <span class="date" style="font-weight:bold">@history.CreatedDate.ToString("dd MMM yyyy")</span>
                                     <h6>@history.Description</h6>
