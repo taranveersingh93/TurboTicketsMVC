@@ -45,7 +45,7 @@ namespace TurboTicketsMVC.Controllers
             _projectService = projectService;
             _fileService = fileService;
             _ticketHistoryService = ticketHistoryService;
-            _notificationService = notificationService; 
+            _notificationService = notificationService;
         }
 
         // GET: Tickets
@@ -105,7 +105,7 @@ namespace TurboTicketsMVC.Controllers
                 await _ticketHistoryService.AddHistoryAsync(null!, newTicket, _userId);
 
                 //notify
-                await _notificationService.NewTicketNotificationAsync(ticket.Id, _userId);
+                await _notificationService.TicketUpdateNotificationAsync(ticket.Id, _userId, nameof(TTTicketNotificationTypes.NewTicket));
 
                 return RedirectToAction(nameof(Index));
             }
@@ -159,7 +159,13 @@ namespace TurboTicketsMVC.Controllers
 
                     await _ticketService.UpdateTicketAsync(ticket);
                     Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
+
+                    //history
                     await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+
+                    //notification
+                    await _notificationService.TicketUpdateNotificationAsync(ticket.Id, _userId, nameof(TTTicketNotificationTypes.UpdateTicket));
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -230,7 +236,7 @@ namespace TurboTicketsMVC.Controllers
                     await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
 
                     //Notify
-                    await _notificationService.NewDeveloperNotificationAsync(ticket.Id, assignTicketViewModel.DeveloperId, _userId);
+                    await _notificationService.TicketUpdateNotificationAsync(ticket.Id, assignTicketViewModel.DeveloperId, nameof(TTTicketNotificationTypes.AssignedTicket));
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -265,7 +271,7 @@ namespace TurboTicketsMVC.Controllers
                     await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
 
                     //Notify
-                    await _notificationService.NewDeveloperNotificationAsync(ticketId, developerId, _userId);
+                    await _notificationService.TicketUpdateNotificationAsync(ticketId, developerId, nameof(TTTicketNotificationTypes.AssignedTicket));
                 }
 
 
@@ -332,7 +338,7 @@ namespace TurboTicketsMVC.Controllers
             return View(ticket);
         }
 
-        // POST: Tickets/Delete/5
+        // POST: Tickets/RestoreConfirmed/5
         [HttpPost, ActionName("RestoreConfirmed")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RestoreConfirmed(int id)
@@ -354,6 +360,8 @@ namespace TurboTicketsMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddTicketAttachment([Bind("Id,ImageFormFile,Description,TicketId")] TicketAttachment ticketAttachment)
         {
+            Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketAttachment.TicketId, _companyId);
+
             string statusMessage;
             ModelState.Remove("TTUserId");
             if (ModelState.IsValid && ticketAttachment.ImageFormFile != null)
@@ -367,6 +375,13 @@ namespace TurboTicketsMVC.Controllers
 
                 await _ticketService.AddTicketAttachmentAsync(ticketAttachment);
                 statusMessage = "Success: New attachment added to Ticket.";
+
+                //Add History
+                Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketAttachment.TicketId, _companyId);
+                await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+
+                //Notify
+                await _notificationService.TicketUpdateNotificationAsync(ticketAttachment.TicketId, _userId, nameof(TTTicketNotificationTypes.UpdateTicket));
             }
             else
             {
@@ -377,14 +392,53 @@ namespace TurboTicketsMVC.Controllers
             return RedirectToAction("Details", new { id = ticketAttachment.TicketId, message = statusMessage });
         }
 
+        public async Task<IActionResult> RemoveTicketAttachment(int? Id)
+        {
+            TicketAttachment? ticketAttachment = new();
+            if (Id != null)
+            {
+                ticketAttachment = await _ticketService.GetTicketAttachmentByIdAsync(Id);
+            }
+
+            Ticket? oldTicket = new();
+            if (ticketAttachment != null)
+            {
+                oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketAttachment.TicketId, _companyId);
+                await _ticketService.RemoveTicketAttachmentAsync(ticketAttachment);
+
+                //Add History
+                Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketAttachment.TicketId, _companyId);
+                await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+
+                //Notify
+                await _notificationService.TicketUpdateNotificationAsync(ticketAttachment.TicketId, _userId, nameof(TTTicketNotificationTypes.AttachmentRemoved));
+
+
+                return RedirectToAction("Details", new { id = ticketAttachment!.TicketId });
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddTicketComment([Bind("Id, Comment,TicketId,UserId")] TicketComment ticketComment)
         {
+            Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketComment.TicketId, _companyId);
+
             if (ModelState.IsValid)
             {
                 ticketComment.CreatedDate = DateTimeOffset.Now;
                 await _ticketService.AddTicketCommentAsync(ticketComment);
+
+                //Add History
+                Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketComment.TicketId, _companyId);
+                await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+
+                //Notify
+                await _notificationService.TicketUpdateNotificationAsync(ticketComment.TicketId, _userId, nameof(TTTicketNotificationTypes.CommentAdded));
+
                 return RedirectToAction(nameof(Details), new { id = ticketComment.TicketId });
             }
             ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using TurboTicketsMVC.Data;
 using TurboTicketsMVC.Models;
@@ -10,15 +11,19 @@ namespace TurboTicketsMVC.Services
     {
         #region Injection
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<TTUser> _userManager;
 
-        public TTTicketHistoryService(ApplicationDbContext context)
+        public TTTicketHistoryService(ApplicationDbContext context,
+                                        UserManager<TTUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
         #endregion
 
         #region Add History 1
         public async Task AddHistoryAsync(Ticket? oldTicket, Ticket? newTicket, string? userId) {
+            TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             // NEW TICKET HAS BEEN ADDED
             if (oldTicket == null && newTicket != null)
             {
@@ -138,6 +143,55 @@ namespace TurboTicketsMVC.Services
                         CreatedDate = DateTimeOffset.UtcNow,
                         UserId = userId,
                         Description = $"New ticket developer: {newTicket?.DeveloperUser?.FullName}"
+
+                    };
+                    await _context.TicketHistories.AddAsync(history);
+                }
+
+                //Check ticket comment count
+                if (oldTicket?.Comments.Count != newTicket?.Comments.Count)
+                {
+                    TicketHistory? history = new()
+                    {
+                        TicketId = newTicket!.Id,
+                        PropertyName = "Ticket Comment",
+                        OldValue = oldTicket?.Comments?.Count == 1 ? "1 Comment" : $"{oldTicket?.Comments.Count} comments",
+                        NewValue = $"Comment #{newTicket.Comments.Count} added by {newTicket.Comments.Last()!.User!.FullName}",
+                        CreatedDate = DateTimeOffset.UtcNow,
+                        UserId = userId,
+                        Description = $"New Comment by {newTicket.Comments.Last()!.User!.FullName}"
+
+                    };
+                    await _context.TicketHistories.AddAsync(history);
+                }
+
+                if (oldTicket?.Attachments.Count < newTicket?.Attachments.Count)
+                {
+                    TicketHistory? history = new()
+                    {
+                        TicketId = newTicket!.Id,
+                        PropertyName = "Ticket Attachment",
+                        OldValue = oldTicket?.Attachments?.Count == 1 ? "1 Attachment" : $"{oldTicket?.Attachments.Count} attachments",
+                        NewValue = $"Attachment #{newTicket.Attachments.Count} added by {newTicket.Attachments.Last()!.TTUser!.FullName}",
+                        CreatedDate = DateTimeOffset.UtcNow,
+                        UserId = userId,
+                        Description = $"New Attachment by {newTicket.Attachments.Last()!.TTUser!.FullName}"
+
+                    };
+                    await _context.TicketHistories.AddAsync(history);
+                }
+
+                if (oldTicket?.Attachments.Count > newTicket?.Attachments.Count)
+                {
+                    TicketHistory? history = new()
+                    {
+                        TicketId = newTicket!.Id,
+                        PropertyName = "Ticket Attachment Removed",
+                        OldValue = oldTicket?.Attachments?.Count == 1 ? "1 Attachment" : $"{oldTicket?.Attachments.Count} attachments",
+                        NewValue = $"Attachment #{oldTicket!.Attachments.Count} removed by {user!.FullName}",
+                        CreatedDate = DateTimeOffset.UtcNow,
+                        UserId = userId,
+                        Description = $"Attachment removed by {user!.FullName}"
 
                     };
                     await _context.TicketHistories.AddAsync(history);

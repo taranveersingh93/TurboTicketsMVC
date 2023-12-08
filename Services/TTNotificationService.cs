@@ -6,39 +6,41 @@ using Microsoft.AspNetCore.Identity;
 using TurboTicketsMVC.Data;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace TurboTicketsMVC.Services
 {
-    public class TTNotificationService:ITTNotificationService
+    public class TTNotificationService : ITTNotificationService
     {
-		private readonly ApplicationDbContext _context;
-		private readonly IEmailSender _emailService;
-		private readonly ITTRolesService _rolesService;
-		private readonly ITTProjectService _projectService;
-		private readonly UserManager<TTUser> _userManager;
+        private readonly ApplicationDbContext _context;
+        private readonly IEmailSender _emailService;
+        private readonly ITTRolesService _rolesService;
+        private readonly ITTProjectService _projectService;
+        private readonly UserManager<TTUser> _userManager;
 
-		public TTNotificationService(ApplicationDbContext context,
-									 IEmailSender emailService,
-									 ITTRolesService rolesService,
-									 UserManager<TTUser> userManager,
-									 ITTProjectService projectService)
-		{
-			_context = context;
-			_emailService = emailService;
-			_rolesService = rolesService;
-			_userManager = userManager;
-			_projectService = projectService;
-		}
-		//add a notification to the db
-		public async Task AddNotificationAsync(Notification? notification) {
+        public TTNotificationService(ApplicationDbContext context,
+                                     IEmailSender emailService,
+                                     ITTRolesService rolesService,
+                                     UserManager<TTUser> userManager,
+                                     ITTProjectService projectService)
+        {
+            _context = context;
+            _emailService = emailService;
+            _rolesService = rolesService;
+            _userManager = userManager;
+            _projectService = projectService;
+        }
+        //add a notification to the db
+        public async Task AddNotificationAsync(Notification? notification)
+        {
             try
             {
-				if (notification != null)
-				{
-					await _context.AddAsync(notification);
-					await _context.SaveChangesAsync();
-				}
+                if (notification != null)
+                {
+                    await _context.AddAsync(notification);
+                    await _context.SaveChangesAsync();
+                }
 
-			}
+            }
             catch (Exception)
             {
 
@@ -46,26 +48,27 @@ namespace TurboTicketsMVC.Services
             }
         }
 
-		//discuss naming convention
-        public async Task NotificationsByRoleAsync(int? companyId, Notification? notification, TTRoles role) {
+        //discuss naming convention
+        public async Task NotificationsByRoleAsync(int? companyId, Notification? notification, string? role)
+        {
             try
             {
-				if (notification != null)
-				{
-					IEnumerable<string> memberIds = (await _rolesService.GetUsersInRoleAsync(nameof(role), companyId))!.Select(u => u.Id);
+                if (notification != null)
+                {
+                    IEnumerable<string> memberIds = (await _rolesService.GetUsersInRoleAsync(role, companyId))!.Select(u => u.Id);
 
-					foreach (string memberId in memberIds)
-					{
-						notification.Id = 0; //db identifies this as a new/unique notification. Only for new records
-						notification.RecipientId = memberId;
+                    foreach (string memberId in memberIds)
+                    {
+                        notification.Id = 0; //db identifies this as a new/unique notification. Only for new records
+                        notification.RecipientId = memberId;
 
-						await _context.AddAsync(notification);
-					}
+                        await _context.AddAsync(notification);
+                    }
 
-					await _context.SaveChangesAsync();
-				}
+                    await _context.SaveChangesAsync();
+                }
 
-			}
+            }
             catch (Exception)
             {
 
@@ -73,26 +76,27 @@ namespace TurboTicketsMVC.Services
             }
         }
 
-		//Get all notifications where either the sender or receiver is a given user
-        public async Task<List<Notification>> GetNotificationsByUserIdAsync(string? userId) {
+        //Get all notifications where either the sender or receiver is a given user
+        public async Task<List<Notification>> GetNotificationsByUserIdAsync(string? userId)
+        {
             try
             {
 
-				List<Notification> notifications = new();
+                List<Notification> notifications = new();
 
-				if (!string.IsNullOrEmpty(userId))
-				{
+                if (!string.IsNullOrEmpty(userId))
+                {
 
-					notifications = await _context.Notifications
-												  .Where(n => n.RecipientId == userId || n.SenderId == userId)
-												  .Include(n => n.Recipient)
-												  .Include(n => n.Sender)
-												  .ToListAsync();
-				}
+                    notifications = await _context.Notifications
+                                                  .Where(n => n.RecipientId == userId || n.SenderId == userId)
+                                                  .Include(n => n.Recipient)
+                                                  .Include(n => n.Sender)
+                                                  .ToListAsync();
+                }
 
-				return notifications;
+                return notifications;
 
-			}
+            }
             catch (Exception)
             {
 
@@ -100,31 +104,32 @@ namespace TurboTicketsMVC.Services
             }
         }
 
-		//a notification generated by the ticket assigner/PM to the assigned dev
-        public async Task<bool> NewDeveloperNotificationAsync(int? ticketId, string? developerId, string? senderId) {
+        //a notification generated by the ticket assigner/PM to the assigned dev
+        public async Task<bool> NewDeveloperNotificationAsync(int? ticketId, string? developerId, string? senderId)
+        {
             try
             {
-				TTUser? ttUser = await _userManager.FindByIdAsync(senderId!);
-				Ticket? ticket = await _context.Tickets.FindAsync(ticketId);
+                TTUser? ttUser = await _userManager.FindByIdAsync(senderId!);
+                Ticket? ticket = await _context.Tickets.FindAsync(ticketId);
 
-				Notification? notification = new()
-				{
-					TicketId = ticket!.Id,
-					Title = "Developer Assigned",
-					Message = $"Ticket: {ticket.Title} was assigned by {ttUser?.FullName} ",
-					CreatedDate = DataUtility.GetPostGresDate(DateTimeOffset.Now),
-					SenderId = senderId,
-					RecipientId = developerId,
-					NotificationType = TTNotificationTypes.Ticket
-				};
+                Notification? notification = new()
+                {
+                    TicketId = ticket!.Id,
+                    Title = "Developer Assigned",
+                    Message = $"Ticket: {ticket.Title} was assigned by {ttUser?.FullName} ",
+                    CreatedDate = DataUtility.GetPostGresDate(DateTimeOffset.Now),
+                    SenderId = senderId,
+                    RecipientId = developerId,
+                    NotificationType = TTNotificationTypes.Ticket
+                };
 
 
-				await AddNotificationAsync(notification);
-				await SendEmailNotificationAsync(notification, "Ticket Developer Assigned");
+                await AddNotificationAsync(notification);
+                await SendEmailNotificationAsync(notification, "Ticket Developer Assigned");
 
-				return true;
+                return true;
 
-			}
+            }
             catch (Exception)
             {
                 return false;
@@ -132,53 +137,55 @@ namespace TurboTicketsMVC.Services
             }
         }
 
-		//a notification to the PM of a project when a project ticket is created.
-		//If PM is unassigned or sender ID is not passed in, the notification is sent to the ticket creator
-        public async Task<bool> NewTicketNotificationAsync(int? ticketId, string? senderId) {
-			TTUser? ttUser = await _userManager.FindByIdAsync(senderId!);
-			Ticket? ticket = await _context.Tickets.FindAsync(ticketId);
-			TTUser? projectManager = await _projectService.GetProjectManagerAsync(ticket?.ProjectId);
+        //a notification to the PM of a project when a project ticket is created.
+        //If PM is unassigned or sender ID is not passed in, the notification is sent to the ticket creator
+        public async Task<bool> NewTicketNotificationAsync(int? ticketId, string? senderId)
+        {
+            TTUser? ttUser = await _userManager.FindByIdAsync(senderId!);
+            Ticket? ticket = await _context.Tickets.FindAsync(ticketId);
+            TTUser? projectManager = await _projectService.GetProjectManagerAsync(ticket?.ProjectId);
 
-			if (ticket != null && ttUser != null)
-			{
-				Notification? notification = new()
-				{
-					TicketId = ticket.Id,
-					Title = "New Ticket Added",
-					Message = $"New Ticket: {ticket.Title} was created by {ttUser.FullName} ",
-					CreatedDate = DataUtility.GetPostGresDate(DateTime.Now),
-					SenderId = senderId,
-					RecipientId = projectManager?.Id ?? senderId, //reconsider having the failsafe as adminId
-					NotificationType = TTNotificationTypes.Ticket
-				};
+            if (ticket != null && ttUser != null)
+            {
+                Notification? notification = new()
+                {
+                    TicketId = ticket.Id,
+                    Title = "New Ticket Added",
+                    Message = $"New Ticket: {ticket.Title} was created by {ttUser.FullName} ",
+                    CreatedDate = DataUtility.GetPostGresDate(DateTime.Now),
+                    SenderId = senderId,
+                    RecipientId = projectManager?.Id ?? senderId, //reconsider having the failsafe as adminId
+                    NotificationType = TTNotificationTypes.Ticket
+                };
 
 
-				if (projectManager != null)
-				{
-					await AddNotificationAsync(notification);
-					await SendEmailNotificationAsync(notification, "New Ticket Added");
-				}
-				else
-				{
-					await NotificationsByRoleAsync(ttUser.CompanyId, notification, TTRoles.Admin);
-					await SendEmailNotificationByRoleAsync(ttUser.CompanyId, notification, TTRoles.Admin);
-				}
-				return true;
-			}
-			return false;
-		}
+                if (projectManager != null)
+                {
+                    await AddNotificationAsync(notification);
+                    await SendEmailNotificationAsync(notification, "New Ticket Added");
+                }
+                else
+                {
+                    await NotificationsByRoleAsync(ttUser.CompanyId, notification, nameof(TTRoles.Admin));
+                    await SendEmailNotificationByRoleAsync(ttUser.CompanyId, notification, nameof(TTRoles.Admin));
+                }
+                return true;
+            }
+            return false;
+        }
 
         //an update notification to PM if one exists or the sender.
         //WHAT IF SENDER AND PM unassigned?. Should we send it to the developer?
         //when will devId be used?
-        public async Task<bool> TicketUpdateNotificationAsync(int? ticketId, string? updaterId, string? senderId = null)
+        public async Task<bool> TicketUpdateNotificationAsync(int? ticketId, string? ticketUserId, string? ticketNotificationType)
         {
             try
             {
-                TTUser? ttUser = await _userManager.FindByIdAsync(updaterId!);
+                TTUser? ticketUser = await _userManager.FindByIdAsync(ticketUserId!);
                 Ticket? ticket = await _context.Tickets.Include(t => t.Project).FirstOrDefaultAsync(t => t.Id == ticketId);
                 TTUser? projectManager = await _projectService.GetProjectManagerAsync(ticket?.ProjectId);
-
+                IEnumerable<TTUser> admins = await _rolesService.GetUsersInRoleAsync(nameof(TTRoles.Admin), ticket!.Project!.CompanyId);
+                TTUser admin = admins.First();
 
                 if (ticket != null)
                 {
@@ -186,25 +193,63 @@ namespace TurboTicketsMVC.Services
                     Notification? notification = new()
                     {
                         TicketId = ticketId,
-                        Title = "Ticket Updated",
-                        Message = $"Ticket: {ticket?.Title} was updated by {ttUser?.FullName} ",
-                        CreatedDate = DataUtility.GetPostGresDate(DateTime.Now),
-                        SenderId = senderId,
-                        RecipientId = projectManager?.Id ?? senderId,
-                        NotificationType = TTNotificationTypes.Ticket
+                        CreatedDate = DateTimeOffset.UtcNow, //DataUtility.GetPostGresDate(DateTimeOffset.Now)
+                        NotificationType = TTNotificationTypes.Ticket,
+                        Title = "",
+                        Message = "",
+                        SenderId = ticketUserId,
+                        RecipientId = projectManager?.Id ?? admin.Id
                     };
 
-
-                    if (projectManager != null)
+                    if (ticketNotificationType == "UpdateTicket")
                     {
-                        await AddNotificationAsync(notification);
-                        await SendEmailNotificationAsync(notification, "New Ticket Added");
+                        notification.Title = "Ticket Updated";
+                        notification.Message = $"Ticket: {ticket?.Title} was updated by {ticketUser?.FullName} ";
+                        notification.SenderId = ticketUserId;
+                        notification.RecipientId = projectManager?.Id ?? admin.Id;
                     }
-                    else
+                    else if (ticketNotificationType == "NewTicket")
                     {
+                        notification.Title = "New Ticket Added";
+                        notification.Message = $"New Ticket: {ticket.Title} was created by {ticketUser?.FullName} ";
+                        notification.SenderId = ticketUserId;
+                        notification.RecipientId = projectManager?.Id ?? admin.Id;
+                    }
+                    else if (ticketNotificationType == "AssignedTicket")
+                    {
+                        notification.Title = "Ticket Updated";
+                        notification.Message = $"Ticket: {ticket.Title} was assigned by {projectManager?.FullName ?? admin?.FullName}";
+                        notification.SenderId = projectManager?.Id ?? admin?.Id;
+                        notification.RecipientId = ticketUserId;
+                    }
+                    else if (ticketNotificationType == "CommentAdded")
+                    {
+                        notification.Title = "Comment Added";
+                        notification.Message = $"Comment: A comment was added to the ticket '{ticket.Title}' by {ticketUser?.FullName}";
+                    }
+                    else if (ticketNotificationType == "AttachmentAdded")
+                    {
+                        notification.Title = "Attachment Added";
+                        notification.Message = $"Attachment: An Attachment was added to the ticket '{ticket.Title}' by {ticketUser?.FullName}";
+                    }
+                    else if(ticketNotificationType == "AttachmentRemoved")
+                    {
+                        notification.Title = "Attachment Removed";
+                        notification.Message = $"Attachment: An Attachment was removed from the ticket '{ticket.Title}' by {ticketUser?.FullName}";
+                    }
 
-                        await NotificationsByRoleAsync(companyId, notification, TTRoles.Admin);
-                        await SendEmailNotificationByRoleAsync(companyId, notification, TTRoles.Admin);
+                    if (ticketNotificationType != "AssignedTicket")
+                    {
+                        if (projectManager != null)
+                        {
+                            await AddNotificationAsync(notification);
+                            await SendEmailNotificationAsync(notification, notification.Title);
+                        }
+                        else
+                        {
+                            await NotificationsByRoleAsync(companyId, notification, nameof(TTRoles.Admin));
+                            await SendEmailNotificationByRoleAsync(companyId, notification, nameof(TTRoles.Admin));
+                        }
                     }
 
                     return true;
@@ -218,56 +263,58 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public async Task<bool> SendEmailNotificationByRoleAsync(int? companyId, Notification? notification, TTRoles role) {
-			try
-			{
+        public async Task<bool> SendEmailNotificationByRoleAsync(int? companyId, Notification? notification, string? role)
+        {
+            try
+            {
 
-				if (notification != null)
-				{
-					IEnumerable<string> memberEmails = (await _rolesService.GetUsersInRoleAsync(nameof(role), companyId))!.Select(u => u.Email)!;
+                if (notification != null)
+                {
+                    IEnumerable<string> memberEmails = (await _rolesService.GetUsersInRoleAsync(role, companyId))!.Select(u => u.Email)!;
 
-					foreach (string adminEmail in memberEmails) //naming convention?
-					{
-						await _emailService.SendEmailAsync(adminEmail, notification.Title!, notification.Message!);
-					}
-					return true;
-				}
+                    foreach (string adminEmail in memberEmails) //naming convention?
+                    {
+                        await _emailService.SendEmailAsync(adminEmail, notification.Title!, notification.Message!);
+                    }
+                    return true;
+                }
 
-				return false;
-			}
-			catch (Exception)
-			{
+                return false;
+            }
+            catch (Exception)
+            {
 
-				throw;
-			}
-		}
+                throw;
+            }
+        }
 
-		//given a notification, send an email to the notification object's recipient
-        public async Task<bool> SendEmailNotificationAsync(Notification? notification, string? emailSubject) {
-			try
-			{
-				if (notification != null)
-				{
-					TTUser? ttUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == notification.RecipientId);
+        //given a notification, send an email to the notification object's recipient
+        public async Task<bool> SendEmailNotificationAsync(Notification? notification, string? emailSubject)
+        {
+            try
+            {
+                if (notification != null)
+                {
+                    TTUser? ttUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == notification.RecipientId);
 
-					string? userEmail = ttUser?.Email;
+                    string? userEmail = ttUser?.Email;
 
-					if (userEmail != null)
-					{
-						await _emailService.SendEmailAsync(userEmail, emailSubject!, notification.Message!);
-						return true;
-					}
-				}
+                    if (userEmail != null)
+                    {
+                        await _emailService.SendEmailAsync(userEmail, emailSubject!, notification.Message!);
+                        return true;
+                    }
+                }
 
-				return false;
-			}
-			catch (Exception)
-			{
+                return false;
+            }
+            catch (Exception)
+            {
 
-				throw;
-			}
-		}
+                throw;
+            }
+        }
 
-		
+
     }
 }

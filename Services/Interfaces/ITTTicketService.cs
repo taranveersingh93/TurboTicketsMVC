@@ -24,6 +24,7 @@ namespace TurboTicketsMVC.Services.Interfaces
 		public Task ArchiveTicketAsync(Ticket? ticket);
         public Task RestoreTicketAsync(Ticket? ticket);
 
+        public Task RemoveTicketAttachmentAsync(TicketAttachment? ticketAttachment);
         public Task<bool> IsUserAuthorized(string? userId, int? ticketId, int? companyId);
     }
 }

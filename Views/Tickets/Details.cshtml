@@ -79,10 +79,11 @@
                         {
                             <div class="card-body">
                                 <h5>Assigned Developer:</h5>
-                                @if(Model.DeveloperUserId != null)
+                                @if (Model.DeveloperUserId != null)
                                 {
                                     <p>@Model.DeveloperUser!.FullName</p>
-                                } else
+                                }
+                                else
                                 {
                                     <p>No Developer Assigned</p>
                                 }
@@ -181,13 +182,21 @@
                                     <div class="row">
                                         @foreach (TicketAttachment item in Model.Attachments)
                                         {
-                                            <div class="col col-sm-2">
+                                            <div class="col col-sm-3 col-lg-2"> 
+                                                @if (isUserAuthorized)
+                                                {
+                                                    <div class="w-100 d-flex justify-content-end">
+                                                        <a asp-controller="Tickets" asp-action="RemoveTicketAttachment" asp-route-Id="@item.Id">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </a>
+                                                    </div>
+                                                }
                                                 <a asp-action="ShowFile" asp-controller="Tickets" asp-route-Id="@item.Id" target="_blank">
-                                                    <div class="icon">
+                                                    <div class="icon d-flex justify-content-center">
                                                         <img src="@FileService.GetFileIcon(item.ImageFileName!)" style="height:50px;width:50px" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="@item.ImageFileName" />
                                                     </div>
                                                 </a>
-                                                <div style="font-size:x-small">
+                                                <div style="font-size:x-small" class="d-flex flex-column align-items-center">
                                                     <div class="file-name">
                                                         <strong>@item.Description</strong>
                                                     </div>
@@ -224,9 +233,13 @@
                                         {
                                             <p>A ticket was added.</p>
                                         }
-                                        else if (history.PropertyName!.Equals("TicketComment") || history.PropertyName.Equals("TicketAttachment"))
+                                        else if (history.PropertyName!.Equals("Ticket Comment") || history.PropertyName.Equals("Ticket Attachment"))
                                         {
-                                            <p>A <b>@history.PropertyName</b> was added.</p>
+                                            <p>A new @history.PropertyName was added by <b>@history.User.FullName</b></p>
+                                        }
+                                        else if (history.PropertyName!.Equals("Ticket Attachment Removed"))
+                                        {
+                                            <p>A Ticket attachment was removed by <b>@history.User.FullName</b></p>
                                         }
                                         else
                                         {

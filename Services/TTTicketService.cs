@@ -78,6 +78,22 @@ namespace TurboTicketsMVC.Services
 			}
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+        public async Task RemoveTicketAttachmentAsync(TicketAttachment? ticketAttachment)
+        {
+            try
+            {
+                if (ticketAttachment != null)
+                {
+                    _context.Remove(ticketAttachment);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
 
                 throw;
             }
@@ -150,6 +166,7 @@ namespace TurboTicketsMVC.Services
                                   .Include(t => t.Project)
                                   .Include(t => t.SubmitterUser)
                                   .Include(t => t.Attachments)
+                                    .ThenInclude(a => a.TTUser)
                                   .Include(t => t.Comments)
                                       .ThenInclude(c => c.User)
                                   .AsNoTracking()
@@ -178,6 +195,7 @@ namespace TurboTicketsMVC.Services
                                     .ThenInclude(h => h.User)
 								.Include(t => t.SubmitterUser)
                                 .Include(t => t.Attachments)
+                                    .ThenInclude(a => a.TTUser)
                                 .Include(t => t.Comments)
                                     .ThenInclude(c => c.User)
 	                            .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);

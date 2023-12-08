@@ -7,7 +7,7 @@ namespace TurboTicketsMVC.Services.Interfaces
     {
         public Task AddNotificationAsync(Notification? notification);
 
-        public Task NotificationsByRoleAsync(int? companyId, Notification? notification, TTRoles role);
+        public Task NotificationsByRoleAsync(int? companyId, Notification? notification, string? role);
 
         public Task<List<Notification>> GetNotificationsByUserIdAsync(string? userId);
 
@@ -15,10 +15,10 @@ namespace TurboTicketsMVC.Services.Interfaces
 
         public Task<bool> NewTicketNotificationAsync(int? ticketId, string? senderId);
 
-        public Task<bool> SendEmailNotificationByRoleAsync(int? companyId, Notification? notification, TTRoles role);
+        public Task<bool> SendEmailNotificationByRoleAsync(int? companyId, Notification? notification, string? role);
 
         public Task<bool> SendEmailNotificationAsync(Notification? notification, string? emailSubject);
 
-        public Task<bool> TicketUpdateNotificationAsync(int? ticketId, string? updaterId, string? senderId = null);
+        public Task<bool> TicketUpdateNotificationAsync(int? ticketId, string? ticketUserId, string? ticketNotificationType);
     }
 }
