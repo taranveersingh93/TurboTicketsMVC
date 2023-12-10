@@ -239,12 +239,36 @@ namespace TurboTicketsMVC.Services
 
         }
 
-        public Task<List<Ticket>> GetTicketsByUserIdAsync(string? userId, int? companyId) {
+        public async Task<IEnumerable<Ticket>> GetTicketsByUserIdAsync(string? userId, int? companyId) {
             try
             {
-                                throw new NotImplementedException();
 
-
+                IEnumerable<Ticket> companyTickets = await GetAllTicketsByCompanyIdAsync(companyId); 
+                if (userId != null && companyId != null)
+                {
+					IEnumerable<Ticket> userTickets = Enumerable.Empty<Ticket>();
+					TTUser user = (await _context.Users.FirstOrDefaultAsync(u => u.Id == userId))!;
+					bool isAdmin = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin));
+					bool isProjectManager = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.ProjectManager));
+					bool isDeveloper = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Developer));
+					bool isSubmitter = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Submitter));
+                    
+                    if (isAdmin)
+                    {
+                        userTickets = companyTickets;
+                    } else if(isProjectManager)
+                    {
+                        userTickets = companyTickets.Where(t => t.Project!.Members.Contains(user));
+                    } else if(isDeveloper)
+                    {
+                        userTickets = companyTickets.Where(t => t.DeveloperUserId == userId);
+                    } else if(isSubmitter)
+                    {
+                        userTickets = companyTickets.Where(t => t.SubmitterUserId == userId);
+                    }
+                    return userTickets;
+                }
+                return companyTickets;
             }
             catch (Exception)
             {

@@ -1,13 +1,23 @@
 ﻿@using Microsoft.AspNetCore.Identity;
 @using TurboTicketsMVC.Data;
-@model Views_Home_Dashboard
+@using TurboTicketsMVC.Services.Interfaces;
+@using TurboTicketsMVC.Models.ViewModels;
+@model DashboardViewModel
 @inject UserManager<TTUser> _UserManager;
 @inject ApplicationDbContext _Context;
+@inject ITTRolesService _RoleService;
+@inject ITTTicketService _TicketService;
+@inject ITTProjectService _ProjectService;
 
 
 @{
 	ViewData["Title"] = "Dashboard";
 	TTUser user = (await _UserManager.GetUserAsync(User))!;
+	IEnumerable<string> userRoles = (await _RoleService.GetUserRolesAsync(user))!;
+	IEnumerable<Ticket> userTickets = (await _TicketService.GetTicketsByUserIdAsync(user.Id, user.CompanyId));
+	IEnumerable<Project> userProjects = (await _ProjectService.GetUserProjectsAsync(user.Id))!;
+
+
 	@* Instantiate the btUser *@
 }
 
@@ -15,33 +25,18 @@
 <a href="javascript:void(0);">
 	@* User Info *@
 	<div class="align-items-center d-flex">
-		<h6 class="mb-0 mr-2 mt-0" style="font-size:x-small">Developer:</h6>
-		<ul class="list-unstyled team-info mt-2">
-@* 			@if (developer != null)
-			{
-				<li>
-					<img src="[Image Service]" data-toggle="tooltip" data-placement="top" title="@developer?.FullName" alt="Avatar"
-						 data-original-title="@developer?.FullName">
-				</li>
 
-
-				if ((projectManager != null) && (projectManager?.Id == btUser?.Id))
-				{
-					<a class="btn btn-xs btn-outline-primary" style="font:x-small" asp-action="AssignDeveloper" asp-controller="Home" asp-route-ticketId="@Model.Id">Manage</a>
-				}
-			}
-			else
-			{
-				<li><span class="badge badge-primary">Not Assigned</span></li>
-			} *@
-		</ul>
+		@foreach(string userRole in userRoles)
+		{
+			<h6 class="mb-0 mr-2 mt-0" style="font-size:x-small">@userRole</h6>
+		}
 	</div>
 </a>
 @* Get The btUser FullName *@
-<strong>[User's FullName]</strong>
+<strong>@user.FullName</strong>          
 <span class="text-muted" style="font-size:x-small;">
 	@* Company Name *@
-	<strong>[Show CompanyName]</strong>
+	<strong>@user.Company!.Name</strong>
 </span>
 
 
@@ -99,6 +94,7 @@
 							<h2>Projects</h2>
 						</div>
 						<div class="card-body">
+							@foreach()
 							@* [Copy and format table from Unassigned Tickets] *@
 						</div>
 						<div class="card-footer">

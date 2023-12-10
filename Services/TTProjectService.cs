@@ -312,12 +312,14 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public Task<IEnumerable<Project>?> GetUserProjectsAsync(string? userId)
+        public async Task<IEnumerable<Project>?> GetUserProjectsAsync(string? userId)
         {
             try
             {
-                throw new NotImplementedException();
-
+                TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                IEnumerable<Project> companyProjects = await GetAllProjectsByCompanyIdAsync(user!.CompanyId);
+                IEnumerable<Project> userProjects = companyProjects.Where(p => p.Members.Contains(user)).ToList();
+                return userProjects;
             }
             catch (Exception)
             {

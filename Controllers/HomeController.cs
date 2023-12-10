@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using TurboTicketsMVC.Data;
@@ -51,6 +52,7 @@ namespace TurboTicketsMVC.Controllers
             return View();
         }
 
+		[Authorize]
         public async Task<IActionResult> Dashboard()
         {
 			DashboardViewModel dashboardViewModel = new()

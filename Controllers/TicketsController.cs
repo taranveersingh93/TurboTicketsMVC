@@ -78,6 +78,7 @@ namespace TurboTicketsMVC.Controllers
         // GET: Tickets/Create
         public async Task<IActionResult> Create()
         {
+            string name = "Taranveer";
             int companyId = User.Identity!.GetCompanyId();
             IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
             IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);

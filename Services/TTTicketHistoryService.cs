@@ -33,7 +33,7 @@ namespace TurboTicketsMVC.Services
                     PropertyName = "",
                     OldValue = "",
                     NewValue = "",
-                    CreatedDate = DateTimeOffset.UtcNow,
+                    CreatedDate = DateTimeOffset.Now,
                     UserId = userId,
                     Description = "New Ticket Created"
                 };
@@ -60,7 +60,7 @@ namespace TurboTicketsMVC.Services
                         PropertyName = "Title",
                         OldValue = oldTicket?.Title,
                         NewValue = newTicket?.Title,
-                        CreatedDate = DateTimeOffset.UtcNow,
+                        CreatedDate = DateTimeOffset.Now,
                         UserId = userId,
                         Description = $"New ticket title: {newTicket?.Title}"
                     };
@@ -76,7 +76,7 @@ namespace TurboTicketsMVC.Services
                         PropertyName = "Description",
                         OldValue = oldTicket?.Description,
                         NewValue = newTicket?.Description,
-                        CreatedDate = DateTimeOffset.UtcNow,
+                        CreatedDate = DateTimeOffset.Now,
                         UserId = userId,
                         Description = $"New ticket description: {newTicket?.Description}"
                     };
@@ -92,7 +92,7 @@ namespace TurboTicketsMVC.Services
                         PropertyName = "TicketPriority",
                         OldValue = oldTicket?.TicketPriority.ToString(),
                         NewValue = newTicket?.TicketPriority.ToString(),
-                        CreatedDate = DateTimeOffset.UtcNow,
+                        CreatedDate = DateTimeOffset.Now,
                         UserId = userId,
                         Description = $"New ticket priority: {newTicket?.TicketPriority!.ToString()}"
                     };
@@ -108,7 +108,7 @@ namespace TurboTicketsMVC.Services
                         PropertyName = "TicketStatus",
                         OldValue = oldTicket?.TicketStatus!.ToString(),
                         NewValue = newTicket?.TicketStatus!.ToString(),
-                        CreatedDate = DateTimeOffset.UtcNow,
+                        CreatedDate = DateTimeOffset.Now,
                         UserId = userId,
                         Description = $"New ticket Status: {newTicket?.TicketStatus!.ToString()}"
                     };
@@ -124,7 +124,7 @@ namespace TurboTicketsMVC.Services
                         PropertyName = "TicketTypeId",
                         OldValue = oldTicket?.TicketType!.ToString(),
                         NewValue = newTicket?.TicketType!.ToString(),
-                        CreatedDate = DateTimeOffset.UtcNow,
+                        CreatedDate = DateTimeOffset.Now,
                         UserId = userId,
                         Description = $"New ticket Type: {newTicket?.TicketType!.ToString()}"
                     };
@@ -140,7 +140,7 @@ namespace TurboTicketsMVC.Services
                         PropertyName = "Developer",
                         OldValue = oldTicket?.DeveloperUser?.FullName ?? "Not Assigned",
                         NewValue = newTicket?.DeveloperUser?.FullName,
-                        CreatedDate = DateTimeOffset.UtcNow,
+                        CreatedDate = DateTimeOffset.Now,
                         UserId = userId,
                         Description = $"New ticket developer: {newTicket?.DeveloperUser?.FullName}"
 
@@ -157,7 +157,7 @@ namespace TurboTicketsMVC.Services
                         PropertyName = "Ticket Comment",
                         OldValue = oldTicket?.Comments?.Count == 1 ? "1 Comment" : $"{oldTicket?.Comments.Count} comments",
                         NewValue = $"Comment #{newTicket.Comments.Count} added by {newTicket.Comments.Last()!.User!.FullName}",
-                        CreatedDate = DateTimeOffset.UtcNow,
+                        CreatedDate = DateTimeOffset.Now,
                         UserId = userId,
                         Description = $"New Comment by {newTicket.Comments.Last()!.User!.FullName}"
 
@@ -173,7 +173,7 @@ namespace TurboTicketsMVC.Services
                         PropertyName = "Ticket Attachment",
                         OldValue = oldTicket?.Attachments?.Count == 1 ? "1 Attachment" : $"{oldTicket?.Attachments.Count} attachments",
                         NewValue = $"Attachment #{newTicket.Attachments.Count} added by {newTicket.Attachments.Last()!.TTUser!.FullName}",
-                        CreatedDate = DateTimeOffset.UtcNow,
+                        CreatedDate = DateTimeOffset.Now,
                         UserId = userId,
                         Description = $"New Attachment by {newTicket.Attachments.Last()!.TTUser!.FullName}"
 
@@ -189,7 +189,7 @@ namespace TurboTicketsMVC.Services
                         PropertyName = "Ticket Attachment Removed",
                         OldValue = oldTicket?.Attachments?.Count == 1 ? "1 Attachment" : $"{oldTicket?.Attachments.Count} attachments",
                         NewValue = $"Attachment #{oldTicket!.Attachments.Count} removed by {user!.FullName}",
-                        CreatedDate = DateTimeOffset.UtcNow,
+                        CreatedDate = DateTimeOffset.Now,
                         UserId = userId,
                         Description = $"Attachment removed by {user!.FullName}"
 
@@ -226,7 +226,7 @@ namespace TurboTicketsMVC.Services
                     PropertyName = model,
                     OldValue = "",
                     NewValue = "",
-                    CreatedDate = DateTime.UtcNow,
+                    CreatedDate = DateTime.Now,
                     UserId = userId,
                     Description = description
                 };
