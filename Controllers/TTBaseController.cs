@@ -7,6 +7,6 @@ namespace TurboTicketsMVC.Controllers
     public abstract class TTBaseController: Controller
     {
         protected string? _userId => User.FindFirstValue(ClaimTypes.NameIdentifier);
-        protected int? _companyId => User.Identity!.GetCompanyId();
+        protected int _companyId => User.Identity!.GetCompanyId();
     }
 }

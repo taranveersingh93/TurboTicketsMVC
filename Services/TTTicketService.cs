@@ -261,7 +261,7 @@ namespace TurboTicketsMVC.Services
                         userTickets = companyTickets.Where(t => t.Project!.Members.Contains(user));
                     } else if(isDeveloper)
                     {
-                        userTickets = companyTickets.Where(t => t.DeveloperUserId == userId);
+                        userTickets = companyTickets.Where(t => t.DeveloperUserId == userId || t.SubmitterUserId == userId);
                     } else if(isSubmitter)
                     {
                         userTickets = companyTickets.Where(t => t.SubmitterUserId == userId);

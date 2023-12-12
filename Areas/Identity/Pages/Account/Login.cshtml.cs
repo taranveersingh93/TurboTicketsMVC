@@ -18,15 +18,18 @@ using TurboTicketsMVC.Models;
 
 namespace TurboTicketsMVC.Areas.Identity.Pages.Account
 {
+    
     public class LoginModel : PageModel
     {
         private readonly SignInManager<TTUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
-
-        public LoginModel(SignInManager<TTUser> signInManager, ILogger<LoginModel> logger)
+        private readonly IConfiguration _configuration
+;
+        public LoginModel(SignInManager<TTUser> signInManager, ILogger<LoginModel> logger, IConfiguration configuration)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _configuration = configuration;
         }
 
         /// <summary>
@@ -102,11 +105,26 @@ namespace TurboTicketsMVC.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null, string demoEmail = null)
         {
             returnUrl ??= Url.Content("~/");
 
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            if (!string.IsNullOrEmpty(demoEmail))
+            {
+                string email = _configuration[demoEmail] ?? Environment.GetEnvironmentVariable(demoEmail);
+                string password = _configuration["DemoUserPassword"] ?? Environment.GetEnvironmentVariable("DemoUserPassword");
+                var result = await _signInManager.PasswordSignInAsync(email, password, false, lockoutOnFailure: false);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("Demo User logged in.");
+                    return LocalRedirect(returnUrl);
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid demo login attempt.");
+                    return Page();
+                }
+            }
 
             if (ModelState.IsValid)
             {

@@ -51,9 +51,8 @@ namespace TurboTicketsMVC.Controllers
         // GET: Tickets
         public async Task<IActionResult> Index()
         {
-            int companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Ticket> companyTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(companyId);
-            return View(companyTickets);
+            IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByUserIdAsync(_userId, _companyId);
+            return View(userTickets);
         }
 
         // GET: Tickets/Details/5
@@ -447,7 +446,6 @@ namespace TurboTicketsMVC.Controllers
             return RedirectToAction(nameof(Details), new { id = ticketComment.TicketId });
         }
 
-
         public async Task<IActionResult> ShowFile(int id)
         {
             TicketAttachment? ticketAttachment = await _ticketService.GetTicketAttachmentByIdAsync(id);
@@ -461,6 +459,8 @@ namespace TurboTicketsMVC.Controllers
             }
             return RedirectToAction(nameof(Details), new { id });
         }
+
+
 
         private bool TicketExists(int id)
         {

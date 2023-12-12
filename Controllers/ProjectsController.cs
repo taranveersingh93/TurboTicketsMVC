@@ -11,6 +11,7 @@ using TurboTicketsMVC.Extensions;
 using TurboTicketsMVC.Models;
 using TurboTicketsMVC.Models.Enums;
 using TurboTicketsMVC.Models.ViewModels;
+using TurboTicketsMVC.Services;
 using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Controllers
@@ -34,10 +35,11 @@ namespace TurboTicketsMVC.Controllers
             _roleService = roleService;
         }
 
+        [Authorize]
         // GET: Projects
         public async Task<IActionResult> Index()
         {
-            IEnumerable<Project> projects = await _projectService.GetAllProjectsByCompanyIdAsync(_companyId);
+            IEnumerable<Project> projects = (await _projectService.GetUserProjectsAsync(_userId))!;
             return View(projects);
         }
 
@@ -90,6 +92,7 @@ namespace TurboTicketsMVC.Controllers
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name");
             return View();
         }
+
 
         // POST: Projects/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
