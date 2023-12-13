@@ -39,11 +39,15 @@ namespace TurboTicketsMVC.Controllers
         // GET: Projects
         public async Task<IActionResult> Index()
         {
-            IEnumerable<Project> projects = (await _projectService.GetUserProjectsAsync(_userId))!;
+            IEnumerable<Project> projects = (await _projectService.GetProjectsByCompanyIdAsync(_companyId))!;
             return View(projects);
         }
 
-        
+        public async Task<IActionResult> MyProjects()
+        {
+            IEnumerable<Project> userProjects = (await _projectService.GetUserProjectsAsync(_userId))!;
+            return View(userProjects);
+        }
 
         // GET: Projects/Details/5
         public async Task<IActionResult> Details(int? id)

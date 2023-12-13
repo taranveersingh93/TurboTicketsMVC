@@ -1,4 +1,31 @@
-﻿<div class="content ">
+﻿@model DashboardViewModel
+@using TurboTicketsMVC.Data;
+@using TurboTicketsMVC.Services.Interfaces;
+@using TurboTicketsMVC.Models.ViewModels;
+@using Microsoft.AspNetCore.Identity;
+@inject UserManager<TTUser> _UserManager;
+@inject ApplicationDbContext _Context;
+@inject ITTRolesService _RoleService;
+@inject ITTTicketService _TicketService;
+@inject ITTProjectService _ProjectService;
+@inject ITTCompanyService _CompanyService;
+
+
+
+@{
+    ViewData["Title"] = "Dashboard";
+    TTUser user = (await _UserManager.GetUserAsync(User))!;
+    IEnumerable<string> userRoles = (await _RoleService.GetUserRolesAsync(user))!;
+    IEnumerable<Ticket> userTickets = (await _TicketService.GetTicketsByUserIdAsync(user.Id, user.CompanyId));
+    IEnumerable<Project> userProjects = (await _ProjectService.GetUserProjectsAsync(user.Id))!;
+    int assignedTickets = (userTickets.Where(t => t.DeveloperUser != null)).Count();
+    int unassignedTickets = userTickets.Count() - assignedTickets;
+    double assignedPercent = Math.Round(((double)(assignedTickets) / (double)(userTickets.Count()))*100, 2);
+    double unassignedPercent = Math.Round(100 - assignedPercent, 2);
+
+}
+
+<div class="content ">
     <div class="page-header d-md-flex justify-content-between">
         <div>
             <h3>Welcome back, Bony</h3>
@@ -19,34 +46,9 @@
     <div class="row">
         <div class="col-lg-6">
             <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h6 class="card-title mb-2">Monthly Financial Status</h6>
-                        <div class="d-flex justify-content-between">
-                            <a href="#" class="btn btn-floating">
-                                <i class="ti-reload"></i>
-                            </a>
-                            <div class="dropdown">
-                                <a href="#" data-toggle="dropdown"
-                                   class="btn btn-floating"
-                                   aria-haspopup="true" aria-expanded="false">
-                                    <i class="ti-more-alt"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#">Action</a>
-                                    <a class="dropdown-item" href="#">Another action</a>
-                                    <a class="dropdown-item" href="#">Something else here</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-muted mb-4">Check how you're doing financially for current month</p>
-                    <div id="sales"></div>
-                    <div class="text-center mt-3">
-                        <a href="#" class="btn btn-primary">
-                            <i class="ti-download mr-2"></i> Create Report
-                        </a>
-                    </div>
+                <div class="card-body overflow-auto">
+                    <h6 class="card-title mb-2">Projects: Tickets vs Developers</h6>
+                    <div id="ticketsDevelopersChart"></div>
                 </div>
             </div>
         </div>
@@ -282,7 +284,7 @@
                             <li class="list-group-item d-flex px-0 py-4">
                                 <a href="#" class="flex-shrink-0">
                                     <figure class="avatar mr-3">
-                                        <img src="../../assets/media/image/user/man_avatar1.jpg"
+                                        <img src="~/gogi/assets/media/image/user/man_avatar1.jpg"
                                              class="rounded-circle" alt="image">
                                     </figure>
                                 </a>
@@ -332,7 +334,7 @@
                             <li class="list-group-item d-flex px-0 py-4">
                                 <a href="#" class="flex-shrink-0">
                                     <figure class="avatar mr-3">
-                                        <img src="../../assets/media/image/user/man_avatar2.jpg"
+                                        <img src="~/gogi/assets/media/image/user/man_avatar2.jpg"
                                              class="rounded-circle" alt="image">
                                     </figure>
                                 </a>
@@ -382,7 +384,7 @@
                             <li class="list-group-item d-flex px-0 py-4">
                                 <a href="#" class="flex-shrink-0">
                                     <figure class="avatar mr-3">
-                                        <img src="../../assets/media/image/user/man_avatar3.jpg"
+                                        <img src="~/gogi/assets/media/image/user/man_avatar3.jpg"
                                              class="rounded-circle" alt="image">
                                     </figure>
                                 </a>
@@ -432,7 +434,7 @@
                             <li class="list-group-item d-flex px-0 py-4">
                                 <a href="#" class="flex-shrink-0">
                                     <figure class="avatar mr-3">
-                                        <img src="../../assets/media/image/user/man_avatar4.jpg"
+                                        <img src="~/gogi/assets/media/image/user/man_avatar4.jpg"
                                              class="rounded-circle" alt="image">
                                     </figure>
                                 </a>
@@ -521,36 +523,20 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-4">
                         <div>
-                            <h6 class="card-title mb-1">Monthly Sales</h6>
-                            <p class="small text-muted">Avarage total sales +25,5%</p>
+                            <h6 class="card-title mb-1">UUnassigned Tickets</h6>
+                            <p class="small text-muted">Unassignment Rate %</p>
                         </div>
-                        <div>
-                            <a href="#" class="btn btn-floating">
-                                <i class="fa fa-refresh"></i>
-                            </a>
-                            <div class="dropdown">
-                                <a href="#" data-toggle="dropdown"
-                                   class="btn btn-floating"
-                                   aria-haspopup="true" aria-expanded="false">
-                                    <i class="ti-more-alt"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#">Action</a>
-                                    <a class="dropdown-item" href="#">Another action</a>
-                                    <a class="dropdown-item" href="#">Something else here</a>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                     <div id="monthly-sales"></div>
                     <ul class="list-inline text-center">
                         <li class="list-inline-item">
-                            <i class="fa fa-circle mr-1 text-success"></i> Bank Card <br>
-                            <small class="text-muted">25,45% over</small>
+                            <i class="fa fa-circle mr-1 text-success"></i> Assigned Tickets<br>
+                            <small class="text-muted">@assignedPercent%</small>
                         </li>
                         <li class="list-inline-item">
-                            <i class="fa fa-circle mr-1 text-primary"></i> Credit Card <br>
-                            <small class="text-muted">75,55% over</small>
+                            <i class="fa fa-circle mr-1 text-primary"></i> Unassigned Tickets<br>
+                            <small class="text-muted">@unassignedPercent%</small>
                         </li>
                     </ul>
                 </div>
@@ -577,7 +563,7 @@
                         <tr>
                             <td>
                                 <a href="product-detail.html" class="d-flex align-items-center">
-                                    <img width="40" src="../../assets/media/image/products/product1.png"
+                                    <img width="40" src="~/gogi/assets/media/image/products/product1.png"
                                          class="rounded mr-3" alt="Vase">
                                     <span>Vase</span>
                                 </a>
@@ -607,7 +593,7 @@
                         <tr>
                             <td>
                                 <a href="product-detail.html" class="d-flex align-items-center">
-                                    <img width="40" src="../../assets/media/image/products/product2.png"
+                                    <img width="40" src="~/gogi/assets/media/image/products/product2.png"
                                          class="rounded mr-3" alt="Glasses">
                                     <span>Glasses</span>
                                 </a>
@@ -637,7 +623,7 @@
                         <tr>
                             <td>
                                 <a href="product-detail.html" class="d-flex align-items-center">
-                                    <img width="40" src="../../assets/media/image/products/product3.png"
+                                    <img width="40" src="~/gogi/assets/media/image/products/product3.png"
                                          class="rounded mr-3" alt="Plate">
                                     <span>Plate</span>
                                 </a>
@@ -667,7 +653,7 @@
                         <tr>
                             <td>
                                 <a href="product-detail.html" class="d-flex align-items-center">
-                                    <img width="40" src="../../assets/media/image/products/product4.png"
+                                    <img width="40" src="~/gogi/assets/media/image/products/product4.png"
                                          class="rounded mr-3" alt="Pen">
                                     <span>Pen</span>
                                 </a>
@@ -697,7 +683,7 @@
                         <tr>
                             <td>
                                 <a href="product-detail.html" class="d-flex align-items-center">
-                                    <img width="40" src="../../assets/media/image/products/product5.png"
+                                    <img width="40" src="~/gogi/assets/media/image/products/product5.png"
                                          class="rounded mr-3" alt="Armchair">
                                     <span>Armchair</span>
                                 </a>
@@ -727,7 +713,7 @@
                         <tr>
                             <td>
                                 <a href="product-detail.html" class="d-flex align-items-center">
-                                    <img width="40" src="../../assets/media/image/products/product6.png"
+                                    <img width="40" src="~/gogi/assets/media/image/products/product6.png"
                                          class="rounded mr-3" alt="Flowerpot">
                                     <span>Flowerpot</span>
                                 </a>
@@ -757,7 +743,7 @@
                         <tr>
                             <td>
                                 <a href="product-detail.html" class="d-flex align-items-center">
-                                    <img width="40" src="../../assets/media/image/products/product7.png"
+                                    <img width="40" src="~/gogi/assets/media/image/products/product7.png"
                                          class="rounded mr-3" alt="Wall Clock">
                                     <span>Wall Clock</span>
                                 </a>
@@ -787,7 +773,7 @@
                         <tr>
                             <td>
                                 <a href="product-detail.html" class="d-flex align-items-center">
-                                    <img width="40" src="../../assets/media/image/products/product8.png"
+                                    <img width="40" src="~/gogi/assets/media/image/products/product8.png"
                                          class="rounded mr-3" alt="Desk">
                                     <span>Desk</span>
                                 </a>
@@ -817,7 +803,7 @@
                         <tr>
                             <td>
                                 <a href="product-detail.html" class="d-flex align-items-center">
-                                    <img width="40" src="../../assets/media/image/products/product9.png"
+                                    <img width="40" src="~/gogi/assets/media/image/products/product9.png"
                                          class="rounded mr-3" alt="Night Light">
                                     <span>Night Light</span>
                                 </a>
@@ -847,7 +833,7 @@
                         <tr>
                             <td>
                                 <a href="product-detail.html" class="d-flex align-items-center">
-                                    <img width="40" src="../../assets/media/image/products/product10.png"
+                                    <img width="40" src="~/gogi/assets/media/image/products/product10.png"
                                          class="rounded mr-3" alt="Shoe">
                                     <span>Shoe</span>
                                 </a>
@@ -888,7 +874,7 @@
                     <div class="row my-3">
                         <div class="col-md-6 ml-auto mr-auto">
                             <figure>
-                                <img class="img-fluid" src="../../assets/media/svg/upgrade.svg" alt="upgrade">
+                                <img class="img-fluid" src="~/gogi/assets/media/svg/upgrade.svg" alt="upgrade">
                             </figure>
                         </div>
                     </div>
@@ -907,3 +893,75 @@
         </div>
     </div>
 </div>
+@section Scripts {
+    <script src='https://cdn.plot.ly/plotly-2.4.2.min.js'></script>
+    <script>
+        $.ajax({
+            type: "POST",
+            url: "/Home/TicketsDevelopersChart",
+            data: '{}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                var data = result;
+
+                var layout = { barmode: 'group' };
+                var config = {responsive:true}
+
+                Plotly.newPlot('ticketsDevelopersChart', data, layout, config);
+            },
+            failure: function (result) {
+                alert(result.d);
+            },
+            error: function (result) {
+                alert(result.d);
+            }
+        });
+    </script>
+
+    <script>
+        var options = {
+            series: [@unassignedPercent, @assignedPercent],
+            chart: {
+                type: 'donut',
+            },
+            labels: ['Unassigned Tickets', 'Assigned Tickets'],
+            track: {
+                background: "#cccccc"
+            },
+            dataLabels: {
+                enabled: false
+            },
+
+            plotOptions: {
+                pie: {
+                    expandOnClick: true,
+                    donut: {
+                        labels: {
+                            show: true,
+                            value: {
+                                formatter: function (val) {
+                                    return val+"%";
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                shared: false,
+                y: {
+                    formatter: function (val) {
+                        return val+"%";
+                    }
+                }
+            },
+            legend: {
+                show: false
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#monthly-sales"), options);
+        chart.render();
+    </script>
+}

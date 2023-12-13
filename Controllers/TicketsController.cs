@@ -51,6 +51,12 @@ namespace TurboTicketsMVC.Controllers
         // GET: Tickets
         public async Task<IActionResult> Index()
         {
+            IEnumerable<Ticket> companyTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
+            return View(companyTickets);
+        }
+
+        public async Task<IActionResult> MyTickets()
+        {
             IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByUserIdAsync(_userId, _companyId);
             return View(userTickets);
         }

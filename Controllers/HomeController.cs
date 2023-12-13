@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 using System.Diagnostics;
 using TurboTicketsMVC.Data;
+using TurboTicketsMVC.Extensions;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Models.ChartModels;
+using TurboTicketsMVC.Models.Enums;
 using TurboTicketsMVC.Models.ViewModels;
 using TurboTicketsMVC.Services.Interfaces;
 
@@ -65,6 +69,48 @@ namespace TurboTicketsMVC.Controllers
 
             return View(dashboardViewModel);
         }
+
+		public async Task<JsonResult> TicketsDevelopersChart()
+		{
+            TicketsDevelopersData ticketsDevelopersData = new();
+            List<TicketsDevelopersBar> barData = new();
+
+            IEnumerable<Project> projects = await _projectService.GetProjectsByCompanyIdAsync(_companyId);
+
+            //Bar One
+            TicketsDevelopersBar barOne = new()
+            {
+                X = projects.Select(p => p.Name).ToArray(),
+                Y = projects.SelectMany(p => p.Tickets)
+                            .GroupBy(t => t.ProjectId)
+                            .Select(g => g.Count())
+                            .ToArray(),
+                Name = "Tickets",
+                Type = "bar"
+            };
+
+            //Bar Two
+            TicketsDevelopersBar barTwo = new()
+            {
+                X = projects.Select(p => p.Name).ToArray(),
+                Y = projects.Select(async p => (await _projectService.GetProjectMembersByRoleAsync(p.Id, nameof(TTRoles.Developer),_companyId)).Count()).Select(c => c.Result).ToArray(),
+
+                Name = "Developers",
+                Type = "bar"
+            };
+
+            barData.Add(barOne);
+            barData.Add(barTwo);
+
+            ticketsDevelopersData.Data = barData;
+
+            return Json(ticketsDevelopersData);
+        }
+
+		public IActionResult Landing()
+		{
+			return View();
+		}
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

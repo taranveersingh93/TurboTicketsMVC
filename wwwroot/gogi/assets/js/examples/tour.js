@@ -10,6 +10,9 @@ $(document).ready(function () {
             },
             {
                 'next .navigation': 'Navigation to navigate the page.',
+            },
+            {
+                'next .tourbc': 'Custom navigation',
             }
         ]);
         enjoyhint_instance.run();

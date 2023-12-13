@@ -27,7 +27,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\img\content-type\" />
-    <Folder Include="wwwroot\gogi\" />
   </ItemGroup>
 
 </Project>
