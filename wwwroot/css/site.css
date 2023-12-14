@@ -60,3 +60,7 @@ body {
     color: white;
     background-color: var(--color-dark);
 }
+
+.carousel-indicators li {
+    background-color: var(--color-primary);
+}

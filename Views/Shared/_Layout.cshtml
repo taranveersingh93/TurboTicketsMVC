@@ -742,7 +742,7 @@
                 <div class="navigation-menu-body">
                     <ul>
                         <li>
-                            <a class="active" href=index.html>
+                            <a class="navigation-item" id="nav-Dashboard" asp-controller="Home" asp-action="Dashboard">
                                 <span class="nav-link-icon">
                                     <i data-feather="pie-chart"></i>
                                 </span>
@@ -750,16 +750,16 @@
                             </a>
                         </li>
                         <li>
-                            <a href="chat.html">
+                            <a class="navigation-item" id="nav-Tickets" asp-controller="Tickets" asp-action="Index">
                                 <span class="nav-link-icon">
                                     <i data-feather="message-circle"></i>
                                 </span>
-                                <span>Chat</span>
+                                <span>Tickets</span>
                                 <span class="badge badge-danger">5</span>
                             </a>
                         </li>
                         <li>
-                            <a href="mail.html">
+                            <a class="navigation-item" href="mail.html">
                                 <span class="nav-link-icon">
                                     <i data-feather="mail"></i>
                                 </span>
@@ -767,7 +767,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="todo-list.html">
+                            <a class="navigation-item" href="todo-list.html">
                                 <span class="nav-link-icon">
                                     <i data-feather="check-square"></i>
                                 </span>
@@ -776,7 +776,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="file-manager.html">
+                            <a class="navigation-item" href="file-manager.html">
                                 <span class="nav-link-icon">
                                     <i data-feather="file-plus"></i>
                                 </span>
@@ -784,7 +784,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="calendar.html">
+                            <a class="navigation-item" href="calendar.html">
                                 <span class="nav-link-icon">
                                     <i data-feather="calendar"></i>
                                 </span>
@@ -792,7 +792,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="gallery.html">
+                            <a class="navigation-item" href="gallery.html">
                                 <span class="nav-link-icon">
                                     <i data-feather="image"></i>
                                 </span>
@@ -1166,7 +1166,23 @@
     </div>
     <!-- ./ Layout wrapper -->
     <!-- Main scripts -->
+    <script>
+            const makeActive = () => {
+            // Remove 'active' tag for all list items
+                var listItems = document.querySelectorAll('.navigation-item');
 
+                var pathname = window.location.pathname;
+
+                for (let i = 0; i < listItems.length; i++) {
+                    listItems[i].classList.remove("active");
+
+                    if (!pathname.includes("Details") && listItems[i].href.includes(pathname)) {
+                        listItems[i].classList.add('active')
+                    }
+                }
+            }
+        window.addEventListener("load", makeActive);
+    </script>
     <script src="~/gogi/vendors/bundle.js"></script>
 
     <!-- Apex chart -->
