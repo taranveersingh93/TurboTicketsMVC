@@ -58,11 +58,11 @@
                     }
                     else if (role == "Developer" || role == "Submitter")
                     {
-                        <span class="badge rounded-pill secondary-bg">@role</span>
+                        <span class="badge rounded-pill dark-bg">@role</span>
                     }
                     else
                     {
-                        <span class="badge rounded-pill secondary-bg">@role</span>
+                        <span class="badge rounded-pill dark-bg">@role</span>
                     }
                 }
             </div>
@@ -99,7 +99,7 @@
 
                             <div class="card text-center">
                                 <div class="body">
-                                    <div class="p-1 rounded secondary-bg">
+                                    <div class="p-1 rounded dark-bg">
                                         <h3 class="mt-2 mb-0">@companyProjects.Count()</h3>
                                         <span class="mt-1 mb-3">Company Projects</span>
                                     </div>
@@ -112,7 +112,7 @@
 
                             <div class="card text-center">
                                 <div class="body">
-                                    <div class="p-1 rounded secondary-bg">
+                                    <div class="p-1 rounded dark-bg">
                                         <h3 class="mt-2 mb-0">@companyTickets.Count()</h3>
                                         <span class="mt-1 mb-3">Company Tickets</span>
          
@@ -217,9 +217,6 @@
                                     Created
                                 </th>
                                 <th>
-                                    Status
-                                </th>
-                                <th>
                                     Project
                                 </th>
 
@@ -240,10 +237,6 @@
                                         </td>
                                         <td>
                                             @item.CreatedDate.ToString("dd, MMM, yyyy")
-                                        </td>
-
-                                        <td>
-                                            @Html.DisplayFor(modelItem => item.TicketStatus)
                                         </td>
                                         <td>
                                             @Html.DisplayFor(modelItem => item.Project.Name)
@@ -278,15 +271,15 @@
 
 
     </div>
-    <div class="row">
-        <div class="col-md-5 col-12">
+    <div class="row equal-height-row">
+        <div class="col-md-5 equal-height-col col-12">
             <div class="card h-100">
-                <div class="card-body h-80">
+                <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <h6 class="card-title card-secondary">Latest Activity</h6>
                         <a asp-controller="Tickets" asp-action="MyTickets" class="link-1">View My Tickets</a>
                     </div>
-                    <div class="card-scroll" style="min-height: 480px;">
+                    <div class="card-scroll">
                         <ul class="list-group list-group-flush">
                             @foreach (TicketHistory historyItem in companyTicketHistory.Take(15))
                             {
@@ -316,7 +309,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-7 col-12">
+        <div class="col-md-7 equal-height-col col-12">
             <div class="card h-100">
                 <div class="card-body">
                     <h6 class="card-title card-secondary mb-3">Projects</h6>

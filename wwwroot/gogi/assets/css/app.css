@@ -1384,6 +1384,39 @@ textarea {
   overflow: auto;
 }
 
+@media (max-width: 992 px) {
+    .card .card-scroll,
+    .app-block .app-content .app-action .card-scroll {
+        height: 400px;
+        overflow: auto;
+    }
+}
+
+@media (max-width: 1200px) {
+    .card .card-scroll,
+    .app-block .app-content .app-action .card-scroll {
+        height: 430px;
+        overflow: auto;
+    }
+}
+
+@media (max-width: 1400px) {
+    .card .card-scroll,
+    .app-block .app-content .app-action .card-scroll {
+        height: 430px;
+        overflow: auto;
+    }
+}
+
+@media (min-width: 1401px) {
+    .card .card-scroll,
+    .app-block .app-content .app-action .card-scroll {
+        height: 550px;
+        overflow: auto;
+    }
+
+}
+
 .card.purple,
 .app-block .app-content .purple.app-action {
   height: 120px;
@@ -9288,6 +9321,8 @@ small {
 }
 
 @media (max-width: 1200px) {
+
+
   body:not(.web-app) {
     overflow: auto;
   }
@@ -9608,6 +9643,7 @@ small {
 }
 
 @media (max-width: 992px) {
+
   .navigation {
     width: 50%;
   }
@@ -9686,6 +9722,8 @@ small {
 }
 
 @media (max-width: 768px) {
+
+
   .chat-block .chat-sidebar {
     padding: 0;
   }
