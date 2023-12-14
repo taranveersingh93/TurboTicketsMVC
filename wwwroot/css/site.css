@@ -45,3 +45,18 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+.primary-bg {
+    color: white;
+    background-color: var(--color-primary);
+}
+
+.secondary-bg {
+    color: var(--color-dark);
+    background-color: var(--color-orange);
+}
+
+.dark-bg {
+    color: white;
+    background-color: var(--color-dark);
+}
