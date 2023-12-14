@@ -67,6 +67,11 @@ Author URL:   https://themeforest.net/user/laborasyon/portfolio
 55. Responsive
 --------------------------------------------------------------------- */
 
+:root {
+        --color-primary: #5066e1;
+        --color-dark: #000000;
+        --color-orange: #fa9421;
+}
 .opacity-0 {
   opacity: 0 !important;
 }
@@ -1416,8 +1421,8 @@ textarea {
 }
 
 .bg-primary {
-  background: #5066e1 !important;
-  color: white !important;
+    background: #5066e1 !important;
+    color: white !important;
 }
 
 .bg-primary-bright {
@@ -1591,7 +1596,7 @@ textarea {
 }
 
 .bg-dark {
-  background: #293134 !important;
+  background: #393536 !important;
   color: white !important;
 }
 
@@ -4200,7 +4205,7 @@ table .dropdown {
 
 .nicescroll-cursors {
   border: none !important;
-  background-color: rgba(41, 49, 52, 0.5) !important;
+  background-color: var(--color-orange) !important;
   width: 8px !important;
 }
 
@@ -9121,7 +9126,7 @@ small {
 }
 
 .list-group-item {
-  border-color: #e6e6e6;
+    border-color: #5066e170;
 }
 
 .jqstooltip {

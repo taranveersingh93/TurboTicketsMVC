@@ -141,6 +141,7 @@ namespace TurboTicketsMVC.Services
                 IEnumerable<Ticket> companyTickets = await _context.Tickets
                             .Include(t => t.DeveloperUser)
                             .Include(t => t.History)
+                                .ThenInclude(h => h.User)
                             .Include(t => t.Project)
                             .Include(t => t.SubmitterUser)
                             .Where(t => t.Project!.CompanyId == companyId && t.ArchivedByProject == false && t.Archived == false ).ToListAsync();

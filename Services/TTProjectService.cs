@@ -184,6 +184,7 @@ namespace TurboTicketsMVC.Services
             {
                 IEnumerable<Project> companyProjects = await _context.Projects
                                                        .Include(p => p.Tickets)
+                                                       .Include(p => p.Members)
                                                       .Where(p => p.CompanyId == companyId).ToListAsync();
                 return companyProjects;
 
@@ -203,6 +204,7 @@ namespace TurboTicketsMVC.Services
                 if (companyId != null)
                 {
                     companyProjects = await _context.Projects.Include(p => p.Tickets)
+                                                            .Include(p => p.Members)
                                                           .Where(p => p.CompanyId == companyId && p.Archived == false).ToListAsync();
 
                 }
@@ -317,8 +319,15 @@ namespace TurboTicketsMVC.Services
             try
             {
                 TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-                IEnumerable<Project> companyProjects = await GetAllProjectsByCompanyIdAsync(user!.CompanyId);
-                IEnumerable<Project> userProjects = companyProjects.Where(p => p.Members.Contains(user)).ToList();
+                IEnumerable<Project> companyProjects = await GetProjectsByCompanyIdAsync(user!.CompanyId);
+                IEnumerable<Project> userProjects = Enumerable.Empty<Project>();
+                if (await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin)))
+                {
+                    return companyProjects;
+                } else
+                {
+                    userProjects = companyProjects.Where(p => p.Members.Contains(user)).ToList();
+                }
                 return userProjects;
             }
             catch (Exception)
