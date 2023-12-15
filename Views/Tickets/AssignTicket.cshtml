@@ -1,8 +1,72 @@
 ﻿@using TurboTicketsMVC.Models.ViewModels;
 @model AssignTicketViewModel
 
+@{
 
-<div class="container">
+}
+
+<div class="content">
+    <div class="page-header">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h3>Assign Developer</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Tickets" asp-action="Details" asp-route-id="@Model.Ticket.Id">Ticket Details</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page" asp-controller="Tickets" asp-action="AssignTicket" asp-route-id="@Model.Ticket.Id">Assign Ticket</li>
+                    </ol>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    @if (Model.DevelopersAvailable) {
+                    <form method="post" asp-action="AssignTicket" asp-controller="Tickets">
+                        <input asp-for="@Model.Ticket!.Id" hidden />
+                        <p>Description:  @Model.Ticket.Description</p>
+                        <div class="form-group">
+                            <label class="col-form-label">Select Developer</label>
+                            <select required asp-for="DeveloperId" class="form-control" asp-items="@Model.Developers">
+                            </select>
+                        </div>
+                        <div class="form-group mt-3">
+                            <input type="submit" value="Assign" class="btn btn-primary" />
+                        </div>
+                    </form>
+                    } else {
+                        <h3 class="text-muted text-center">
+                            There are no developers in the project team.
+                        </h3>
+                        @if(User.IsInRole("Admin")) {
+                            <div class="d-flex justify-content-center">
+
+                            <a asp-controller="Companies" asp-action="ManageUserRoles">
+                                <div class="btn btn-warning">
+                                    Manage Roles
+                                </div>
+                            </a>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@* <div class="container">
     <h2>Assign Developer for</h2>
     <div class="row">
         <div class="col-md-6">
@@ -33,4 +97,4 @@
     <div>
         <a asp-action="UnassignedTickets" asp-controller="Tickets">Unassigned Tickets</a>
     </div>
-</div>
+</div> *@

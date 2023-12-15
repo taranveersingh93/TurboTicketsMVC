@@ -201,13 +201,15 @@ namespace TurboTicketsMVC.Controllers
             {
                 return NotFound();
             }
-
             Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+            IEnumerable<TTUser> availableDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
+       
             AssignTicketViewModel assignTicketViewModel = new AssignTicketViewModel()
             {
                 Ticket = ticket,
                 DeveloperId = String.Empty,
-                Developers = new SelectList(await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId), "Id", "FullName", ticket.DeveloperUserId)
+                Developers = new SelectList(availableDevelopers, "Id", "FullName", ticket.DeveloperUserId),
+                DevelopersAvailable = availableDevelopers.Count() > 0
             };
 
             if (ticket.DeveloperUserId != null)
