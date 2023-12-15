@@ -19,11 +19,15 @@
     ViewData["Title"] = "Dashboard";
     TTUser user = (await _UserManager.GetUserAsync(User))!;
     string? userEmail = await _UserManager.GetEmailAsync(user);
+    IEnumerable<TicketHistory> companyTicketHistory = await _HistoryService.GetCompanyTicketsHistoriesAsync(user.CompanyId);
     IEnumerable<Project> companyProjects = await _ProjectService.GetProjectsByCompanyIdAsync(user.CompanyId);
     IEnumerable<Ticket> companyTickets = await _TicketService.GetAllTicketsByCompanyIdAsync(user.CompanyId);
     IEnumerable<string> userRoles = (await _RoleService.GetUserRolesAsync(user))!;
     IEnumerable<Ticket> userTickets = (await _TicketService.GetTicketsByUserIdAsync(user.Id, user.CompanyId));
     IEnumerable<Project> userProjects = (await _ProjectService.GetUserProjectsAsync(user.Id))!;
+    IEnumerable<Ticket> testuserTickets2 = userTickets.Where(t => t.ProjectId == 2);
+    IEnumerable<Ticket> testUserTicketsFromProject2 = userProjects.FirstOrDefault(p => p.Id == 2)!.Tickets;
+
     int assignedTickets = (userTickets.Where(t => t.DeveloperUser != null)).Count();
     int unassignedTickets = userTickets.Count() - assignedTickets;
     double assignedPercent = Math.Round(((double)(assignedTickets) / (double)(userTickets.Count())) * 100, 2);
@@ -36,7 +40,6 @@
     double developmentPercent = Math.Round(((double)(developmentTickets) / (double)(userTickets.Count())) * 100, 2);
     double testingPercent = Math.Round(((double)(testingTickets) / (double)(userTickets.Count())) * 100, 2);
     double resolvedPercent = Math.Round(((double)(resolvedTickets) / (double)(userTickets.Count())) * 100, 2);
-    IEnumerable<TicketHistory> companyTicketHistory = await _HistoryService.GetCompanyTicketsHistoriesAsync(user.CompanyId);
     IEnumerable<string> projectNames = userProjects.Select(p => p.Name);
     IEnumerable<int> ticketNums = userProjects.Select(p => p.Tickets.Count());
     IEnumerable<int> developerNums = userProjects.Select(p => p.Tickets.Where(t => t.DeveloperUser != null).Count());
@@ -259,9 +262,12 @@
                                             </td>
                                         }
                                         <td>
-                                            <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                                            <a asp-controller="Tickets" asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                                            <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id">Archive</a>
+                                            <a asp-controller="Tickets" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                                            @if(User.IsInRole("Admin") || User.IsInRole("ProjectManager"))
+                                            {
+                                            <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                                            <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id">Archive</a>                        
+                                            }
                                         </td>
                                     </tr>
                                 }

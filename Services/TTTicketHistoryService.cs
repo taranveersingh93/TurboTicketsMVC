@@ -270,14 +270,14 @@ namespace TurboTicketsMVC.Services
 
             try
             {
-                IEnumerable<Project> projects = (await _context.Companies
+                IEnumerable<Project> projects = (await _context.Companies.AsNoTracking()
                                                         .Include(c => c.Projects)
                                                             .ThenInclude(p => p.Tickets)
                                                                 .ThenInclude(t => t.History)
                                                                     .ThenInclude(h => h.User)
                                                         .FirstOrDefaultAsync(c => c.Id == companyId))!.Projects.ToList();
 
-                IEnumerable<Ticket> tickets = projects.SelectMany(p => p.Tickets).ToList();
+                IEnumerable<Ticket> tickets = projects.SelectMany(p => p.Tickets.Where(t => t.Archived == false && t.ArchivedByProject == false)).ToList();
 
                 IEnumerable<TicketHistory> ticketHistories = tickets.SelectMany(t => t.History).ToList();
                 IEnumerable<TicketHistory> sortedHistories = ticketHistories.OrderByDescending(h => h.CreatedDate);

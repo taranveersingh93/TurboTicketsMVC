@@ -183,7 +183,7 @@ namespace TurboTicketsMVC.Services
             try
             {
                 IEnumerable<Project> companyProjects = await _context.Projects
-                                                       .Include(p => p.Tickets)
+                                                       .Include(p => p.Tickets.Where(t => t.ArchivedByProject == false && t.Archived == false))
                                                        .Include(p => p.Members)
                                                       .Where(p => p.CompanyId == companyId).ToListAsync();
                 return companyProjects;
@@ -203,7 +203,7 @@ namespace TurboTicketsMVC.Services
                 IEnumerable<Project> companyProjects = Enumerable.Empty<Project>();
                 if (companyId != null)
                 {
-                    companyProjects = await _context.Projects.Include(p => p.Tickets)
+                    companyProjects = await _context.Projects.Include(p => p.Tickets.Where(t => t.ArchivedByProject == false && t.Archived == false))
                                                             .Include(p => p.Members)
                                                           .Where(p => p.CompanyId == companyId && p.Archived == false).ToListAsync();
 

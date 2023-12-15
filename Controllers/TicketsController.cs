@@ -196,6 +196,7 @@ namespace TurboTicketsMVC.Controllers
         }
         //authorize PMs and devs
         //GET: Tickets/AssignTicketView
+        [Authorize(Roles = "Admin, ProjectManager")]
         public async Task<IActionResult> AssignTicket(int? id)
         {
             if (id == null)
@@ -221,6 +222,7 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // POST: Tickets/AssignTicketView/
+        [Authorize(Roles = "Admin, ProjectManager")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignTicket(AssignTicketViewModel assignTicketViewModel)
@@ -258,6 +260,7 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // POST: Tickets/AssignTicketView/
+        [Authorize(Roles = "Admin, ProjectManager")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignTicketFromDetails(int? ticketId, string? developerId)
@@ -296,6 +299,8 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // GET: Tickets/Delete/5
+        [Authorize(Roles = "Admin, ProjectManager")]
+        //needs controller logic for PM
         public async Task<IActionResult> Archive(int? id)
         {
             if (id == null || _context.Tickets == null)
@@ -314,6 +319,8 @@ namespace TurboTicketsMVC.Controllers
 
         // POST: Tickets/Archive/5
         [HttpPost, ActionName("ArchiveConfirmed")]
+        [Authorize(Roles = "Admin, ProjectManager")]
+
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ArchiveConfirmed(int id)
         {
@@ -331,6 +338,8 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // GET: Tickets/Restore/5
+        [Authorize(Roles = "Admin, ProjectManager")]
+
         public async Task<IActionResult> Restore(int? id)
         {
             if (id == null || _context.Tickets == null)
@@ -349,6 +358,8 @@ namespace TurboTicketsMVC.Controllers
 
         // POST: Tickets/RestoreConfirmed/5
         [HttpPost, ActionName("RestoreConfirmed")]
+        [Authorize(Roles = "Admin, ProjectManager")]
+
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RestoreConfirmed(int id)
         {
