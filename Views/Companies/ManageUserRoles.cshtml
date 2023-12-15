@@ -1,8 +1,30 @@
 ﻿@using TurboTicketsMVC.Models.ViewModels;
 @model IEnumerable<ManageUserRolesViewModel>
 
-<div class="row">
-    <h2 class="m-t-0 h3"><b>Manage Member Roles </b></h2>
+@{
+    ViewData["Title"] = "Manage User Roles";
+}
+
+<div class="content">
+    <div class="page-header">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h3>Manage User Roles</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Tickets" asp-action="Index">All Tickets</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page" asp-controller="Companies" asp-action="ManageUserRoles">Manage User Roles</li>
+                    </ol>
+                </nav>
+
+            </div>
+        </div>
+    </div>
     @foreach ( ManageUserRolesViewModel viewModel in Model )
     {
         <div class="row">

@@ -33,9 +33,9 @@
             </div>
         </div>
     </div>
-    <div class="row gy-2">
-        <div class="col-12 row">
-            <div class="col-12 row mt-5 g-2">
+    <div class="row">
+        <div class="col-12 mt-5">
+            <div class="row">
                 <div class="col-12 col-md-4">
                     <div class="card h-100">
                         <div class="card-body">
@@ -79,22 +79,33 @@
                     <div class="card h-100">
                         @if (isUserAuthorized)
                         {
-                            <div class="card-body">
-                                <form method="post" asp-action="AssignTicketFromDetails" asp-controller="Tickets">
-                                    <input name="ticketId" value="@Model.Id" hidden />
-                                    <div class="form-group">
-                                        <label class="col-form-label">Select Developer</label>
-                                        <select required name="developerId" class="form-control" asp-items="ViewBag.Developers">
-                                            @if (Model.DeveloperUserId == null)
-                                            {
-                                                <option>---</option>
-                                            }
-                                        </select>
-                                    </div>
-                                    <div class="form-group mt-3">
-                                        <input type="submit" value="Assign" class="btn btn-primary" />
-                                    </div>
-                                </form>
+                            <div class="card-body d-flex flex-column justify-content-center">
+                                @if (Model.DeveloperUserId == null)
+                                {
+                                    <h6 class="text-muted text-center">No Developers in the Project Team</h6>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="ManageUserRoles" asp-controller="Companies">
+                                            <div class="btn btn-primary">
+                                                Manage Roles
+                                            </div>
+                                        </a>
+                                    }
+                                }
+                                else
+                                {
+                                    <form method="post" asp-action="AssignTicketFromDetails" asp-controller="Tickets">
+                                        <input name="ticketId" value="@Model.Id" hidden />
+                                        <div class="form-group">
+                                            <label class="col-form-label">Select Developer</label>
+                                            <select required name="developerId" class="form-control" asp-items="ViewBag.Developers">
+                                            </select>
+                                        </div>
+                                        <div class="form-group mt-3">
+                                            <input type="submit" value="Assign" class="btn btn-primary" />
+                                        </div>
+                                    </form>
+                                }
                             </div>
                         }
                         else
@@ -114,164 +125,165 @@
                         }
                     </div>
                 </div>
+
             </div>
         </div>
-        <div class="col-md-8 col-12 mt-5 ">
-            <div class="">
-                <div class="card m-1 p-2">
-                    <div class="card-header">
-                        <h2>Comments</h2>
+        <div class="col-md-8 col-12 mt-5">
+            <div class="card m-1 p-2 mb-5">
+                <div class="card-header">
+                    <h2>Comments</h2>
+                </div>
+                <div class="card-body" style="overflow-y:auto;">
+
+                    @*Form and Logic for authorized users to add comments*@
+                    <div class="comment-respond">
+                        @if (User.Identity!.IsAuthenticated)
+                        {
+                            <h4 class="title">Post a comment</h4>
+                            @* "Comment,CreatedDate,TicketId,UserId" *@
+                            <form asp-controller="Tickets" asp-action="AddTicketComment" method="post">
+                                <input hidden name="TicketId" value="@Model.Id" />
+                                <input hidden name="UserId" value="@userId" />
+
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                                <div class="row row-md-10">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <textarea id="commentBox" class="form-control" name="Comment"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-submit cerchio">
+                                        <input type="submit" value="Post Comment" class="btn-primary btn button-rounded">
+                                    </div>
+                                </div>
+                            </form>
+                        }
+
                     </div>
-                    <div class="card-body" style="overflow-y:auto;height:600px;">
-
-                        @*Form and Logic for authorized users to add comments*@
-                        <div class="comment-respond">
-                            @if (User.Identity!.IsAuthenticated)
-                            {
-                                <h4 class="title">Post a comment</h4>
-                                @* "Comment,CreatedDate,TicketId,UserId" *@
-                                <form asp-controller="Tickets" asp-action="AddTicketComment" method="post">
-                                    <input hidden name="TicketId" value="@Model.Id" />
-                                    <input hidden name="UserId" value="@userId" />
-
-                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-                                    <div class="row row-md-10">
-                                        <div class="col-12">
-                                            <div class="form-group">
-                                                <label for="commentBox">Add a comment</label>
-                                                <textarea id="commentBox" class="form-control" name="Comment"></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-12">
-                                        <div class="form-submit cerchio">
-                                            <input type="submit" value="Post Comment" class="btn-primary btn button-rounded">
-                                        </div>
-                                    </div>
-                                </form>
-                            }
-
-                        </div>
-                        <hr />
-                        <h6>Comments</h6>
-                        <ul class="right_chat list-unstyled mb-0">
+                    <hr />
+                    <ul class="right_chat list-unstyled mb-0">
+                        @if (Model.Comments.Count() > 0)
+                        {
+                            <h6>Comments</h6>
                             @foreach (TicketComment comment in Model.Comments)
                             {
                                 <li>@comment.User!.FullName: @comment.Comment</li>
                             }
-                        </ul>
-                    </div>
-                    <div class="card-footer">
-                    </div>
+
+                        }
+                        else
+                        {
+                            <h3 class="text-muted text-center">No comments to show</h3>
+                        }
+                    </ul>
+                </div>
+                <div class="card-footer">
                 </div>
             </div>
-            <div class="">
-                <div class="card m-1 p-2">
-                    <div class="card-header">
-                        <h2>Attachments</h2>
-                    </div>
-                    <div class="card-body" style="overflow-y:auto;height:300px;">
+            <div class="card m-1 p-2">
+                <div class="card-header">
+                    <h2>Attachments</h2>
+                </div>
+                <div class="card-body" style="overflow-y:auto;">
+                    <div class="row clearfix">
+                        <div>
+                            <form asp-action="AddTicketAttachment" asp-controller="Tickets" enctype="multipart/form-data" method="post">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <input type="hidden" asp-for="@Model.Id" name="TicketId">
+                                <div class="media-body ml-3">
+                                    <label>
+                                        Description
+                                        <input name="Description" type="text" class="form-control" required />
+                                    </label><br />
+                                    <div class="d-flex align-items-center">
 
-                        @* Refer to the Ticket Attachments document for this section *@
-
-                        @* Ticket attachments part 1 here *@
-                        <div class="row clearfix">
-                            <div>
-                                <form asp-action="AddTicketAttachment" asp-controller="Tickets" enctype="multipart/form-data" method="post">
-                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                                    <input type="hidden" asp-for="@Model.Id" name="TicketId">
-                                    <div class="media-body ml-3">
-                                        <label>
-                                            Description
-                                            <input name="Description" type="text" class="form-control" required />
-                                        </label><br />
-                                        <label class="btn btn-outline-primary btn-sm">
+                                        <label class="btn btn-outline-primary btn-sm m-0">
                                             <input name="ImageFormFile" type="file" class="form-control-file" />
                                         </label>
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm md-btn-flat">Submit</button>
+                                        <button type="submit" class="btn btn-primary md-btn-flat ms-2">Submit</button>
                                     </div>
-                                </form>
-                            </div>
+                                </div>
+                            </form>
                         </div>
+                    </div>
 
 
-                        @* Ticket attachments part 2 here *@
-                        <hr />
-                        <h6>Attachments</h6>
-                        <div class="container">
-                            <div class="row">
-                                @foreach (TicketAttachment item in Model.Attachments)
-                                {
-                                    <div class="col col-sm-3 col-lg-2">
-                                        @if (isUserAuthorized)
-                                        {
-                                            <div class="w-100 d-flex justify-content-end">
-                                                <a asp-controller="Tickets" asp-action="RemoveTicketAttachment" asp-route-Id="@item.Id">
-                                                    <i class="bi bi-trash-fill"></i>
-                                                </a>
-                                            </div>
-                                        }
-                                        <a asp-action="ShowFile" asp-controller="Tickets" asp-route-Id="@item.Id" target="_blank">
-                                            <div class="icon d-flex justify-content-center">
-                                                <img src="@FileService.GetFileIcon(item.ImageFileName!)" style="height:50px;width:50px" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="@item.ImageFileName" />
-                                            </div>
-                                        </a>
-                                        <div style="font-size:x-small" class="d-flex flex-column align-items-center">
-                                            <div class="file-name">
-                                                <strong>@item.Description</strong>
-                                            </div>
-                                            <small>Size: @FileService.FormatFileSize(item.ImageFileData!.Length) </small>
+                    @* Ticket attachments part 2 here *@
+                    <hr />
+                    <h6>Attachments</h6>
+                    <div class="container">
+                        <div class="row">
+                            @foreach (TicketAttachment item in Model.Attachments)
+                            {
+                                <div class="col col-sm-3 col-lg-2">
+                                    @if (isUserAuthorized)
+                                    {
+                                        <div class="w-100 d-flex justify-content-end">
+                                            <a asp-controller="Tickets" asp-action="RemoveTicketAttachment" asp-route-Id="@item.Id">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </a>
                                         </div>
+                                    }
+                                    <a asp-action="ShowFile" asp-controller="Tickets" asp-route-Id="@item.Id" target="_blank">
+                                        <div class="icon d-flex justify-content-center">
+                                            <img src="@FileService.GetFileIcon(item.ImageFileName!)" style="height:50px;width:50px" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="@item.ImageFileName" />
+                                        </div>
+                                    </a>
+                                    <div style="font-size:x-small" class="d-flex flex-column align-items-center">
+                                        <div class="file-name">
+                                            <strong>@item.Description</strong>
+                                        </div>
+                                        <small>Size: @FileService.FormatFileSize(item.ImageFileData!.Length) </small>
                                     </div>
-                                }
-                            </div>
+                                </div>
+                            }
                         </div>
                     </div>
-                    <div class="card-footer">
-                    </div>
+                </div>
+                <div class="card-footer">
                 </div>
             </div>
         </div>
         <div class="col-md-4 col-12 mt-5 ">
-            <div class="">
-                <div class="card m-1 p-2">
-                    <div class="card-header">
-                        <h2>History</h2>
-                        <hr />
-                    </div>
-                    <div class="card-body" style="overflow-y:auto;height:1000px;background-color:antiquewhite">
-                        @*Loop to show the history entries for the Ticket*@
-                        @foreach (TicketHistory history in Model.History)
-                        {
+            <div class="card m-1 p-2">
+                <div class="card-header">
+                    <h2>History</h2>
+                    <hr />
+                </div>
+                <div class="card-body" style="overflow-y:auto;max-height:500px; height:auto;">
+                    @*Loop to show the history entries for the Ticket*@
+                    @foreach (TicketHistory history in Model.History)
+                    {
+                        <div class="border border-primary p-3 m-3" style="border-radius: 5px;">
+                            <span class="date" style="font-weight:bold">@history.CreatedDate.ToString("dd MMM yyyy")</span>
+                            <h6 class="text-primary mt-2">@history.Description</h6>
+                            <span>By: <a href="" title="@history.User!.FullName">@history.User!.FullName</a></span>
                             <div class="">
-                                <span class="date" style="font-weight:bold">@history.CreatedDate.ToString("dd MMM yyyy")</span>
-                                <h6>@history.Description</h6>
-                                <span>By: <a href="" title="@history.User!.FullName">@history.User!.FullName</a></span>
-                                <div class="">
-                                    @if (history.Description!.Contains("New Ticket Created"))
-                                    {
-                                        <p>A ticket was added.</p>
-                                    }
-                                    else if (history.PropertyName!.Equals("Ticket Comment") || history.PropertyName.Equals("Ticket Attachment"))
-                                    {
-                                        <p>A new @history.PropertyName was added by <b>@history.User.FullName</b></p>
-                                    }
-                                    else if (history.PropertyName!.Equals("Ticket Attachment Removed"))
-                                    {
-                                        <p>A Ticket attachment was removed by <b>@history.User.FullName</b></p>
-                                    }
-                                    else
-                                    {
-                                        <p>The ticket <b>@history.PropertyName</b> was edited.</p>
-                                        <p>@($"Previous {history.PropertyName}: ") <span style="color:red">@history.OldValue</span></p>
-                                        <p>@($"Current {history.PropertyName}: ") <span style="color:yellow">@history.NewValue</span></p>
-                                    }
+                                @if (history.Description!.Contains("New Ticket Created"))
+                                {
+                                    <p>A ticket was added.</p>
+                                }
+                                else if (history.PropertyName!.Equals("Ticket Comment") || history.PropertyName.Equals("Ticket Attachment"))
+                                {
+                                    <p>A new @history.PropertyName was added by <b>@history.User.FullName</b></p>
+                                }
+                                else if (history.PropertyName!.Equals("Ticket Attachment Removed"))
+                                {
+                                    <p>A Ticket attachment was removed by <b>@history.User.FullName</b></p>
+                                }
+                                else
+                                {
+                                    <p>The ticket <b>@history.PropertyName</b> was edited.</p>
+                                    <p>@($"Previous {history.PropertyName}: ") <span style="color:red">@history.OldValue</span></p>
+                                    <p>@($"Current {history.PropertyName}: ") <span style="color:yellow">@history.NewValue</span></p>
+                                }
 
-                                </div>
                             </div>
-                        }
-                    </div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
