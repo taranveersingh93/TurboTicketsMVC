@@ -28,7 +28,7 @@ namespace TurboTicketsMVC.Controllers
         private readonly ITTFileService _fileService;
         private readonly ITTTicketHistoryService _ticketHistoryService;
         private readonly ITTNotificationService _notificationService;
-
+        private readonly ITTRolesService _roleService;
         public TicketsController(ApplicationDbContext context,
                                  UserManager<TTUser> userManager,
                                  ITTTicketService ticketService,
@@ -36,7 +36,8 @@ namespace TurboTicketsMVC.Controllers
                                  ITTProjectService projectService,
                                  ITTFileService fileService,
                                  ITTTicketHistoryService ticketHistoryService,
-                                 ITTNotificationService notificationService)
+                                 ITTNotificationService notificationService,
+                                 ITTRolesService roleService)
         {
             _context = context;
             _userManager = userManager;
@@ -46,6 +47,7 @@ namespace TurboTicketsMVC.Controllers
             _fileService = fileService;
             _ticketHistoryService = ticketHistoryService;
             _notificationService = notificationService;
+            _roleService = roleService;
         }
 
         // GET: Tickets
@@ -86,8 +88,8 @@ namespace TurboTicketsMVC.Controllers
             string name = "Taranveer";
             int companyId = User.Identity!.GetCompanyId();
             IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
-            IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
-            ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
+            IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+            ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
             ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View();
         }
@@ -115,10 +117,9 @@ namespace TurboTicketsMVC.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            int companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
-            IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
-            ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
+            IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(_companyId);
+            IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+            ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
             ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View(ticket);
         }
@@ -138,8 +139,8 @@ namespace TurboTicketsMVC.Controllers
             }
             int companyId = User.Identity!.GetCompanyId();
             IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
-            IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
-            ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
+            IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+            ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
             ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View(ticket);
         }
@@ -184,12 +185,12 @@ namespace TurboTicketsMVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Details), new {id = ticket.Id});
             }
             int companyId = User.Identity!.GetCompanyId();
             IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
-            IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
-            ViewData["DeveloperUsers"] = new SelectList(companyUsers, "Id", "FullName");
+            IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+            ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
             ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
             return View(ticket);
         }
