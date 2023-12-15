@@ -9,8 +9,8 @@ namespace TurboTicketsMVC.Services.Interfaces
 
         public Task<IEnumerable<IdentityRole>> GetRolesAsync();
 
-        public Task<IEnumerable<string>?> GetUserRolesAsync(TTUser? user);
-
+        public Task<IEnumerable<string?>> GetUserRolesAsync(TTUser? user);
+        public Task<IEnumerable<IdentityRole>> GetProdRoles();
         public Task<IEnumerable<TTUser>> GetUsersInRoleAsync(string? roleName, int? companyId);
 
         public Task<bool> IsUserInRoleAsync(TTUser? member, string? roleName);

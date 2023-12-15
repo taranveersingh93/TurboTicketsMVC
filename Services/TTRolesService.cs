@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TurboTicketsMVC.Data;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Models.Enums;
 using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Services
@@ -52,11 +53,25 @@ namespace TurboTicketsMVC.Services
 			}
 		}
 
-		public async Task<IEnumerable<string>?> GetUserRolesAsync(TTUser? user)
+		public async Task<IEnumerable<IdentityRole>> GetProdRoles()
 		{
 			try
 			{
-				IEnumerable<string> userRoles = Enumerable.Empty<string>();
+				IEnumerable<IdentityRole> allRoles = await GetRolesAsync();
+				IEnumerable<IdentityRole> roles = allRoles.Where(r => r.Name != "DemoUser");
+				return roles;
+			}
+			catch (Exception)
+			{
+
+				throw;
+			}
+		}
+		public async Task<IEnumerable<string?>> GetUserRolesAsync(TTUser? user)
+		{
+			try
+			{
+				IEnumerable<string?> userRoles = Enumerable.Empty<string>();
 				if (user != null)
 				{
 					userRoles = await _userManager.GetRolesAsync(user);
