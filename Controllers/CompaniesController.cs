@@ -39,7 +39,7 @@ namespace TurboTicketsMVC.Controllers
         //}
 
         [HttpGet]
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ManageUserRoles()
         {
             //add an inst of viewModel as a list(model)
@@ -50,7 +50,7 @@ namespace TurboTicketsMVC.Controllers
             IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
             IEnumerable<IdentityRole> prodRoles = await _rolesService.GetProdRoles();
             //loop over users to populate the model.
-            foreach(TTUser user in companyUsers)
+            foreach (TTUser user in companyUsers)
             {
                 //more comprehensive than user.Id == _userId
                 if (string.Compare(user.Id, _userId) != 0)
@@ -62,7 +62,8 @@ namespace TurboTicketsMVC.Controllers
                     if (currentRoles!.Contains(nameof(TTRoles.DemoUser)))
                     {
                         viewModel.IsDemoUser = true;
-                    } else
+                    }
+                    else
                     {
                         viewModel.IsDemoUser = false;
                     }
@@ -71,12 +72,12 @@ namespace TurboTicketsMVC.Controllers
                         viewModel.SelectedRole = currentRoles.FirstOrDefault(r => r != nameof(TTRoles.DemoUser));
                     }
                     viewModel.TTUser = user;
-                    viewModel.Roles = new SelectList(prodRoles,"Name", "Name", viewModel.SelectedRole);
+                    viewModel.Roles = new SelectList(prodRoles, "Name", "Name", viewModel.SelectedRole);
                     model.Add(viewModel);
                 }
             }
 
-    // loop over users to populate 
+            // loop over users to populate 
             return View(model);
         }
 
@@ -90,19 +91,19 @@ namespace TurboTicketsMVC.Controllers
             //get roles of user
             IEnumerable<string>? currentRoles = await _rolesService.GetUserRolesAsync(ttUser);
             //get selected roles of user
-            IEnumerable<string> selectedRoles = Enumerable.Empty<string>();
-            selectedRoles.Append(viewModel.SelectedRole);
+            List<string> selectedRoles = new();
+            selectedRoles.Add(viewModel.SelectedRole!);
             if (viewModel.IsDemoUser)
             {
-                selectedRoles.Append(nameof(TTRoles.DemoUser));
+                selectedRoles.Add(nameof(TTRoles.DemoUser));
             }
-            
-      
+
+
             if (selectedRoles!.Count() > 0)
             {
-                foreach(string selectedRole in selectedRoles)
+                if (await _rolesService.RemoveUserFromRolesAsync(ttUser, currentRoles)) //boolean return
                 {
-                    if (await _rolesService.RemoveUserFromRolesAsync(ttUser, currentRoles)) //boolean return
+                    foreach (string selectedRole in selectedRoles)
                     {
                         await _rolesService.AddUserToRoleAsync(ttUser, selectedRole);
                     }
@@ -236,14 +237,14 @@ namespace TurboTicketsMVC.Controllers
             {
                 _context.Companies.Remove(company);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CompanyExists(int id)
         {
-          return (_context.Companies?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Companies?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
