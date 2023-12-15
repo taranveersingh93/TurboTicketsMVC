@@ -364,7 +364,7 @@ namespace TurboTicketsMVC.Services
                 TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 Ticket? ticket = await GetTicketByIdAsync(ticketId, companyId);
                 TTUser? projectManager = await _projectService.GetProjectManagerAsync(ticket.ProjectId);
-                bool isProjectManager = user?.Id == projectManager.Id;
+                bool isProjectManager = user?.Id == projectManager?.Id;
                 bool isAdmin = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin));
 
 				if ( isProjectManager|| isAdmin)

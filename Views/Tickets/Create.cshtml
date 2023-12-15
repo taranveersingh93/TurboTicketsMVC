@@ -5,7 +5,88 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<div class="content ">
+
+    <div class="page-header">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h3>Create Ticket</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Tickets" asp-action="Index">All Tickets</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page" asp-controller="Tickets" asp-action="Create">Create Ticket</li>
+                    </ol>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <form asp-action="Create">
+                                <input type="hidden" asp-for="TicketStatus" value="@TTTicketStatuses.New" />
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="form-group">
+                                    <label asp-for="Title" class="control-label"></label>
+                                    <input asp-for="Title" class="form-control" />
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Description" class="control-label"></label>
+                                    <textarea asp-for="Description" id="editor" class="editor form-control"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ProjectId" class="control-label">Project</label>
+                                    <select asp-for="ProjectId" class="form-control" asp-items="ViewBag.Projects"></select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="TicketType" class="control-label"></label>
+                                    <select asp-for="TicketType" class="form-select" asp-items="@Html.GetEnumSelectList<TTTicketTypes>()"></select>
+                                    <span asp-validation-for="TicketType" class="text-danger"></span>
+                                </div>
+
+                                @*                                 <div class="form-group">
+                                <label asp-for="TicketStatus" class="control-label"></label>
+                                <select asp-for="TicketStatus" class="form-select" asp-items="@Html.GetEnumSelectList<TTTicketStatuses>()"></select>
+                                <span asp-validation-for="TicketStatus" class="text-danger"></span>
+                                </div> *@
+                                <div class="form-group">
+                                    <label asp-for="TicketPriority" class="control-label"></label>
+                                    <select asp-for="TicketPriority" class="form-select" asp-items="@Html.GetEnumSelectList<TTTicketPriorities>()"></select>
+                                    <span asp-validation-for="TicketPriority" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="DeveloperUserId" class="control-label">Developer</label>
+                                    <select asp-for="DeveloperUserId" class="form-control" asp-items="ViewBag.DeveloperUsers"></select>
+                                </div>
+
+                                <div class="form-group">
+                                    <input type="submit" value="Create" class="btn btn-primary" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@* <h1>Create</h1>
 
 <h4>Ticket</h4>
 <hr />
@@ -67,8 +148,18 @@
 
 <div>
     <a asp-action="Index">Back to List</a>
-</div>
+</div> *@
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#editor'))
+            .catch(error => {
+                console.error(error);
+            });
+    </script>
 }

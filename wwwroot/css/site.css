@@ -64,3 +64,23 @@ body {
 .carousel-indicators li {
     background-color: var(--color-primary);
 }
+
+.primary-button {
+    background-color: var(--color-primary);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    transition: all linear 0.12s;
+    border-radius: 5px;
+}
+
+.primary-button a {
+    color:white;
+}
+
+    .primary-button:hover {
+        filter:brightness(1.2);
+        cursor: pointer;
+    }
