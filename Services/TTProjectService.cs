@@ -98,7 +98,6 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-
         public async Task<bool> AddProjectManagerAsync(string? userId, int? projectId)
         {
             try
@@ -428,9 +427,13 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
+
+        public async Task<bool> IsUserPmAsync(int projectId, string userId)
+        {
+            TTUser projectPM = await GetProjectManagerAsync(projectId);
+            return projectPM.Id == userId;
+        }
     }
 }
-//were you sending in applications on linkedin or company websites?
-//when you had your first interview, how fluent you were with explaining or demoing your code?
-//After graduating, were you still adding functionalities to your app?
+
 

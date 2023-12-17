@@ -1507,20 +1507,20 @@ textarea {
 }
 
 .bg-secondary {
-  background: #DD44A7 !important;
-  color: white !important;
+    background: #0F2167 !important;
+    color: white !important;
 }
 
 .bg-secondary.bg-hover {
   transition: background 0.2s;
 }
 
-.bg-secondary.bg-hover:hover {
-  background: #e56fbb !important;
-}
+    .bg-secondary.bg-hover:hover {
+        background: #4CB9E7 !important;
+    }
 
 .bg-secondary-bright {
-  background: rgba(221, 68, 167, 0.3) !important;
+    background: #4CB9E7 !important;
 }
 
 .bg-secondary-bright.bg-hover {

@@ -1,84 +1,71 @@
-﻿@model IEnumerable<TurboTicketsMVC.Models.Project>
+﻿@using Microsoft.AspNetCore.Identity;
+@using TurboTicketsMVC.Models.Enums;
+@using TurboTicketsMVC.Services.Interfaces;
+@using TurboTicketsMVC.Services;
+@model IEnumerable<TurboTicketsMVC.Models.Project>
+@inject ITTFileService _FileService;
+@inject ITTProjectService _ProjectService;
+@inject UserManager<TTUser> _UserManager;
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StartDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ProjectPriority)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Archived)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Company)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+<div class="content">
+    <div class="page-header">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h3>All Projects</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">All Projects</li>
+                    </ol>
+                </nav>
+            </div>
+            <a asp-controller="Projects" asp-action="Create">
+                <div class="btn btn-primary">
+                    Create New
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        @foreach(Project project in Model)
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CreatedDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.StartDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.EndDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ProjectPriority)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Archived)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Company.Name)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    @if (item.Archived)
-                    {
-                        <a asp-action="Restore" asp-route-id="@item.Id">Restore</a>
-                    } else
-                    {
-                        <a asp-action="Archive" asp-route-id="@item.Id">Archive</a>
-                    }
-                </td>
-            </tr>
+        <div class="col-12 col-md-4">
+                <div class="card h-100">
+                    <img src="@_FileService.ConvertByteArrayToFile(project.ImageFileData!, project.ImageFileType!, DefaultImage.ProjectImage)" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title mb-2">@project.Name</h5>
+                        @if(project.Members.Count() > 0)
+                        {
+                        <div class="mr-3 d-sm-inline d-none">
+                            <div class="avatar-group">
+                                @foreach(TTUser member in project.Members)
+                                {
+                                <figure class="avatar avatar-sm" title="@member.FullName"
+                                        data-toggle="tooltip">
+                                    <img src="@_FileService.ConvertByteArrayToFile(member.ImageFileData!, member.ImageFileType!, DefaultImage.BTUserImage)"
+                                         class="rounded-circle"
+                                         alt="image">
+                                </figure>                              
+                                }
+                 
+                            </div>
+                            </div>
+                        } else
+                        {
+                            <h6 class="text-muted">No Members</h6>
+                        }
+                        <p class="card-text line-clamp-3">@project.Description</p>
+                        <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary">Details</a>
+                    </div>
+                </div>
+        </div>    
         }
-    </tbody>
-</table>
+    </div>
+</div>
+
