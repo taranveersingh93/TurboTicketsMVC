@@ -1,59 +1,84 @@
 ﻿@using TurboTicketsMVC.Models.Enums;
 @using TurboTicketsMVC.Services.Interfaces;
 @model TurboTicketsMVC.Models.Project
-@inject ITTFileService _TTFileService
+@inject ITTFileService _fileService
 
 @{
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<div class="content">
+    <div class="page-header">
+        <div class="d-flex">
+            <div class="d-flex flex-column justify-content-center">
+                <h3 class="text-start mb-1">Create Project</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Projects" asp-action="Index">All Projects</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Create Project</li>
+                    </ol>
+                </nav>
 
-<h4>Project</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="ImageFormFile" class="control-label">Project Image</label>
-                <img class="img-fluid border rounded-3 mb-2" style="max-height: 350px;" src="@_TTFileService.ConvertByteArrayToFile(Model?.ImageFileData, Model?.ImageFileType, DefaultImage.ProjectImage)" id="projectImage">
-                <input asp-for="ImageFormFile" type="file" class="form-control mt-3 pt-2" accept=".png,.jpg,.jpeg,.gif"
-                       onchange="document.getElementById('projectImage').src = window.URL.createObjectURL(this.files[0])" />
             </div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="ProjectPriority" class="control-label"></label>
-                <select asp-for="ProjectPriority" class="form-select" asp-items="@Html.GetEnumSelectList<TTProjectPriorities>()"></select>
-                <span asp-validation-for="ProjectPriority" class="text-danger"></span>
-            </div>
-
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Archived" /> @Html.DisplayNameFor(model => model.Archived)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
+    <div class="row">
+        <div class="col-md-7 col-12">
+            <form asp-action="Create" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="ImageFormFile" class="control-label">Project Image</label>
+                    <img class="img-fluid border rounded-3 mb-2" style="max-height: 350px;" src="@_fileService.ConvertByteArrayToFile(Model?.ImageFileData, Model?.ImageFileType, DefaultImage.ProjectImage)" id="projectImage">
+                    <input asp-for="ImageFormFile" type="file" class="form-control mt-3 pt-2" accept=".png,.jpg,.jpeg,.gif"
+                           onchange="document.getElementById('projectImage').src = window.URL.createObjectURL(this.files[0])" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" id="editor" class="editor form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ProjectPriority" class="control-label"></label>
+                    <select asp-for="ProjectPriority" class="form-select" asp-items="@Html.GetEnumSelectList<TTProjectPriorities>()"></select>
+                    <span asp-validation-for="ProjectPriority" class="text-danger"></span>
+                </div>
+
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="Archived" /> @Html.DisplayNameFor(model => model.Archived)
+                    </label>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
+        <script>
+            ClassicEditor
+                .create(document.querySelector('#editor'))
+                .catch(error => {
+                    console.error(error);
+                });
+        </script>
+    }
 }
