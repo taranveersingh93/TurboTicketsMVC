@@ -25,9 +25,8 @@
     IEnumerable<string> userRoles = (await _RoleService.GetUserRolesAsync(user))!;
     IEnumerable<Ticket> userTickets = (await _TicketService.GetTicketsByUserIdAsync(user.Id, user.CompanyId));
     IEnumerable<Project> userProjects = (await _ProjectService.GetUserProjectsAsync(user.Id))!;
-    IEnumerable<Ticket> testuserTickets2 = userTickets.Where(t => t.ProjectId == 2);
-    IEnumerable<Ticket> testUserTicketsFromProject2 = userProjects.FirstOrDefault(p => p.Id == 2)!.Tickets;
-
+    bool isAdmin = User.IsInRole("Admin");
+    bool isPM = User.IsInRole("ProjectManager");
     int assignedTickets = (userTickets.Where(t => t.DeveloperUser != null)).Count();
     int unassignedTickets = userTickets.Count() - assignedTickets;
     double assignedPercent = Math.Round(((double)(assignedTickets) / (double)(userTickets.Count())) * 100, 2);
@@ -130,7 +129,9 @@
         </div>
     </div>
 
-    <div class="row mb-5">
+    @if(companyTickets.Count() > 0)
+    {
+        <div class="row mb-5">
         <div class="col-12 col-md-8">
             <div class="card border border-dark h-100">
                 <div class="card-body overflow-auto">
@@ -140,7 +141,7 @@
 
             </div>
         </div>
-        @if (User.IsInRole("Admin") || User.IsInRole("ProjectManager"))
+        @if (isAdmin || isPM)
         {
             <div class="col-12 col-md-4">
                 <div class="card border border-dark h-100">
@@ -204,8 +205,8 @@
         }
       
 
-    </div>
-    <div class="row">
+    </div>     
+        <div class="row">
         <div class="col-12">
             <div class="card border border-dark">
                 <div class="card-body">
@@ -281,49 +282,14 @@
 
 
     </div>
-    <div class="row equal-height-row">
-        <div class="col-md-5 equal-height-col col-12">
-            <div class="card border border-dark h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <h6 class="card-title card-secondary">Latest Activity</h6>
-                        <a asp-controller="Tickets" asp-action="MyTickets" class="link-1">View My Tickets</a>
-                    </div>
-                    <div class="card-scroll">
-                        <ul class="list-group list-group-flush">
-                            @foreach (TicketHistory historyItem in companyTicketHistory.Take(15))
-                            {
-
-                                <li class="list-group-item d-flex px-0 py-4 history-container">
-                                    <a href="#" class="flex-shrink-0">
-                                        <figure class="avatar mr-3">
-                                            <img src="@_FileService.ConvertByteArrayToFile(historyItem.User?.ImageFileData, historyItem.User?.ImageFileType, DefaultImage.BTUserImage)"
-                                                 class="rounded-circle" alt="image">
-                                        </figure>
-                                    </a>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between">
-                                            <a asp-controller="Tickets" asp-action="Details" asp-route-id="@historyItem.TicketId">
-                                                <h6 class="card-primary">@historyItem.Ticket.Title</h6>
-                                            </a>
-                                            <span class="text-muted">@historyItem.CreatedDate.ToString("dd MMM")</span>
-                                        </div>
-                                        <p class="mb-0">
-                                            @historyItem.Description
-                                        </p>
-                                    </div>
-                                </li>
-                            }
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+    }
+    <div class="row">
         <div class="col-md-7 equal-height-col col-12">
             <div class="card border border-dark h-100">
                 <div class="card-body">
                     <h6 class="card-title card-secondary mb-5">Projects</h6>
-
+                    @if(companyProjects.Count() > 0)
+                    {
                     <div id="carouselProjects" class="carousel slide">
                        
                         <div class="carousel-inner">
@@ -376,7 +342,62 @@
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
                             <span class="sr-only">Next</span>
                         </a>
+                        </div>
+                    } else
+                    {
+                        <h5 class="text-muted text-center">Your Company has no Projects</h5>
+                        @if(isAdmin || isPM)
+                        {
+                            <div class="d-flex justify-content-center">
+                            <a asp-controller="Projects" asp-action="Create" class="btn btn-primary">Create Project</a>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5 equal-height-col col-12">
+            <div class="card border border-dark h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="card-title card-secondary">Latest Activity</h6>
+                        @if(userTickets.Count() > 0) {
+                        <a asp-controller="Tickets" asp-action="MyTickets" class="link-1">View My Tickets</a>
+                        }
                     </div>
+                    @if(companyTickets.Count() > 0)
+                    {
+                    <div class="card-scroll">
+                        <ul class="list-group list-group-flush">
+                            @foreach (TicketHistory historyItem in companyTicketHistory.Take(15))
+                            {
+
+                                <li class="list-group-item d-flex px-0 py-4 history-container">
+                                    <a href="#" class="flex-shrink-0">
+                                        <figure class="avatar mr-3">
+                                            <img src="@_FileService.ConvertByteArrayToFile(historyItem.User?.ImageFileData, historyItem.User?.ImageFileType, DefaultImage.BTUserImage)"
+                                                 class="rounded-circle" alt="image">
+                                        </figure>
+                                    </a>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between">
+                                            <a asp-controller="Tickets" asp-action="Details" asp-route-id="@historyItem.TicketId">
+                                                <h6 class="card-primary">@historyItem.Ticket.Title</h6>
+                                            </a>
+                                            <span class="text-muted">@historyItem.CreatedDate.ToString("dd MMM")</span>
+                                        </div>
+                                        <p class="mb-0">
+                                            @historyItem.Description
+                                        </p>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                        </div>
+                    } else
+                    {
+                        <h5 class="text-muted text-center mt-3">Your company has no Ticket Activity</h5>
+                    }
                 </div>
             </div>
         </div>
