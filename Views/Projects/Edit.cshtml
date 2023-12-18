@@ -1,65 +1,187 @@
 ﻿@using TurboTicketsMVC.Models.Enums;
 @using TurboTicketsMVC.Services.Interfaces;
 @model TurboTicketsMVC.Models.Project
-@inject ITTFileService _FileService;
+@inject ITTFileService _fileService;
+@inject ITTProjectService _projectService;
+@inject ITTRolesService _roleService;
+
 
 @{
     ViewData["Title"] = "Edit";
+    TTUser projectManager = await _projectService.GetProjectManagerAsync(Model.Id);
+    bool isAdmin = User.IsInRole("Admin");
 }
 
-<h1>Edit</h1>
+<div class="content">
+    <div class="page-header">
+        <div class="d-flex">
+            <img class="mr-3 avatar" src="@_fileService.ConvertByteArrayToFile(Model.ImageFileData!, Model.ImageFileType!, DefaultImage.BTUserImage)" />
+            <div class="d-flex flex-column justify-content-center">
+                <h3 class="text-start mb-1">Edit Project</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Projects" asp-action="Index">All Projects</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@Model.Id">Project Details</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Edit Project</li>
+                    </ol>
+                </nav>
 
-<h4>Project</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="CompanyId" />
-            <input type="hidden" asp-for="CreatedDate" />
-            <input type="hidden" asp-for="StartDate" />
-            <input type="hidden" asp-for="EndDate" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-7 col-12">
+            <form asp-action="Edit" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CompanyId" />
+                <input type="hidden" asp-for="CreatedDate" />
+                <input type="hidden" asp-for="StartDate" />
+                <input type="hidden" asp-for="EndDate" />
 
-            <div class="form-group">
-                <label asp-for="ImageFormFile" class="control-label">Project Image</label>
-                <img class="img-fluid border rounded-3 mb-2" style="max-height: 350px;" src="@_FileService.ConvertByteArrayToFile(Model?.ImageFileData, Model?.ImageFileType, DefaultImage.ProjectImage)" id="projectImage">
-                <input asp-for="ImageFormFile" type="file" class="form-control mt-3 pt-2" accept=".png,.jpg,.jpeg,.gif"
-                       onchange="document.getElementById('projectImage').src = window.URL.createObjectURL(this.files[0])" />
-            </div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
+                <div class="form-group">
+                    <label asp-for="ImageFormFile" class="control-label">Project Image</label>
+                    <img class="img-fluid border rounded-3 mb-2" style="max-height: 350px;" src="@_fileService.ConvertByteArrayToFile(Model?.ImageFileData, Model?.ImageFileType, DefaultImage.ProjectImage)" id="projectImage">
+                    <input asp-for="ImageFormFile" type="file" class="form-control mt-3 pt-2" accept=".png,.jpg,.jpeg,.gif"
+                           onchange="document.getElementById('projectImage').src = window.URL.createObjectURL(this.files[0])" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" id="editor" class="editor form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
 
-            <div class="form-group">
-                <label asp-for="ProjectPriority" class="control-label"></label>
-                <select asp-for="ProjectPriority" class="form-select" asp-items="@Html.GetEnumSelectList<TTProjectPriorities>()"></select>
-                <span asp-validation-for="ProjectPriority" class="text-danger"></span>
-            </div>
+                <div class="form-group">
+                    <label asp-for="ProjectPriority" class="control-label"></label>
+                    <select asp-for="ProjectPriority" class="form-select" asp-items="@Html.GetEnumSelectList<TTProjectPriorities>()"></select>
+                    <span asp-validation-for="ProjectPriority" class="text-danger"></span>
+                </div>
 
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Archived" /> @Html.DisplayNameFor(model => model.Archived)
-                </label>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="Archived" /> @Html.DisplayNameFor(model => model.Archived)
+                    </label>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+        <div class="col-md-5 col-12 ">
+            <div class="border border-dark card m-1 p-2">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Project Team</h5>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editTeamModal">
+                        Edit Team
+                    </button>
+                </div>
+                <div class="card-body list-group list-group-flush" style="overflow-y:auto;">
+                    @foreach (TTUser member in Model.Members)
+                    {
+                        <div class="list-group-item d-flex px-0 align-items-start">
+                            <div class="pr-3">
+                                <span class="avatar">
+                                    <img src="@_fileService.ConvertByteArrayToFile(member.ImageFileData!, member.ImageFileType!, DefaultImage.BTUserImage)"
+                                         class="rounded-circle"
+                                         alt="image">
+                                </span>
+                            </div>
+                            <div class="flex-grow- 1">
+                                <h6 class="mb-1">@member.FullName</h6>
+                                @foreach (string? role in await _roleService.GetUserRolesAsync(member))
+                                {
+                                    if (role == "Admin" || role == "ProjectManager")
+                                    {
+                                        <span class="badge rounded-pill dark-bg">@role</span>
+                                    }
+                                    else if (role == "Developer")
+                                    {
+                                        <span class="badge rounded-pill bg-primary">@role</span>
+                                    }
+                                    else if (role == "Submitter")
+                                    {
+                                        <span class="badge rounded-pill bg-secondary">@role</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-warning">@role</span>
+
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="modal fade" id="editTeamModal" tabindex="-1" aria-labelledby="editTeamModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="EditTeam" asp-controller="Projects" method="Post">
+                <input type="hidden" value="@Model.Id" name="ProjectId" />
+                <input type="hidden" value="Edit" name="redirect" />
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Team</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if (isAdmin)
+                    {
+                        <div class="form-group">
+                            <label for="projectManagerSelect" class="control-label">Project Manager</label>
+                            <select name="projectManagerId" id="projectManagerSelect" class="form-control dropdown-toggle" asp-items="ViewBag.ProjectManagers"></select>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="ProjectManagerId" value="@projectManager.Id" />
+                    }
+                    <div class="form-group">
+                        <label for="developerTeamSelect" class="control-label">Developers</label>
+                        <select name="DeveloperIds" id="developerTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Developers" multiple></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="submitterTeamSelect" class="control-label">Submitters</label>
+                        <select name="SubmitterIds" id="submitterTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Submitters" multiple></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                    @if (isAdmin)
+                    {
+                        <a role="button" class="btn btn-secondary" asp-controller="Companies" asp-action="ManageUserRoles">Manage Roles</a>
+                    }
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
+        <script>
+            ClassicEditor
+                .create(document.querySelector('#editor'))
+                .catch(error => {
+                    console.error(error);
+                });
+        </script>
+}
 }

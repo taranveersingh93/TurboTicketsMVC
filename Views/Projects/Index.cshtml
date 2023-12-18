@@ -36,7 +36,7 @@
         @foreach(Project project in Model)
         {
         <div class="col-12 col-md-4">
-                <div class="card h-100">
+                <div class="card border border-dark h-100">
                     <img src="@_FileService.ConvertByteArrayToFile(project.ImageFileData!, project.ImageFileType!, DefaultImage.ProjectImage)" class="card-img-top" alt="...">
                     <div class="card-body">
                         <h5 class="card-title mb-2">@project.Name</h5>

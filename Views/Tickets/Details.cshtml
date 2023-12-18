@@ -12,6 +12,8 @@
     string? userId = _UserManager.GetUserId(User);
     bool isUserAuthorized = await _TicketService.IsUserAuthorized(userId, Model.Id, Model.Project!.CompanyId);
 }
+<link rel="stylesheet" href="~/gogi/vendors/dataTable/datatables.min.css" type="text/css">
+
 
 <div class="content ">
     <div class="page-header">
@@ -275,7 +277,7 @@
                                     {
                                         <p>A ticket was added.</p>
                                     }
-                                    else if (history.PropertyName!.Equals("Ticket Comment") || history.PropertyName.Equals("Ticket Attachment"))
+                                    else if (history.PropertyName!.Equals("Latest Comment") || history.PropertyName.Equals("Ticket Attachment"))
                                     {
                                         <p>A new @history.PropertyName was added by <b>@history.User.FullName</b></p>
                                     }
@@ -286,8 +288,8 @@
                                     else
                                     {
                                         <p>The ticket <b>@history.PropertyName</b> was edited.</p>
-                                        <p>@($"Previous {history.PropertyName}: ") <span style="color:red">@history.OldValue</span></p>
-                                        <p>@($"Current {history.PropertyName}: ") <span style="color:yellow">@history.NewValue</span></p>
+                                        <p class="mb-1">@($"Previous {history.PropertyName}: ") <span style="color:#B80000">@history.OldValue</span></p>
+                                        <p class="mt-1">@($"Current {history.PropertyName}: ") <span style="color:#5F8670">@history.NewValue</span></p>
                                     }
 
                                 </div>
@@ -305,6 +307,8 @@
     </div>
 </div>
 
-@section Scripts {
-
-    }
+@section scripts {
+    <!-- DataTable -->
+    <script src="~/gogi/vendors/dataTable/datatables.min.js"></script>
+    <script src="~/gogi/assets/js/examples/datatable.js"></script>
+}

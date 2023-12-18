@@ -79,7 +79,7 @@ namespace TurboTicketsMVC.Controllers
             TTUser projectManager = await _projectService.GetProjectManagerAsync(project.Id);
             string projectManagerId = projectManager.Id;
             IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
-            IEnumerable<string> submitterIds = selectedDevelopers.Select(d => d.Id);
+            IEnumerable<string> submitterIds = selectedSubmitters.Select(s => s.Id);
             
 
             ViewData["ProjectManagers"] = new SelectList(projectManagers, "Id", "FullName", projectManagerId);
@@ -138,13 +138,16 @@ namespace TurboTicketsMVC.Controllers
             IEnumerable<string> DeveloperIds,
             IEnumerable<string> SubmitterIds,
             string ProjectManagerId,
-            int? projectId)
+            int? projectId,
+            string? redirect
+            )
         {
             await _projectService.RemoveMembersFromProjectAsync(projectId, _companyId);
             await _projectService.AddProjectManagerAsync(ProjectManagerId, projectId);
             await _projectService.AddMembersToProjectAsync(DeveloperIds, projectId, _companyId);
             await _projectService.AddMembersToProjectAsync(SubmitterIds, projectId, _companyId);
-            return RedirectToAction(nameof(Details), new {id = projectId});
+       
+            return RedirectToAction(redirect, new {id = projectId});
         }
 
         // GET: Projects/Edit/5
@@ -162,7 +165,20 @@ namespace TurboTicketsMVC.Controllers
             {
                 return NotFound();
             }
-            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", project.CompanyId);
+            IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
+            IEnumerable<TTUser> developers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+            IEnumerable<TTUser> submitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
+            IEnumerable<TTUser> selectedDevelopers = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Developer), _companyId);
+            IEnumerable<TTUser> selectedSubmitters = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Submitter), _companyId);
+            TTUser projectManager = await _projectService.GetProjectManagerAsync(project.Id);
+            string projectManagerId = projectManager.Id;
+            IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
+            IEnumerable<string> submitterIds = selectedSubmitters.Select(s => s.Id);
+
+
+            ViewData["ProjectManagers"] = new SelectList(projectManagers, "Id", "FullName", projectManagerId);
+            ViewData["Developers"] = new MultiSelectList(developers, "Id", "FullName", developerIds);
+            ViewData["Submitters"] = new MultiSelectList(submitters, "Id", "FullName", submitterIds);
             return View(project);
         }
 
