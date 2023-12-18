@@ -9,8 +9,12 @@
 
 @{
     ViewData["Title"] = "Details";
-    TTUser projectManager = await _projectService.GetProjectManagerAsync(Model.Id);
+    TTUser? projectManager = await _projectService.GetProjectManagerAsync(Model.Id);
     bool isAdmin = User.IsInRole("Admin");
+    bool isPm = false;
+    if (projectManager != null) {
+        isPm = _UserManager.GetUserId(User) == projectManager.Id;
+    }
 }
 
 <link rel="stylesheet" href="~/gogi/vendors/dataTable/datatables.min.css" type="text/css">
@@ -35,7 +39,7 @@
 
             </div>
         </div>
-        @if(_UserManager.GetUserId(User) == projectManager.Id || isAdmin ) {
+        @if(isPm || isAdmin) {
             <a asp-controller="Projects" asp-action="Edit" asp-route-id="@Model.Id" role="button" class="btn btn-primary">Edit Project</a>
         }
     </div>
@@ -101,7 +105,9 @@
                     </button>
                 </div>
                 <div class="card-body list-group list-group-flush" style="overflow-y:auto;height:300px;">
-                    @foreach (TTUser member in Model.Members)
+                    @if(Model.Members.Count() > 0)
+                    {
+                        @foreach (TTUser member in Model.Members)
                     {
                         <div class="list-group-item d-flex px-0 align-items-start">
                             <div class="pr-3">
@@ -135,6 +141,10 @@
                                 }
                             </div>
                         </div>
+                        }
+                    } else
+                    {
+                        <h4 class="text-muted">No Team Members</h4>
                     }
                 </div>
             </div>
@@ -147,6 +157,9 @@
                 </div>
                 <div class="card-body" style="overflow-y:auto;height:300px;">
                     @* Project Activity loop *@
+                    @if(Model.Tickets.SelectMany(t => t.History).Count() > 0)
+                    {
+                        
                     @foreach (TicketHistory history in Model.Tickets.SelectMany(t => t.History).OrderBy(h => h.CreatedDate))
                     {
                         <div class="border border-primary p-3 m-3" style="border-radius: 5px;">
@@ -172,6 +185,10 @@
                             </div>
                         </div>
                         <hr />
+                        }
+                    } else
+                    {
+                        <h4 class="text-muted">No Project Activity</h4>
                     }
                 </div>
 

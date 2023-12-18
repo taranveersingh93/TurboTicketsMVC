@@ -8,8 +8,9 @@
 
 @{
     ViewData["Title"] = "Edit";
-    TTUser projectManager = await _projectService.GetProjectManagerAsync(Model.Id);
+    TTUser? projectManager = await _projectService.GetProjectManagerAsync(Model.Id);
     bool isAdmin = User.IsInRole("Admin");
+
 }
 
 <div class="content">
@@ -88,6 +89,9 @@
                     </button>
                 </div>
                 <div class="card-body list-group list-group-flush" style="overflow-y:auto;">
+                    @if(Model.Members.Count() > 0)
+                    {
+                        
                     @foreach (TTUser member in Model.Members)
                     {
                         <div class="list-group-item d-flex px-0 align-items-start">
@@ -122,6 +126,10 @@
                                 }
                             </div>
                         </div>
+                        }
+                    } else
+                    {
+                        <h4 class="text-muted">No Team Members</h4>
                     }
                 </div>
             </div>

@@ -76,8 +76,13 @@ namespace TurboTicketsMVC.Controllers
             IEnumerable<TTUser> submitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
             IEnumerable<TTUser> selectedDevelopers = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Developer), _companyId);
             IEnumerable<TTUser> selectedSubmitters = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Submitter), _companyId);
-            TTUser projectManager = await _projectService.GetProjectManagerAsync(project.Id);
-            string projectManagerId = projectManager.Id;
+            TTUser? projectManager = await _projectService.GetProjectManagerAsync(project.Id);
+            string? projectManagerId = string.Empty;
+            if (projectManager != null)
+            {
+                projectManagerId = projectManager.Id;
+            }
+
             IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
             IEnumerable<string> submitterIds = selectedSubmitters.Select(s => s.Id);
             
@@ -170,8 +175,12 @@ namespace TurboTicketsMVC.Controllers
             IEnumerable<TTUser> submitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
             IEnumerable<TTUser> selectedDevelopers = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Developer), _companyId);
             IEnumerable<TTUser> selectedSubmitters = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Submitter), _companyId);
-            TTUser projectManager = await _projectService.GetProjectManagerAsync(project.Id);
-            string projectManagerId = projectManager.Id;
+            TTUser? projectManager = await _projectService.GetProjectManagerAsync(project.Id);
+            string? projectManagerId = string.Empty;
+            if (projectManager != null)
+            {
+                projectManagerId = projectManager.Id;
+            }
             IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
             IEnumerable<string> submitterIds = selectedSubmitters.Select(s => s.Id);
 
