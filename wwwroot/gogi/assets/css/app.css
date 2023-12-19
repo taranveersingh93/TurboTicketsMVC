@@ -6187,16 +6187,17 @@ body:not(.horizontal-navigation) .navigation .navigation-menu-body ul li.open > 
   flex-direction: column;
 }
 
-.layout-wrapper .content-wrapper > .content-body > .content {
-  padding: 30px;
-  margin-top: 70px;
-  margin-left: 280px;
-  margin-right: 30px;
-  border-radius: 15px;
-  background-color: #f4f5fd;
-  overflow: auto;
-  height: calc(100vh - 70px - 50px);
-}
+    .layout-wrapper .content-wrapper > .content-body > .content {
+        padding: 30px;
+        margin-top: 70px;
+        margin-left: 280px;
+        margin-right: 30px;
+        border-radius: 15px;
+        background-color: #f4f5fd;
+        /*background-color: rgba(80, 102, 225, 0.3);*/
+        overflow: auto;
+        height: calc(100vh - 70px - 50px);
+    }
 
 @media (min-width: 1200px) {
   body.small-navigation .navigation {

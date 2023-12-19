@@ -31,6 +31,7 @@ namespace TurboTicketsMVC.Services
 
 			try
 			{
+				invite.JoinDate = DateTimeOffset.Now;
 				invite.IsValid = false;
 				invite.InviteeId = userId;
 				await _context.SaveChangesAsync();
