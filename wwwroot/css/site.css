@@ -106,3 +106,7 @@ card-link:hover {
 .badge {
     --bs-badge-color: none;
 }
+
+.border-bottom-gray {
+    border-bottom: 1px solid var(--color-gray);
+}
