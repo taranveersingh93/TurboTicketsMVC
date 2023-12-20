@@ -96,9 +96,12 @@ namespace TurboTicketsMVC.Controllers
 
 
         // GET: Projects/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name");
+            IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
+
+            ViewData["ProjectManagers"] = new SelectList(projectManagers, "Id", "FullName");
             return View();
         }
 
@@ -110,7 +113,7 @@ namespace TurboTicketsMVC.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin, ProjectManager")]
 
-        public async Task<IActionResult> Create([Bind("Id, Name,Description,ProjectPriority,ImageFormFile,Archived")] Project project)
+        public async Task<IActionResult> Create([Bind("Id, Name,Description,ProjectPriority,ImageFormFile,Archived")] Project project, string? selectedProjectManagerId)
         {
             if (ModelState.IsValid)
             {
@@ -124,7 +127,14 @@ namespace TurboTicketsMVC.Controllers
                     project.ImageFileType = project.ImageFormFile.ContentType;
                 }
                 await _projectService.AddProjectAsync(project);
-                bool pmAdded = await _projectService.AddProjectManagerAsync(_userId, project.Id);
+                bool pmAdded = false;
+                if (selectedProjectManagerId == "(Project Creator)")
+                {
+                    pmAdded = await _projectService.AddProjectManagerAsync(_userId, project.Id);
+                } else
+                {
+                    pmAdded = await _projectService.AddProjectManagerAsync(selectedProjectManagerId, project.Id);
+                }
                 if (pmAdded)
                 {
                     return RedirectToAction(nameof(Index));

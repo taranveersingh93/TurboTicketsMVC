@@ -1,10 +1,13 @@
-﻿@using TurboTicketsMVC.Models.Enums;
+﻿@using Microsoft.AspNetCore.Identity;
+@using TurboTicketsMVC.Models.Enums;
 @using TurboTicketsMVC.Services.Interfaces;
 @model TurboTicketsMVC.Models.Project
 @inject ITTFileService _fileService
+@inject UserManager<TTUser> _userManager;
 
 @{
     ViewData["Title"] = "Create";
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <div class="content">
@@ -47,7 +50,18 @@
                     <textarea asp-for="Description" id="editor" class="editor form-control"></textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
-
+                @if(isAdmin)
+                {
+                    <div class="form-group">
+                        <label for="projectManagerSelect" class="control-label">Project Manager</label>
+                        <select name="selectedProjectManagerId" id="projectManagerSelect" class="form-control dropdown-toggle" asp-items="ViewBag.ProjectManagers">
+                            <option>(Project Creator)</option>
+                        </select>
+                    </div>
+                } else
+                {
+                    <input type="hidden" name="selectedProjectManagerId" value="(Project Creator)" />
+                }
                 <div class="form-group">
                     <label asp-for="ProjectPriority" class="control-label"></label>
                     <select asp-for="ProjectPriority" class="form-select" asp-items="@Html.GetEnumSelectList<TTProjectPriorities>()"></select>

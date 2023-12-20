@@ -1,4 +1,13 @@
-﻿<!doctype html>
+﻿@using Microsoft.AspNetCore.Identity;
+@using TurboTicketsMVC.Services.Interfaces;
+@inject ITTNotificationService _notificationService;
+@inject UserManager<TTUser> _userManager;
+
+@{
+    IEnumerable <Notification> myNotifications = await _notificationService.GetNotificationsByUserIdAsync(_userManager.GetUserId(User));
+}
+
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -94,16 +103,20 @@
         </div>
         <!-- END: Settings -->
         <!-- BEGIN: Chat List -->
-        <div class="sidebar" id="chat-list">
+        <div class="sidebar" id="my-notifications">
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title d-flex justify-content-between">
-                        Chats
+                        Notifications
                         <a class="btn-sidebar-close" href="#">
                             <i class="ti-close"></i>
                         </a>
                     </h6>
                     <div class="list-group list-group-flush">
+                        @foreach(Notification notification in myNotifications)
+                        {
+                            
+                        }
                         <a href="chat.html" class="list-group-item d-flex px-0 align-items-start">
                             <div class="pr-3">
                                 <span class="avatar avatar-state-danger">
@@ -445,8 +458,8 @@
                             </li>
 
                             <li class="nav-item dropdown">
-                                <a href="#" class="nav-link nav-link-notify" title="Chats" data-sidebar-target="#chat-list">
-                                    <i data-feather="message-circle"></i>
+                                <a href="#" class="nav-link" title="My Notifications" data-sidebar-target="#my-notifications">
+                                    <i data-feather="bell"></i>
                                 </a>
                             </li>
 
