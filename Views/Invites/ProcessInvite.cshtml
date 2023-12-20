@@ -2,27 +2,25 @@
 
 @{
     ViewData["Title"] = "Process Invite";
-    Layout = null;
+    Layout = "/Views/Shared/_LoginLayout.cshtml";
+
 }
 
-<div class="panel card-sign">
-    <div class="card-title mt-3 text-center">
-        <h2 class="title text-uppercase font-weight-bold m-0"> Invite</h2>
-    </div>
-    <div class="header">
+<div class="px-4">
+<h2 class="title font-weight-bold py-2 m-0" style="border-bottom: 1px solid #d4d4d4">You've been Invited</h2>
+    <div class="py-4" style="border-bottom: 1px solid #d4d4d4">
         <h3>
             <span class="clearfix title">
-                <span class="number">Welcome</span><br />
-                <span>@Model.InviteeFirstName @Model.InviteeLastName!</span> <br>
+                <span class="text-primary">Welcome @Model.InviteeFirstName @Model.InviteeLastName!</span> <br>
             </span>
         </h3>
-        <h5><span>Company Name: @Model.Company!.Name </span></h5>
+        <h5 class="mb-0"><span>Company Name: @Model.Company!.Name </span></h5>
     </div>
-    <div class="card-body">
+    <div class="card-body px-4">
         <p>
-            @Model.Invitor!.FullName has invited you to collaborate on the @Model.Project!.Name project.
-            <br /><br /> Click the "Join" button below to register with the company and begin creating tickets.
+            @Model.Invitor!.FullName has invited you to collaborate on the <strong>"@Model.Project!.Name"</strong> project.
         </p>
-        <a class="btn btn-primary btn-lg btn-block" asp-area="Identity" asp-page="/Account/RegisterByInvite" asp-route-id="@Model.Id" asp-route-companyId="@Model.CompanyId"><i class="bi bi-box-arrow-in-right"></i> <span>Join</span></a>
+        <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/RegisterByInvite" asp-route-id="@Model.Id" asp-route-companyId="@Model.CompanyId">
+            <i class="bi bi-box-arrow-in-right"></i> <span>Join</span></a>
     </div>
 </div>

@@ -2,14 +2,90 @@
 
 @{
     ViewData["Title"] = "Create";
+    bool projectsAvailable = Enumerable.Count(ViewBag.Projects) > 0;
 }
 
-<h1>Create</h1>
+<div class="content ">
 
-<h4>Invite</h4>
-<hr />
+    <div class="page-header">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h3>Create Invite</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Invites" asp-action="Index">All Invites</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Create Invite</li>
+                    </ol>
+                </nav>
 
-<div class="col-lg-6 col-md-12">
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-12">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            @if(projectsAvailable)
+                            {
+                            <form asp-action="Create">
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="form-group">
+                                    <label asp-for="InviteeEmail" class="control-label">Invitee Email</label>
+                                    <input asp-for="InviteeEmail" class="form-control" placeholder="example@example.com"/>
+                                    <span asp-validation-for="InviteeEmail" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="InviteeFirstName" class="control-label">Invitee First Name</label>
+                                    <input asp-for="InviteeFirstName" class="form-control" placeholder="Bill"/>
+                                    <span asp-validation-for="InviteeFirstName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="InviteeLastName" class="control-label">Invitee Last Name</label>
+                                    <input asp-for="InviteeLastName" class="form-control" placeholder="Jones" />
+                                    <span asp-validation-for="InviteeLastName" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="ProjectId" class="control-label">Select Project</label>
+                                    <select asp-for="ProjectId" class="form-control" asp-items="ViewBag.Projects" required></select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="Message" class="control-label"></label>
+                                    <textarea asp-for="Message" class="form-control" rows="4" style="height:auto;"></textarea>
+                                    <span asp-validation-for="Message" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <input type="submit" value="Create" class="btn btn-primary" />
+                                </div>
+                                </form>
+
+                            } else
+                            {
+                                <div class="p-4 d-flex flex-column align-items-center justify-content-between">
+                                    <h4 class="text-muted text-center mb-4">You need to create a project first to be able to send an invite.</h4>
+                                    <a asp-controller="Projects" asp-action="Create" role="button" class="btn btn-primary">Create Project</a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* <div class="col-lg-6 col-md-12">
     <div class="card custom-card">
         <div class="card-body">
             <div>
@@ -72,7 +148,7 @@
 
 <div>
     <a asp-action="Index">Back to List</a>
-</div>
+</div> *@
 
 @section Scripts {
     @{

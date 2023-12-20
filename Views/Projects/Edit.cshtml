@@ -10,7 +10,9 @@
     ViewData["Title"] = "Edit";
     TTUser? projectManager = await _projectService.GetProjectManagerAsync(Model.Id);
     bool isAdmin = User.IsInRole("Admin");
-
+    bool pmAvailable = Enumerable.Count(ViewBag.ProjectManagers) > 0;
+    bool developersAvailable = Enumerable.Count(ViewBag.Developers) > 0;
+    bool submittersAvailable = Enumerable.Count(ViewBag.Submitters) > 0;
 }
 
 <div class="content">
@@ -152,7 +154,14 @@
                     {
                         <div class="form-group">
                             <label for="projectManagerSelect" class="control-label">Project Manager</label>
-                            <select name="projectManagerId" id="projectManagerSelect" class="form-control dropdown-toggle" asp-items="ViewBag.ProjectManagers"></select>
+                            @if (pmAvailable)
+                            {
+                                <select name="projectManagerId" id="projectManagerSelect" class="form-control dropdown-toggle" asp-items="ViewBag.ProjectManagers"></select>
+                            }
+                            else
+                            {
+                                <h6 class="text-muted text-center">No company member, with a PM role, available.</h6>
+                            }
                         </div>
                     }
                     else
@@ -161,11 +170,25 @@
                     }
                     <div class="form-group">
                         <label for="developerTeamSelect" class="control-label">Developers</label>
-                        <select name="DeveloperIds" id="developerTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Developers" multiple></select>
+                        @if (developersAvailable)
+                        {
+                            <select name="DeveloperIds" id="developerTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Developers" multiple></select>
+                        }
+                        else
+                        {
+                            <h6 class="text-muted text-center">No company member, with a developer role, available.</h6>
+                        }
                     </div>
                     <div class="form-group">
                         <label for="submitterTeamSelect" class="control-label">Submitters</label>
-                        <select name="SubmitterIds" id="submitterTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Submitters" multiple></select>
+                        @if (submittersAvailable)
+                        {
+                            <select name="SubmitterIds" id="submitterTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Submitters" multiple></select>
+                        }
+                        else
+                        {
+                            <h6 class="text-muted text-center">No company member, with a submitter role, available.</h6>
+                        }
                     </div>
                 </div>
                 <div class="modal-footer">

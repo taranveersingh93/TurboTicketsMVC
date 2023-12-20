@@ -14,10 +14,11 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Identity;
 using TurboTicketsMVC.Extensions;
 using System.ComponentModel.Design;
+using Microsoft.CodeAnalysis;
 
 namespace TurboTicketsMVC.Controllers
 {
-    [Authorize(Roles="Admin")]
+    [Authorize(Roles = "Admin")]
     public class InvitesController : TTBaseController
     {
         private readonly ApplicationDbContext _context;
@@ -46,10 +47,14 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // GET: Invites
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? swalMessage)
         {
-            var applicationDbContext = _context.Invites.Include(i => i.Company).Include(i => i.Invitee).Include(i => i.Invitor).Include(i => i.Project);
-            return View(await applicationDbContext.ToListAsync());
+            if (!string.IsNullOrEmpty(swalMessage))
+            {
+                ViewData["SwalMessage"] = swalMessage;
+            }
+            IEnumerable<Invite> companyInvites = await _inviteService.GetCompanyInvites(_companyId);
+            return View(companyInvites);
         }
 
         // GET: Invites/Details/5
@@ -77,12 +82,12 @@ namespace TurboTicketsMVC.Controllers
         // GET: Invites/Create
         public async Task<IActionResult> Create()
         {
-			int? companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
+            int? companyId = User.Identity!.GetCompanyId();
+            IEnumerable<Models.Project> companyProjects = await _projectService.GetProjectsByCompanyIdAsync(companyId);
 
-			ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
-			return View();
-		}
+            ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
+            return View();
+        }
 
         // POST: Invites/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -92,62 +97,165 @@ namespace TurboTicketsMVC.Controllers
         public async Task<IActionResult> Create([Bind("Id,ProjectId,InviteeEmail,InviteeFirstName,InviteeLastName,Message")] Invite invite)
         {
             ModelState.Remove("InvitorId");
-           
+
             if (ModelState.IsValid)
             {
-				try
-				{
-					//encrypt code for invite
-					Guid guid = Guid.NewGuid();
+                try
+                {
+                    //encrypt code for invite
+                    Guid guid = Guid.NewGuid();
 
                     //create callbackURL attributes
-					string token = _protector.Protect(guid.ToString());
-					string email = _protector.Protect(invite.InviteeEmail!);
-					string company = _protector.Protect(_companyId.ToString()!);
-
-					string? callbackUrl = Url.Action("ProcessInvite", "Invites", new { token, email, company }, protocol: Request.Scheme);
+                    string token = _protector.Protect(guid.ToString());
+                    string email = _protector.Protect(invite.InviteeEmail!);
+                    string company = _protector.Protect(_companyId.ToString()!);
 
 
-					string body = $@"{invite.Message} <br />
+
+                    // Save invite in the DB
+                    invite.CompanyToken = guid;
+                    invite.CompanyId = _companyId;
+                    invite.InviteDate = DateTimeOffset.Now;
+                    invite.InvitorId = _userId;
+                    invite.IsValid = true;
+
+                    // Add Invite service method for "AddNewInviteAsync"
+                    if (await _inviteService.AddNewInviteAsync(invite))
+                    {
+                        string? callbackUrl = Url.Action("ProcessInvite", "Invites", new { token, email, company }, protocol: Request.Scheme);
+
+
+                        string body = $@"{invite.Message} <br />
                        
                        Please click the following link to join our team. <br />
                        <a href=""{callbackUrl}"">Collaborate</a>";
 
-					string? destination = invite.InviteeEmail;
+                        string? destination = invite.InviteeEmail;
 
-					Company ttCompany = await _companyService.GetCompanyInfoAsync(_companyId);
+                        Company ttCompany = await _companyService.GetCompanyInfoAsync(_companyId);
 
-					string? subject = $"Turbo Tickets: {ttCompany.Name} Invite";
+                        string? subject = $"Turbo Tickets: {ttCompany.Name} Invite";
 
-					await _emailService.SendEmailAsync(destination!, subject, body);
+                        await _emailService.SendEmailAsync(destination!, subject, body);
+                        string? swalMessage = "Invite sent";
+                        return RedirectToAction(nameof(Index), new { swalMessage });
+                    }
+                    else
+                    {
+                        string? swalMessage = "Invite failed, please try another email address";
+                        return RedirectToAction(nameof(Index), new { swalMessage });
+                    }
 
 
-					// Save invite in the DB
-					invite.CompanyToken = guid;
-					invite.CompanyId = _companyId;
-					invite.InviteDate = DateTimeOffset.Now;
-					invite.InvitorId = _userId;
-					invite.IsValid = true;
 
-					// Add Invite service method for "AddNewInviteAsync"
-					await _inviteService.AddNewInviteAsync(invite);
+                    // TODO: Possibly use SWAL message
 
-					return RedirectToAction("Dashboard", "Home");
+                }
+                catch (Exception)
+                {
 
-					// TODO: Possibly use SWAL message
-
-				}
-				catch (Exception)
-				{
-
-					throw;
-				}
-			}
+                    throw;
+                }
+            }
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", invite.CompanyId);
             ViewData["InviteeId"] = new SelectList(_context.Users, "Id", "Id", invite.InviteeId);
             ViewData["InvitorId"] = new SelectList(_context.Users, "Id", "Id", invite.InvitorId);
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", invite.ProjectId);
             return View(invite);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> InvalidateInvite(int? id)
+        {
+            if (id != null)
+            {
+                Invite? invite = await _inviteService.GetInviteByIdAsync(id, _companyId);
+                if (invite != null)
+                {
+                    await _inviteService.InvalidateExistingCompanyInvites(invite);
+                    string? swalMessage = "Invalidation successful";
+
+                    return RedirectToAction(nameof(Index), new { swalMessage});
+                } else
+                {
+                    string? swalMessage = "Invalidation failed";
+                    return RedirectToAction(nameof(Index), new { swalMessage});
+                }
+            } else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResendInvite(int? id)
+        {
+            
+                try
+                {
+                    Invite? invite = await _inviteService.GetInviteByIdAsync(id, _companyId);
+
+                if (invite != null)
+                {
+                    //encrypt code for invite
+                    Guid guid = Guid.NewGuid();
+
+                    //create callbackURL attributes
+                    string token = _protector.Protect(guid.ToString());
+                    string email = _protector.Protect(invite.InviteeEmail!);
+                    string company = _protector.Protect(_companyId.ToString()!);
+
+                // Save invite in the DB
+                    Invite newInvite = new();
+                    newInvite.CompanyToken = guid;
+                    newInvite.CompanyId = _companyId;
+                    newInvite.InviteDate = DateTimeOffset.Now;
+                    newInvite.InvitorId = _userId;
+                    newInvite.IsValid = true;
+                    newInvite.InviteeEmail = invite.InviteeEmail;
+                    newInvite.InviteeFirstName = invite.InviteeFirstName;
+                    newInvite.InviteeLastName = invite.InviteeLastName;
+                    newInvite.ProjectId = invite.ProjectId;
+                    newInvite.Message = invite.Message;
+
+                    // Add Invite service method for "AddNewInviteAsync"
+                    if (await _inviteService.AddNewInviteAsync(newInvite))
+                    {
+                        string? callbackUrl = Url.Action("ProcessInvite", "Invites", new { token, email, company }, protocol: Request.Scheme);
+
+
+                        string body = $@"{invite.Message} <br />
+                       
+                       Please click the following link to join our team. <br />
+                       <a href=""{callbackUrl}"">Collaborate</a>";
+
+                        string? destination = invite.InviteeEmail;
+
+                        Company ttCompany = await _companyService.GetCompanyInfoAsync(_companyId);
+
+                        string? subject = $"Turbo Tickets: {ttCompany.Name} Invite";
+
+                        await _emailService.SendEmailAsync(destination!, subject, body);
+                        return RedirectToAction(nameof(Index), new { swalMessage = "Invite sent" });
+                    }
+                    else
+                    {
+                        return RedirectToAction(nameof(Index), new { swalMessage = "Invite failed, please try another email address" });
+                    }
+
+                }
+                else
+                {
+                    return RedirectToAction(nameof(Index), new { swalMessage = "Invite failed, please try another email address" });
+                }
+            }
+                catch
+                {
+                 return NotFound();
+                }
+     
         }
 
         // GET: Invites/Edit/5
@@ -245,9 +353,16 @@ namespace TurboTicketsMVC.Controllers
             {
                 _context.Invites.Remove(invite);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public ViewResult InvalidInvite()
+        {
+            return View();
         }
 
 
@@ -270,7 +385,14 @@ namespace TurboTicketsMVC.Controllers
 
                 if (invite != null)
                 {
-                    return View(invite);
+                    if (await _inviteService.ValidateInviteCodeAsync(companyToken))
+                    {
+                        return View(invite);
+                    }
+                    else
+                    {
+                        return RedirectToAction(nameof(InvalidInvite));
+                    }
                 }
 
                 return NotFound();
@@ -284,7 +406,7 @@ namespace TurboTicketsMVC.Controllers
         }
         private bool InviteExists(int id)
         {
-          return (_context.Invites?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Invites?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

@@ -30,68 +30,78 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <table id="userRolesTable" class="table table-striped table-bordered" style="width: 100%;">
-                        <thead>
-                            <tr>
-                                <th>
-                                    User
-                                </th>
-
-                                <th>
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (ManageUserRolesViewModel viewModel in Model)
-                            {
+                    @if (Model.Count() > 0)
+                    {
+                        <table id="userRolesTable" class="table table-striped table-bordered" style="width: 100%;">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <p>@viewModel.TTUser!.FullName<p>
+                                    <th>
+                                        User
+                                    </th>
 
-                                                @if (viewModel.SelectedRole == "Admin")
-                                                {
-                                                <div class="badge rounded-pill bg-dark">@viewModel.SelectedRole</div>
-                                                }
-                                                else if (viewModel.SelectedRole == "Developer")
-                                                {
-                                                <div class="badge rounded-pill bg-success text-dark">@viewModel.SelectedRole</div>
-                                                }
-                                                else if (viewModel.SelectedRole == "Submitter")
-                                                {
-                                                <div class="badge rounded-pill bg-info text-dark">@viewModel.SelectedRole</div>
-                                                }
-                                                else
-                                                {
-                                                <div class="badge rounded-pill bg-primary">Project Manager</div>
-                                                }
-
-                                                @if (viewModel.IsDemoUser)
-                                                {
-                                                <div class="badge rounded-pill bg-warning text-dark">Demo User</div>
-
-                                                }
-
-                                    </td>
-
-                                    <td>
-                                        <form asp-action="ManageUserRoles" asp-controller="Companies" method="post">
-                                            <input type="hidden" asp-for="@viewModel.TTUser!.Id" />
-                                            <select class="form-select" asp-for="@viewModel.SelectedRole" asp-items="@viewModel.Roles"></select>
-                                            <div class="d-flex mt-1 justify-content-around align-items-center">
-                                                <label class="form-check-label d-flex justify-content-between align-items-center">
-                                                    Demo User&nbsp;
-                                                    <input asp-for="@viewModel.IsDemoUser" />
-                                                </label>
-                                                <input type="submit" value="Assign Role" class="btn btn-warning" />
-
-                                            </div>
-                                        </form>
-                                    </td>
+                                    <th>
+                                        Actions
+                                    </th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (ManageUserRolesViewModel viewModel in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <p>@viewModel.TTUser!.FullName<p>
+
+                                                    @if (viewModel.SelectedRole == "Admin")
+                                                    {
+                                                    <div class="badge rounded-pill bg-dark">@viewModel.SelectedRole</div>
+                                                    }
+                                                    else if (viewModel.SelectedRole == "Developer")
+                                                    {
+                                                    <div class="badge rounded-pill bg-success text-dark">@viewModel.SelectedRole</div>
+                                                    }
+                                                    else if (viewModel.SelectedRole == "Submitter")
+                                                    {
+                                                    <div class="badge rounded-pill bg-info text-dark">@viewModel.SelectedRole</div>
+                                                    }
+                                                    else
+                                                    {
+                                                    <div class="badge rounded-pill bg-primary">Project Manager</div>
+                                                    }
+
+                                                    @if (viewModel.IsDemoUser)
+                                                    {
+                                                    <div class="badge rounded-pill bg-warning text-dark">Demo User</div>
+
+                                                    }
+
+                                        </td>
+
+                                        <td>
+                                            <form asp-action="ManageUserRoles" asp-controller="Companies" method="post">
+                                                <input type="hidden" asp-for="@viewModel.TTUser!.Id" />
+                                                <select class="form-select" asp-for="@viewModel.SelectedRole" asp-items="@viewModel.Roles"></select>
+                                                <div class="d-flex mt-1 justify-content-around align-items-center">
+                                                    <label class="form-check-label d-flex justify-content-between align-items-center">
+                                                        Demo User&nbsp;
+                                                        <input asp-for="@viewModel.IsDemoUser" />
+                                                    </label>
+                                                    <input type="submit" value="Assign Role" class="btn btn-warning" />
+
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column align-items-center justify-content-between p-4">
+                            <h4 class="text-muted text-center">No members in the company.</h4>
+                            <a asp-controller="Invites" asp-action="Create" class="btn btn-primary mt-4" role="button">Invite Members to Company</a>
+                        </div>
+                    }
                 </div>
             </div>
 

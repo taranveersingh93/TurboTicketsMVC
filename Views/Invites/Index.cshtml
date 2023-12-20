@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Index";
     bool isAdmin = User.IsInRole("Admin");
+    string? swalMessage = ViewBag.SwalMessage;
 }
 
 <link rel="stylesheet" href="~/gogi/vendors/dataTable/datatables.min.css" type="text/css">
@@ -60,6 +61,7 @@
                                     <th>
                                         Validity
                                     </th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -78,39 +80,63 @@
                                         <td>
                                             @item.InviteDate.ToString("dd MMM yyyy")
                                         </td>
-                                        @if(item.JoinDate != null)
+                                        @if (item.JoinDate != null)
                                         {
                                             <td>
                                                 <div class="badge d-flex justify-content-center bg-success">
                                                     Joined
                                                 </div>
                                             </td>
-                                        } else
+                                        }
+                                        else
                                         {
                                             <td>
                                                 <div class="badge d-flex justify-content-center badge bg-primary">
-                                                Not Joined
+                                                    Not Joined
 
                                                 </div>
                                             </td>
                                         }
-                                        @if(item.IsValid)
+                                        @if (item.IsValid)
                                         {
                                             <td>
                                                 <div class="bg-success d-flex justify-content-center badge">
 
-                                                Valid
+                                                    Valid
                                                 </div>
                                             </td>
-                                        } else
+                                        }
+                                        else
                                         {
                                             <td>
                                                 <div class="badge d-flex justify-content-center bg-danger">
                                                     Invalid
                                                 </div>
-                                                </td>
-                                        }                                     
-                
+                                            </td>
+                                        }
+                                        @if (isAdmin)
+                                        {
+                                            <td>
+
+                                                <form asp-controller="Invites" asp-action="ResendInvite" method="post">
+                                                    <input type="hidden" name="id" value="@item.Id" />
+@*                                                     <input type="hidden" name="projectId" value="@item.ProjectId" />
+                                                    <input type="hidden" name="inviteeEmail" value="@item.InviteeEmail" />
+                                                    <input type="hidden" name="inviteeFirstName" value="@item.InviteeFirstName" />
+                                                    <input type="hidden" name="inviteeLastName" value="@item.InviteeLastName" />
+                                                    <input type="hidden" name="message" value="@item.Message" />  *@
+                                                    <button class="btn-sm btn btn-primary" type="submit">Resend Invite</button>
+                                                </form>
+                                                <form asp-controller="Invites" asp-action="InvalidateInvite">
+                                                    <input type="hidden" name="id" value="@item.Id"/>
+                                                    <button class="btn-sm btn btn-warning" type="submit">Invalidate Invite</button>
+
+                                                </form>
+                                                @* <a class="btn btn-sm btn-warning" asp-action="InvalidateInvite" asp-route-id="@item.Id">Invalidate</a> *@
+
+                                            </td>
+                                        }
+
                                     </tr>
                                 }
                             </tbody>
@@ -127,103 +153,51 @@
     </div>
 </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.InviteDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.JoinDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CompanyToken)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.InviteeEmail)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.InviteeFirstName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.InviteeLastName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Message)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsValid)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Company)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Project)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Invitor)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Invitee)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.InviteDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.JoinDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CompanyToken)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.InviteeEmail)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.InviteeFirstName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.InviteeLastName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Message)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.IsValid)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Company.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Project.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Invitor.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Invitee.Id)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
 
 
 @section Scripts {
     <script src="~/gogi/vendors/dataTable/datatables.min.js"></script>
     <script src="~/gogi/assets/js/examples/datatable.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        var swalMessage = "@swalMessage";
+        if (swalMessage) {
+            if (swalMessage.includes("sent")) {
+                Swal.fire(
+                    {
+                        title: 'Success',
+                        text: '@swalMessage',
+                        icon: 'success',
+                        confirmButtonText: 'ok',
+                        color: '#5066e1'
+                    }
+                )
+            }
+
+            if (swalMessage.includes("failed")) {
+                Swal.fire(
+                    {
+                        title: 'Sorry',
+                        text: '@swalMessage',
+                        icon: 'error',
+                        confirmButtonText: 'ok',
+                        color: '#820300'
+                    }
+                )
+            }
+
+            if (swalMessage.includes("successful")) {
+                Swal.fire(
+                    {
+                        title: 'Success',
+                        text: '@swalMessage',
+                        icon: 'success',
+                        confirmButtonText: 'ok',
+                        color: '#5066e1'
+                    }
+                )
+            }
+        }
+    </script>
 }

@@ -38,62 +38,63 @@
             @foreach (Project project in Model)
             {
                 <div class="col-12 col-md-4">
-                    <div class="card border border-dark h-100 px-3">
-                        <div class="py-3 mt-1 border-bottom-gray">
-                            @if ((await _ProjectService.GetProjectManagerAsync(project.Id)) != null)
-                            {
-                            <div class="d-flex align-items-start">
-                                <div class="pr-3">
-                                    <span class="avatar avatar-sm">
-                                        <img src="@_FileService.ConvertByteArrayToFile((await _ProjectService.GetProjectManagerAsync(project.Id)).ImageFileData!, (await _ProjectService.GetProjectManagerAsync(project.Id)).ImageFileType!, DefaultImage.BTUserImage)"
-                                             class="rounded-circle"
-                                             alt="image">
-                                    </span>
-                                </div>
-                                <div class="flex-grow- 1">
-                                    <h6 class="mb-1">@((await _ProjectService.GetProjectManagerAsync(project.Id)).FullName)</h6>
-                                    <h6 class="text-muted">Project Manager</h6>
-                                </div>
-                             </div>
-                            } else
-                            {
-                                <h6 class="text-center text-muted my-2">No Project Manager Assigned</h6>
-                            }
-                        </div>
-                        <div class="py-3 border-bottom-gray">
-                        <a asp-asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">
-                            <img src="@_FileService.ConvertByteArrayToFile(project.ImageFileData!, project.ImageFileType!, DefaultImage.ProjectImage)" class="card-img-top" alt="...">
-                        </a>
-                        </div>
-                        <div class="card-body py-3 px-0">
-                            <h5 class="card-title text-primary mb-2">@project.Name</h5>
-                            @if (project.Members.Count() > 0)
-                            {
-                                <div class="mr-3 d-sm-inline d-none">
-                                    <div class="avatar-group">
-                                        @foreach (TTUser member in project.Members)
-                                        {
-                                            <figure class="avatar avatar-sm" title="@member.FullName"
-                                                    data-toggle="tooltip">
-                                                <img src="@_FileService.ConvertByteArrayToFile(member.ImageFileData!, member.ImageFileType!, DefaultImage.BTUserImage)"
+                    <a asp-asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">
+                        <div class="card border border-dark h-100 px-3">
+                            <div class="py-3 mt-1 border-bottom-gray">
+                                @if ((await _ProjectService.GetProjectManagerAsync(project.Id)) != null)
+                                {
+                                    <div class="d-flex align-items-start">
+                                        <div class="pr-3">
+                                            <span class="avatar avatar-sm">
+                                                <img src="@_FileService.ConvertByteArrayToFile((await _ProjectService.GetProjectManagerAsync(project.Id)).ImageFileData!, (await _ProjectService.GetProjectManagerAsync(project.Id)).ImageFileType!, DefaultImage.BTUserImage)"
                                                      class="rounded-circle"
                                                      alt="image">
-                                            </figure>
-                                        }
-
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow- 1">
+                                            <h6 class="mb-1">@((await _ProjectService.GetProjectManagerAsync(project.Id)).FullName)</h6>
+                                            <h6 class="text-muted">Project Manager</h6>
+                                        </div>
                                     </div>
-                                </div>
-                            }
-                            else
-                            {
-                                <h6 class="text-muted">No Members</h6>
-                            }
-                            <div class="line-clamp-3 m-2">
-                                @Html.Raw(project.Description)
+                                }
+                                else
+                                {
+                                    <h6 class="text-center text-muted my-2">No Project Manager Assigned</h6>
+                                }
                             </div>
-                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary">Details</a>
+                            <div class="py-3 border-bottom-gray">
+                                <img src="@_FileService.ConvertByteArrayToFile(project.ImageFileData!, project.ImageFileType!, DefaultImage.ProjectImage)" class="card-img-top" alt="...">
+                            </div>
+                            <div class="card-body py-3 px-0">
+                                <h5 class="card-title text-primary mb-2">@project.Name</h5>
+                                @if (project.Members.Count() > 0)
+                                {
+                                    <div class="mr-3 d-sm-inline d-none">
+                                        <div class="avatar-group">
+                                            @foreach (TTUser member in project.Members)
+                                            {
+                                                <figure class="avatar avatar-sm" title="@member.FullName"
+                                                        data-toggle="tooltip">
+                                                    <img src="@_FileService.ConvertByteArrayToFile(member.ImageFileData!, member.ImageFileType!, DefaultImage.BTUserImage)"
+                                                         class="rounded-circle"
+                                                         alt="image">
+                                                </figure>
+                                            }
+
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <h6 class="text-muted">No Members</h6>
+                                }
+                                <div class="line-clamp-3 m-2">
+                                    @Html.Raw(project.Description)
+                                </div>
+                                <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary">Details</a>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             }
         }

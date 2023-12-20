@@ -135,6 +135,9 @@ public class RegisterByInviteModel : PageModel
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string? ConfirmPassword { get; set; }
+
+        [Required]
+        public Guid CompanyToken { get; set; }
     }
 
 
@@ -153,6 +156,7 @@ public class RegisterByInviteModel : PageModel
         Input.Company = invite.Company!.Name!;
         Input.CompanyId = invite.CompanyId;
         Input.ProjectId = invite.ProjectId;
+        Input.CompanyToken = invite.CompanyToken;
 
     }
 
@@ -187,6 +191,8 @@ public class RegisterByInviteModel : PageModel
                     pageHandler: null,
                     values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                     protocol: Request.Scheme);
+
+                await _inviteService.AcceptInviteAsync(Input.CompanyToken, userId, user.CompanyId);
 
                 await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                     $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");

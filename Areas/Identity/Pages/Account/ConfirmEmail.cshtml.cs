@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Services;
+using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Areas.Identity.Pages.Account
 {
@@ -22,6 +24,7 @@ namespace TurboTicketsMVC.Areas.Identity.Pages.Account
         public ConfirmEmailModel(UserManager<TTUser> userManager)
         {
             _userManager = userManager;
+
         }
 
         /// <summary>
@@ -46,6 +49,7 @@ namespace TurboTicketsMVC.Areas.Identity.Pages.Account
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             var result = await _userManager.ConfirmEmailAsync(user, code);
             StatusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+ 
             return Page();
         }
     }
