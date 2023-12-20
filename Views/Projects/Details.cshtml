@@ -205,6 +205,8 @@
                     <h2>Tickets</h2>
                 </div>
                 <div class="card-body">
+                    @if(Model.Tickets.Count() > 0)
+                    {
                     <table id="example1" class="table table-striped table-bordered" style="width: 100%;">
                             <thead class="">
                                 <tr>
@@ -270,6 +272,11 @@
                                 }
                             </tbody>
                         </table>
+                    } else
+                    {
+                     <h4 class="text-muted">No Tickets to show</h4>
+                     <a asp-controller="Tickets" asp-action="Create" class="btn btn-primary" role="button">Create Ticket</a>
+                    }
 
                 </div>
             </div>

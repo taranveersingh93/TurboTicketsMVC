@@ -23,22 +23,29 @@ namespace TurboTicketsMVC.Controllers
         private readonly ITTFileService _fileService;
         private readonly ITTProjectService _projectService;
         private readonly ITTRolesService _roleService;
+        private readonly ITTNotificationService _notificationService;
 
         public ProjectsController(ApplicationDbContext context,
                                   ITTFileService fileService,
                                   ITTProjectService projectService,
-                                  ITTRolesService roleService)
+                                  ITTRolesService roleService,
+                                  ITTNotificationService notificationService)
         {
             _fileService = fileService;
             _context = context;
             _projectService = projectService;
             _roleService = roleService;
+            _notificationService = notificationService;
         }
 
         [Authorize]
         // GET: Projects
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? swalMessage)
         {
+            if (!string.IsNullOrEmpty(swalMessage))
+            {
+                ViewData["SwalMessage"] = swalMessage;
+            } 
             IEnumerable<Project> projects = (await _projectService.GetProjectsByCompanyIdAsync(_companyId))!;
             return View(projects);
         }
@@ -127,15 +134,26 @@ namespace TurboTicketsMVC.Controllers
                     project.ImageFileType = project.ImageFormFile.ContentType;
                 }
                 await _projectService.AddProjectAsync(project);
+
                 bool pmAdded = false;
-                if (selectedProjectManagerId == "(Project Creator)")
+                bool projectNotificationConfirmation = false;
+                bool pmNotificationConfirmation = false;
+                
+                if (selectedProjectManagerId == "(Project Creator)" && User.IsInRole("ProjectManager"))
                 {
                     pmAdded = await _projectService.AddProjectManagerAsync(_userId, project.Id);
                 } else
                 {
                     pmAdded = await _projectService.AddProjectManagerAsync(selectedProjectManagerId, project.Id);
                 }
+
                 if (pmAdded)
+                {
+                    projectNotificationConfirmation = await _notificationService.ProjectUpdateNotificationAsync(project.Id, _userId, nameof(TTProjectNotificationTypes.NewProject));
+                    pmNotificationConfirmation = await _notificationService.ProjectUpdateNotificationAsync(project.Id, _userId, nameof(TTProjectNotificationTypes.AssignedProject));
+                }
+
+                if (pmNotificationConfirmation && projectNotificationConfirmation)
                 {
                     return RedirectToAction(nameof(Index));
                 }
@@ -157,12 +175,31 @@ namespace TurboTicketsMVC.Controllers
             string? redirect
             )
         {
+            TTUser? oldPM = await _projectService.GetProjectManagerAsync(projectId);
+            bool pmChanged = false;
+            bool pmAssigned = oldPM == null && ProjectManagerId != null;
+            if (oldPM != null && ProjectManagerId != null)
+            {
+                pmChanged = oldPM.Id != ProjectManagerId;
+            }
             await _projectService.RemoveMembersFromProjectAsync(projectId, _companyId);
             await _projectService.AddProjectManagerAsync(ProjectManagerId, projectId);
             await _projectService.AddMembersToProjectAsync(DeveloperIds, projectId, _companyId);
             await _projectService.AddMembersToProjectAsync(SubmitterIds, projectId, _companyId);
-       
-            return RedirectToAction(redirect, new {id = projectId});
+
+            if (pmChanged || pmAssigned)
+            {
+                await _notificationService.ProjectUpdateNotificationAsync(projectId, _userId, nameof(TTProjectNotificationTypes.AssignedProject));
+            }
+            bool teamChangeNotification = await _notificationService.ProjectUpdateNotificationAsync(projectId, _userId, nameof(TTProjectNotificationTypes.TeamChanged));
+            if (teamChangeNotification)
+            {
+                return RedirectToAction(redirect, new {id = projectId});
+            } else
+            {
+                string? swalMessage = "Action failed, something went wrong";
+                return RedirectToAction(nameof(Index), new { swalMessage });
+            }
         }
 
         // GET: Projects/Edit/5
@@ -224,8 +261,14 @@ namespace TurboTicketsMVC.Controllers
                         project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
                         project.ImageFileType = project.ImageFormFile.ContentType;
                     }
-                    _context.Update(project);
-                    await _context.SaveChangesAsync();
+
+                    await _projectService.UpdateProjectAsync(project);
+                    bool updateNotification = await _notificationService.ProjectUpdateNotificationAsync(id, _userId, nameof(TTProjectNotificationTypes.UpdateProject));
+                    string? swalMessage = "Action succeeded";
+                    if (updateNotification)
+                    {
+                        return RedirectToAction(nameof(Index), new { swalMessage });
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {

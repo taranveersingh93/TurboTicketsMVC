@@ -212,9 +212,14 @@ namespace TurboTicketsMVC.Services
                     }
                 }
 
+                if (projectAdmin == null)
+                {
+                    projectAdmin = admins.First();
+                }
+
                 string? recipientId = "";
 
-                if(projectUserId == projectAdmin!.Id)
+                if (projectUserId == projectAdmin!.Id && projectManager != null)
                 {
                     recipientId = projectManager!.Id;
                 } else
@@ -241,7 +246,6 @@ namespace TurboTicketsMVC.Services
                     {
                         notification.Title = "Project Updated";
                         notification.Message = $"Project: {project?.Name} was updated by {projectUser?.FullName} ";
-
                     }
                     else if (projectNotificationType == "NewProject")
                     {
