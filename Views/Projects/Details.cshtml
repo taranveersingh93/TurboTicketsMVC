@@ -167,7 +167,7 @@
                         
                     @foreach (TicketHistory history in Model.Tickets.SelectMany(t => t.History).OrderBy(h => h.CreatedDate))
                     {
-                        <div class="border border-primary p-3 m-3" style="border-radius: 5px;">
+                        <div class="border border-bottom-gray p-3 m-3" style="border-radius: 5px;">
                             <span class="date" style="font-weight:bold">@history.CreatedDate.ToString("dd MMM yyyy")</span>
                             <h6 class="text-primary mt-2">@history.Description</h6>
                             <span>By: 
@@ -228,7 +228,7 @@
                                         @if (string.IsNullOrEmpty(ticket.DeveloperUser?.FullName))
                                         {
                                             <td>
-                                                <div class="badge bg-danger">
+                                                <div class="badge rounded-pill bg-danger">
                                                     Unassigned
                                                 </div>
                                             </td>
@@ -240,14 +240,14 @@
                                     @if(ticket.TicketStatus == TTTicketStatuses.New)
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-info">
+                                            <div class="badge rounded-pill bg-info">
                                                 @ticket.TicketStatus
                                             </div>
                                         </td>
                                     } else if(ticket.TicketStatus == TTTicketStatuses.Testing)
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-primary">
+                                            <div class="badge rounded-pill bg-primary">
                                                 @ticket.TicketStatus
                                             </div>
                                         </td>
@@ -255,19 +255,21 @@
                                     else if (ticket.TicketStatus == TTTicketStatuses.Resolved)
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-success">
+                                            <div class="badge rounded-pill bg-success">
                                                 @ticket.TicketStatus
                                             </div>
                                         </td>
                                     } else
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-dark">
+                                            <div class="badge rounded-pill bg-dark">
                                                 @ticket.TicketStatus
                                             </div>
                                         </td>
                                     }
-                                    <td><a asp-controller="Tickets" asp-action="Details" asp-route-id="@ticket.Id">Details</a></td>
+                                        <td>
+                                            <a asp-controller="Tickets" asp-action="Details" asp-route-id="@ticket.Id" class="btn btn-sm btn-primary d-flex justify-content-center" role="button">Details</a>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>

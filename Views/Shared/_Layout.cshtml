@@ -254,7 +254,71 @@
                 </div>
 
                 <div class="header-body">
-                    <div class="header-body-left"></div>
+                    <div class="header-body-left">
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown d-none d-md-block">
+                                <a href="#" class="nav-link btn btn-warning" title="Roles Guide" data-toggle="dropdown">Roles Guide</a>
+                                <div class="dropdown-menu dropdown-menu-big">
+                                    <div class="border-bottom px-4 py-3 text-center d-flex justify-content-between">
+                                        <h5 class="mb-0">Roles</h5>
+                                    </div>
+                                    <div class="p-3">
+                                        <div class="row row-xs">
+                                            <div class="col-6">
+                                                <a href="#" data-toggle="modal" data-target="#adminModal">
+                                                    <div class="border-radius-1 text-center mb-3">
+                                                        <figure class="avatar avatar-lg border-0">
+                                                            <span class="avatar-title d-flex justify-content-center a bg-danger text-white rounded-circle">
+                                                                <i class="width-30 height-30" data-feather="anchor"></i>
+                                                            </span>
+                                                        </figure>
+                                                        <div class="mt-2">Admin</div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col-6">
+                                                <a href="#" data-toggle="modal" data-target="#projectManagerModal">
+                                                    <div class="border-radius-1 text-center mb-3">
+                                                        <figure class="avatar avatar-lg border-0">
+                                                            <span class="avatar-title d-flex justify-content-center a bg-dark text-white rounded-circle">
+                                                                <i class="width-30 bi bi-binoculars height-30"></i>
+                                                            </span>
+                                                        </figure>
+                                                        <div class="mt-2">Project Manager</div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col-6">
+                                                <a href="#" data-toggle="modal" data-target="#developerModal">
+                                                    <div class="border-radius-1 text-center">
+                                                        <figure class="avatar avatar-lg border-0">
+                                                            <span class="avatar-title d-flex justify-content-center a bg-secondary text-white rounded-circle">
+                                                                <i class="width-30 height-30 bi bi-code-square"></i>
+                                                            </span>
+                                                        </figure>
+                                                        <div class="mt-2">Developer</div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col-6">
+                                                <a href="#" data-toggle="modal" data-target="#submitterModal">
+                                                    <div class="border-radius-1 text-center">
+                                                        <figure class="avatar avatar-lg border-0">
+                                                            <span class="avatar-title d-flex justify-content-center a bg-warning text-dark rounded-circle">
+                                                                <i class="width-30 height-30 bi bi-file-earmark-arrow-up"></i>
+                                                            </span>
+                                                        </figure>
+                                                        <div class="mt-2">Submitter</div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
 
                     <div class="header-body-right">
                         <ul class="navbar-nav">
@@ -438,6 +502,115 @@
         </div>
         <!-- ./ Content wrapper -->
     </div>
+
+    @* Modals *@
+    <div class="modal fade" id="adminModal" tabindex="-1" role="dialog" aria-labelledby="adminModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Admin Role</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <li>When an uninvited user signs up, they're registered as an <strong>admin</strong>.</li>
+                        <li>Initially, this admin is the only member belonging to the company which was specified during registration.</li>
+                        <li>An admin can invite other users to the company.</li>
+                        <li>Every user that subdequently signs up using an admin's invite, starts off as a <strong>submitter.</strong></li>
+                        <li>An admin is the only role that can change the roles of other company members.</li>
+                        <li>An admin can't relinquish their own role.</li>
+                        <li>An admin can create/edit projects and assign/reassign the project manager at any point.</li>
+                        <li>An admin can also edit the teaam of a particular project.</li>
+                        <li>An admin can submit tickets for a project.</li>
+                        <li>An admin can add comments and attachments to any ticket.</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="projectManagerModal" tabindex="-1" role="dialog" aria-labelledby="adminModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Admin Role</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <li>A PM role needs to be assigned to a user by that company's admin.'</li>
+                        <li>The role alone doesn't make them the PM of the company's projects.</li>
+                        <li>If an admin creates a project, they can choose to assign that project to a PM.</li>
+                        <li>An existing project assigned to one PM can also be reassigned to another PM by the admin.</li>
+                        <li>A PM can create/edit a project.</li>
+                        <li>If a PM creates a project, they're automatically assigned as the PM for that project.'</li>
+                        <li>A PM can edit the teams of their projects but can not change the user roles.</li>
+                        <li>A PM can submit tickets for a project and edit all tickets belonging to their projects.</li>
+                        <li>A PM can add comments and attachments to any ticket belonging to their projects.</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="developerModal" tabindex="-1" role="dialog" aria-labelledby="adminModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Admin Role</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <li>A developer role needs to be assigned to a user by that company's admin.</li>
+                        <li>A developer needs to be assigned to a ticket by either the project manager or the admin.</li>
+                        <li>A developer can edit all tickets to which they're assigned.</li>
+                        <li>A developer can add comments and attachments to any ticket they're assigned to.</li>
+                        <li>A developer can create tickets for any project that they're a member of.'</li>
+                        <li>While a developer can create tickets, they would still need to be assigned to the ticket as a developer by a PM or an admin.</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="submitterModal" tabindex="-1" role="dialog" aria-labelledby="adminModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Admin Role</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        <li>Whenever a user signs up using an admin invite, they start off with the <strong>submitter</strong> role.</li>
+                        <li>A submitter could be added to a project by a project manager or an admin.</li>
+                        <li>Once a project member, a submitter can create tickets and be that ticket's owner.</li>
+                        <li>A submitter can view and edit all tickets they own.</li>
+                        <li>A submitter can add comments and attachments to all tickets they own..</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ./ Layout wrapper -->
     <!-- Main scripts -->
     <script>
