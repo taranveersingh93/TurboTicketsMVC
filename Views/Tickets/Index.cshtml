@@ -83,7 +83,7 @@
                                     @if (item.TicketStatus == TTTicketStatuses.New)
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-info">
+                                            <div class="badge badge-pill bg-info">
                                                 @item.TicketStatus
                                             </div>
                                         </td>
@@ -91,7 +91,7 @@
                                     else if (item.TicketStatus == TTTicketStatuses.Testing)
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-primary">
+                                            <div class="badge badge-pill bg-primary">
                                                 @item.TicketStatus
                                             </div>
                                         </td>
@@ -99,7 +99,7 @@
                                     else if (item.TicketStatus == TTTicketStatuses.Resolved)
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-success">
+                                            <div class="badge badge-pill bg-success">
                                                 @item.TicketStatus
                                             </div>
                                         </td>
@@ -107,7 +107,7 @@
                                     else
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-dark">
+                                            <div class="badge badge-pill bg-dark">
                                                 @item.TicketStatus
                                             </div>
                                         </td>
@@ -116,7 +116,7 @@
                                     @if(item.TicketPriority == TTTicketPriorities.Urgent)
                                     {
                                     <td class="text-center">
-                                        <div class="badge bg-danger">
+                                        <div class="badge badge-pill bg-danger">
                                         @Html.DisplayFor(modelItem => item.TicketPriority)
                                         </div>
                                         </td>
@@ -124,7 +124,7 @@
                                     } else if(item.TicketPriority == TTTicketPriorities.High)
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-dark">
+                                            <div class="badge badge-pill bg-dark">
                                                 @Html.DisplayFor(modelItem => item.TicketPriority)
                                             </div>
                                         </td>
@@ -132,14 +132,14 @@
                                     else if (item.TicketPriority == TTTicketPriorities.Medium)
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-primary">
+                                            <div class="badge badge-pill bg-primary">
                                                 @Html.DisplayFor(modelItem => item.TicketPriority)
                                             </div>
                                         </td>
                                     } else
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-info">
+                                            <div class="badge badge-pill bg-info">
                                                 @Html.DisplayFor(modelItem => item.TicketPriority)
                                             </div>
                                         </td>
@@ -154,19 +154,19 @@
                                     else
                                     {
                                         <td class="text-center">
-                                            <div class="badge bg-danger">
+                                            <div class="badge badge-pill bg-danger">
                                             Unassigned
 
                                             </div>
                                         </td>
                                     }
                                     <td>
-                                        <a asp-controller="Tickets" asp-action="Details" asp-route-id="@item.Id">Details</a>
-                                        @if (User.IsInRole("Admin") || User.IsInRole("ProjectManager"))
-                                        {
-                                            <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                                            <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id">Archive</a>
-                                        }
+                                            <a asp-controller="Tickets" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary" role="button">Details</a>
+                                            @if (User.IsInRole("Admin") || User.IsInRole("ProjectManager"))
+                                            {
+                                                <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary" role="button">Edit</a>
+                                                <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id" class="btn btn-sm btn-danger" role="button">Archive</a>
+                                            }
                                     </td>
                                 </tr>
                             }

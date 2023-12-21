@@ -85,9 +85,8 @@ namespace TurboTicketsMVC.Controllers
         // GET: Tickets/Create
         public async Task<IActionResult> Create()
         {
-            string name = "Taranveer";
             int companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
+            IEnumerable<Project> companyProjects = await _projectService.GetProjectsByCompanyIdAsync(companyId);
             IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
             ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
             ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
@@ -185,7 +184,7 @@ namespace TurboTicketsMVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Details), new {id = ticket.Id});
+                return RedirectToAction(nameof(Details), new { id = ticket.Id });
             }
             int companyId = User.Identity!.GetCompanyId();
             IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
@@ -205,7 +204,7 @@ namespace TurboTicketsMVC.Controllers
             }
             Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
             IEnumerable<TTUser> availableDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
-       
+
             AssignTicketViewModel assignTicketViewModel = new AssignTicketViewModel()
             {
                 Ticket = ticket,
@@ -480,7 +479,20 @@ namespace TurboTicketsMVC.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
-
+        [HttpGet]
+        public async Task<IActionResult> MarkRead(int id)
+        {
+            if (id != null)
+            {
+                Notification? notification = await _notificationService.GetNotificationAsync(id);
+                await _notificationService.MarkNotificationRead(notification);
+                return RedirectToAction(nameof(Details), new {id = notification.TicketId});
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
 
         private bool TicketExists(int id)
         {

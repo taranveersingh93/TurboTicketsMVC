@@ -77,24 +77,25 @@ namespace TurboTicketsMVC.Services
         }
 
         //Get all notifications where either the sender or receiver is a given user
-        public async Task<List<Notification>> GetNotificationsByUserIdAsync(string? userId)
+        public async Task<IEnumerable<Notification>> GetNotificationsByUserIdAsync(string? userId)
         {
             try
             {
 
-                List<Notification> notifications = new();
-
+                IEnumerable<Notification> sortedNotifications = Enumerable.Empty<Notification>();
                 if (!string.IsNullOrEmpty(userId))
                 {
 
+                IEnumerable<Notification> notifications = Enumerable.Empty<Notification>();
                     notifications = await _context.Notifications
                                                   .Where(n => n.RecipientId == userId || n.SenderId == userId)
                                                   .Include(n => n.Recipient)
                                                   .Include(n => n.Sender)
                                                   .ToListAsync();
+                    sortedNotifications = notifications.OrderByDescending(n => n.CreatedDate);
                 }
 
-                return notifications;
+                return sortedNotifications;
 
             }
             catch (Exception)
@@ -329,6 +330,24 @@ namespace TurboTicketsMVC.Services
             }
         }
 
+        public async Task<Notification> GetNotificationAsync(int? id)
+        {
+            if (id != null)
+            {
+                Notification? notification = await _context.Notifications.FirstOrDefaultAsync(n => n.Id == id);
+                return notification!;
+            }
+            return null!;
+        }
+        public async Task MarkNotificationRead(Notification? notification)
+        {
+            if (notification != null && !notification.HasBeenViewed)
+            {
+                notification.HasBeenViewed = true;
+                _context.Update(notification);
+                await _context.SaveChangesAsync();
+            }
+        }
 
     }
 }

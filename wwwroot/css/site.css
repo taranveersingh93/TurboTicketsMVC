@@ -110,3 +110,7 @@ card-link:hover {
 .border-bottom-gray {
     border-bottom: 1px solid var(--color-gray);
 }
+
+.unread-notification {
+    background-color: var(--color-light-gray);
+}

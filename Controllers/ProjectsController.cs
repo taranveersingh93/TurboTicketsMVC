@@ -419,6 +419,22 @@ namespace TurboTicketsMVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> MarkRead(int id)
+        {
+            if (id != null)
+            {
+                Notification? notification = await _notificationService.GetNotificationAsync(id);
+                await _notificationService.MarkNotificationRead(notification);
+                return RedirectToAction(nameof(Details), new { id = notification.ProjectId });
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
         private bool ProjectExists(int id)
         {
             return (_context.Projects?.Any(e => e.Id == id)).GetValueOrDefault();

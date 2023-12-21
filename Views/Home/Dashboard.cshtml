@@ -254,7 +254,7 @@
                                             }
                                             else
                                             {
-                                                <td>
+                                                <td class="text-center">
                                                     <a asp-controller="Tickets" asp-action="AssignTicket" asp-route-id="@item.Id">
                                                         <div class="btn btn-warning">
                                                             Assign
@@ -262,12 +262,12 @@
                                                     </a>
                                                 </td>
                                             }
-                                            <td>
-                                                <a asp-controller="Tickets" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                                            <td class="text-center">
+                                                <a asp-controller="Tickets" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary" role="button">Details</a>
                                                 @if (User.IsInRole("Admin") || User.IsInRole("ProjectManager"))
                                                 {
-                                                    <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                                                    <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id">Archive</a>
+                                                    <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary" role="button">Edit</a>
+                                                    <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id" class="btn btn-sm btn-danger" role="button">Archive</a>
                                                 }
                                             </td>
                                         </tr>
@@ -287,7 +287,7 @@
         <div class="col-md-7 equal-height-col col-12">
             <div class="card border border-dark h-100">
                 <div class="card-body">
-                    <h6 class="card-title card-secondary mb-5">Projects</h6>
+                    <h6 class="card-title card-secondary border-bottom-gray p-2 mb-5">Projects</h6>
                     @if (userProjects.Count() > 0)
                     {
                         <div id="carouselProjects" class="carousel slide">
@@ -303,9 +303,9 @@
                                                     <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">
                                                         <div class="h-100 d-flex flex-column justify-content-around">
                                                             <img class="d-block w-100" src="@_FileService.ConvertByteArrayToFile(project?.ImageFileData, project?.ImageFileType, DefaultImage.ProjectImage)">
-                                                            <h5 class="m-3 card-primary">@project.Name</h5>
+                                                            <h5 class="m-3 pb-2 card-primary border-bottom-gray">@project.Name</h5>
 
-                                                            <div class="m-1 line-clamp">@Html.Raw(project.Description)</div>
+                                                            <div class="m-1 pb-2 line-clamp border-bottom-gray">@Html.Raw(project.Description)</div>
                                                             <p class="text-muted">@project.CreatedDate.ToString("dd, MMM, yyyy")</p>
                                                         </div>
                                                     </a>
@@ -318,15 +318,15 @@
                                         <div class="carousel-item">
                                             <div class="row">
                                                 <div class="col-12">
-                                                        <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">
-                                                    <div class="h-100 d-flex flex-column justify-content-around">
-                                                        <img class="d-block w-100" src="@_FileService.ConvertByteArrayToFile(project?.ImageFileData, project?.ImageFileType, DefaultImage.ProjectImage)">
-                                                            <h5 class="m-3 card-primary">@project.Name</h5>
+                                                    <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">
+                                                        <div class="h-100 d-flex flex-column justify-content-around">
+                                                            <img class="d-block w-100" src="@_FileService.ConvertByteArrayToFile(project?.ImageFileData, project?.ImageFileType, DefaultImage.ProjectImage)">
+                                                            <h5 class="m-3 pb-2 card-primary border-bottom-gray">@project.Name</h5>
 
-                                                        <div class="m-1 line-clamp">@Html.Raw(project.Description)</div>
-                                                        <p class="text-muted">@project.CreatedDate.ToString("dd, MMM, yyyy")</p>
-                                                    </div>
-                                                        </a>
+                                                            <div class="m-1 pb-2 line-clamp border-bottom-gray">@Html.Raw(project.Description)</div>
+                                                            <p class="text-muted">@project.CreatedDate.ToString("dd, MMM, yyyy")</p>
+                                                        </div>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
