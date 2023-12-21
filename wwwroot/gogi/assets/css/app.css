@@ -618,7 +618,7 @@ Author URL:   https://themeforest.net/user/laborasyon/portfolio
 body {
   font-family: "Inter", sans-serif;
   position: relative;
-  background-color: #5066e1;
+  background-color: var(--color-primary);
   color: black;
   font-size: 14px;
   overflow: hidden;

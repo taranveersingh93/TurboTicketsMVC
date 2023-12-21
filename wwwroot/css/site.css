@@ -2,6 +2,18 @@ html {
   font-size: 14px;
 }
 
+:root {
+    --color-primary: #5066e1;
+    --color-dark: #393536;
+    --color-orange: #fa9421;
+    --color-primary-light: #5066e190;
+    --color-secondary: #0f2167;
+    --color-secondary-light: #2E4374;
+    --color-danger: #820300;
+    --color-gray: #d4d4d4;
+    --color-danger-light: #B80000;
+    --color-light-gray: #f3f3f3;
+}
 
 
 @media (min-width: 768px) {
