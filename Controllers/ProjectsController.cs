@@ -120,14 +120,13 @@ namespace TurboTicketsMVC.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin, ProjectManager")]
 
-        public async Task<IActionResult> Create([Bind("Id, Name,Description,ProjectPriority,ImageFormFile,Archived")] Project project, string? selectedProjectManagerId)
+        public async Task<IActionResult> Create([Bind("Id, Name,Description,ProjectPriority,ImageFormFile,Archived, StartDate, EndDate")] Project project, string? selectedProjectManagerId)
         {
             if (ModelState.IsValid)
             {
                 project.CompanyId = User.Identity!.GetCompanyId();
                 project.CreatedDate = DateTimeOffset.Now;
-                project.StartDate = DateTimeOffset.Now;
-                project.EndDate = DateTimeOffset.Now;
+     
                 if (project.ImageFormFile != null)
                 {
                     project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
