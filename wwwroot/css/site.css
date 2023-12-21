@@ -114,3 +114,14 @@ card-link:hover {
 .unread-notification {
     background-color: var(--color-light-gray);
 }
+
+.glow-link {
+    transition: 0.05s all ease-in-out;
+}
+.glow-link:hover {
+    color:white;
+}
+
+.custom-tooltip {
+    --bs-tooltip-bg: var(--color-primary);
+}
