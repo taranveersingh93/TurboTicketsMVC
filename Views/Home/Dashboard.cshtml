@@ -367,7 +367,7 @@
                             <a asp-controller="Tickets" asp-action="MyTickets" class="link-1">View My Tickets</a>
                         }
                     </div>
-                    @if (userTickets.Count() > 0)
+                    @if (userTickets.Count() > 0 && companyTicketHistory.Count() > 0)
                     {
                         <div class="card-scroll">
                             <ul class="list-group list-group-flush">
