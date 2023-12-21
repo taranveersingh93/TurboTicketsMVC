@@ -4,12 +4,14 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Areas.Identity.Pages.Account.Manage
 {
@@ -17,13 +19,16 @@ namespace TurboTicketsMVC.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<TTUser> _userManager;
         private readonly SignInManager<TTUser> _signInManager;
+        private readonly ITTFileService _fileService;
 
         public IndexModel(
             UserManager<TTUser> userManager,
-            SignInManager<TTUser> signInManager)
+            SignInManager<TTUser> signInManager,
+            ITTFileService fileService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _fileService = fileService;
         }
 
         /// <summary>
@@ -56,21 +61,34 @@ namespace TurboTicketsMVC.Areas.Identity.Pages.Account.Manage
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Phone]
-            [Display(Name = "Phone number")]
-            public string PhoneNumber { get; set; }
+
+            [Display(Name = "First Name")]
+            [StringLength(50, ErrorMessage = "The {0} must be at least {2} and upto {1} characters long.", MinimumLength = 2)]
+            public string FirstName { get; set; }
+
+            [Display(Name = "Last Name")]
+            [StringLength(50, ErrorMessage = "The {0} must be at least {2} and upto {1} characters long.", MinimumLength = 2)]
+            public string LastName { get; set; }
+
+
+            [NotMapped]
+            public IFormFile ImageFormFile { get; set; }
+
+            public byte[] ImageFileData { get; set; }
+            public string ImageFileType { get; set; }
         }
 
         private async Task LoadAsync(TTUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
 
             Username = userName;
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                ImageFileData = user.ImageFileData,
             };
         }
 
@@ -100,16 +118,21 @@ namespace TurboTicketsMVC.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if (Input.PhoneNumber != phoneNumber)
+
+            //custom code
+            user.FirstName = Input.FirstName;
+            user.LastName = Input.LastName;
+
+            if (Input.ImageFormFile != null)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
-                {
-                    StatusMessage = "Unexpected error when trying to set phone number.";
-                    return RedirectToPage();
-                }
+                user.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(Input.ImageFormFile);
+                user.ImageFileType = Input.ImageFormFile.ContentType;
             }
+
+            await _userManager.UpdateAsync(user);
+            //end
+
+
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
