@@ -1,9 +1,12 @@
 ﻿@model IEnumerable<TurboTicketsMVC.Models.Ticket>
 @using Microsoft.AspNetCore.Identity;
 @using TurboTicketsMVC.Models.Enums;
+@using TurboTicketsMVC.Services.Interfaces;
 @inject UserManager<TTUser> _UserManager;
+@inject ITTTicketService _TicketService;
 @{
     ViewData["Title"] = "Index";
+    string? userId = _UserManager.GetUserId(User);
 }
 <link rel="stylesheet" href="~/gogi/vendors/dataTable/datatables.min.css" type="text/css">
 
@@ -14,13 +17,13 @@
     <div class="page-header">
         <div class="d-flex justify-content-between">
             <div>
-                <h3>All Tickets</h3>
+                <h3>User Tickets</h3>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
                             <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
                         </li>
-                        <li class="breadcrumb-item active" aria-current="page">All Tickets</li>
+                        <li class="breadcrumb-item active" aria-current="page">User Tickets</li>
                     </ol>
                 </nav>
             </div>
@@ -162,10 +165,17 @@
                                     }
                                     <td>
                                             <a asp-controller="Tickets" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary" role="button">Details</a>
-                                            @if (User.IsInRole("Admin") || User.IsInRole("ProjectManager"))
+                                            @if (await _TicketService.CanActOnTicket(userId, item.Id,item.Project.CompanyId))
                                             {
                                                 <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary" role="button">Edit</a>
-                                                <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id" class="btn btn-sm btn-danger" role="button">Archive</a>
+                                                @if (item.Archived && await _TicketService.CanAssignDeveloper(userId, item.Id, item.Project!.CompanyId))
+                                                {
+                                                    <a asp-controller="Tickets" asp-action="Restore" asp-route-id="@item.Id" class="btn btn-sm btn-warning" role="button">Restore</a>
+                                                }
+                                                @if (!item.Archived && await _TicketService.CanAssignDeveloper(userId, item.Id, item.Project!.CompanyId))
+                                                {
+                                                    <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id" class="btn btn-sm btn-danger" role="button">Archive</a>
+                                                }
                                             }
                                     </td>
                                 </tr>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
+using System.ComponentModel.Design;
 using TurboTicketsMVC.Data;
 using TurboTicketsMVC.Models;
 using TurboTicketsMVC.Models.Enums;
@@ -142,7 +143,7 @@ namespace TurboTicketsMVC.Services
                 if (project != null && companyId != null && project.CompanyId == companyId)
                 {
                     project.Archived = true;
-                    foreach(Ticket ticket in project.Tickets)
+                    foreach (Ticket ticket in project.Tickets)
                     {
                         ticket.ArchivedByProject = true;
                     }
@@ -260,7 +261,7 @@ namespace TurboTicketsMVC.Services
         {
             try
             {
-                Project? project = await _context.Projects.Include(p => p.Members).FirstOrDefaultAsync(p => p.Id == projectId);
+                Project? project = await _context.Projects.AsNoTracking().Include(p => p.Members).FirstOrDefaultAsync(p => p.Id == projectId);
 
                 if (project != null)
                 {
@@ -323,7 +324,8 @@ namespace TurboTicketsMVC.Services
                 if (await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin)))
                 {
                     return companyProjects;
-                } else
+                }
+                else
                 {
                     userProjects = companyProjects.Where(p => p.Members.Contains(user)).ToList();
                 }
@@ -428,12 +430,54 @@ namespace TurboTicketsMVC.Services
             }
         }
 
-        public async Task<bool> IsUserPmAsync(int projectId, string userId)
+        public async Task<bool> IsUserPmAsync(int? projectId, string userId)
         {
-            TTUser projectPM = await GetProjectManagerAsync(projectId);
-            return projectPM.Id == userId;
+            if (projectId != null)
+            {
+                TTUser? projectPM = await GetProjectManagerAsync(projectId);
+                if (projectPM != null)
+                {
+                    return projectPM.Id == userId;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> CanViewProject(int? projectId, string userId, int? companyId)
+        {
+            if (projectId != null && companyId != null)
+            {
+                Project? project = await _context.Projects.AsNoTracking()
+                    .Include(p => p.Tickets)
+                        .ThenInclude(t => t.DeveloperUser)
+                    .Include(p => p.Tickets)
+                        .ThenInclude(t => t.SubmitterUser)
+                    .Include(p => p.Tickets)
+                        .ThenInclude(t => t.History)
+                            .ThenInclude(h => h.User)
+                    .Include(p => p.Members)
+                .Include(p => p.Company)
+                    .FirstOrDefaultAsync(project => project.Id == projectId && project.CompanyId == companyId);
+
+                TTUser? user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+                bool isAdmin = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin));
+                bool isPM = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.ProjectManager));
+                bool isMember = false;
+                if (project != null)
+                {
+                 isMember = project!.Members.Any(m => m.Id == userId);
+                }
+                return isAdmin || isMember || isPM;
+            }
+            return false;
         }
     }
 }
-
 

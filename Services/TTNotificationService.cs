@@ -86,7 +86,7 @@ namespace TurboTicketsMVC.Services
                 if (!string.IsNullOrEmpty(userId))
                 {
 
-                IEnumerable<Notification> notifications = Enumerable.Empty<Notification>();
+                    IEnumerable<Notification> notifications = Enumerable.Empty<Notification>();
                     notifications = await _context.Notifications
                                                   .Where(n => n.RecipientId == userId || n.SenderId == userId)
                                                   .Include(n => n.Recipient)
@@ -105,6 +105,34 @@ namespace TurboTicketsMVC.Services
             }
         }
 
+        public async Task<bool> NotifyDeveloper(Ticket? ticket, TTUser? ticketUser)
+        {
+            try
+            {
+                if (ticket != null && ticketUser != null)
+                {
+                    Notification? notification = new()
+                    {
+                        TicketId = ticket.Id,
+                        CreatedDate = DateTimeOffset.UtcNow,
+                        NotificationType = TTNotificationTypes.Ticket,
+                        Title = $"Ticket {ticket.Title} Updated",
+                        Message = $"Ticket: {ticket?.Title} was updated by {ticketUser?.FullName} ",
+                        SenderId = ticketUser!.Id,
+                        RecipientId = ticket!.DeveloperUserId
+                    };
+                    await AddNotificationAsync(notification);
+                    await SendEmailNotificationAsync(notification, notification.Title);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         //an update notification to PM if one exists or the sender.
         //WHAT IF SENDER AND PM unassigned?. Should we send it to the developer?
         //when will devId be used?
@@ -138,6 +166,10 @@ namespace TurboTicketsMVC.Services
                         notification.Message = $"Ticket: {ticket?.Title} was updated by {ticketUser?.FullName} ";
                         notification.SenderId = ticketUserId;
                         notification.RecipientId = projectManager?.Id ?? admin.Id;
+                        if (ticket!.DeveloperUserId != null)
+                        {
+                            await NotifyDeveloper(ticket, ticketUser);
+                        }
                     }
                     else if (ticketNotificationType == "NewTicket")
                     {
@@ -152,19 +184,32 @@ namespace TurboTicketsMVC.Services
                         notification.Message = $"Ticket: {ticket.Title} was assigned by {projectManager?.FullName ?? admin?.FullName}";
                         notification.SenderId = projectManager?.Id ?? admin?.Id;
                         notification.RecipientId = ticketUserId;
+                        
                     }
                     else if (ticketNotificationType == "CommentAdded")
                     {
+                        if (ticket!.DeveloperUserId != null)
+                        {
+                            await NotifyDeveloper(ticket, ticketUser);
+                        }
                         notification.Title = "Comment Added";
                         notification.Message = $"Comment: A comment was added to the ticket '{ticket.Title}' by {ticketUser?.FullName}";
                     }
                     else if (ticketNotificationType == "AttachmentAdded")
                     {
+                        if (ticket!.DeveloperUserId != null)
+                        {
+                            await NotifyDeveloper(ticket, ticketUser);
+                        }
                         notification.Title = "Attachment Added";
                         notification.Message = $"Attachment: An Attachment was added to the ticket '{ticket.Title}' by {ticketUser?.FullName}";
                     }
-                    else if(ticketNotificationType == "AttachmentRemoved")
+                    else if (ticketNotificationType == "AttachmentRemoved")
                     {
+                        if (ticket!.DeveloperUserId != null)
+                        {
+                            await NotifyDeveloper(ticket, ticketUser);
+                        }
                         notification.Title = "Attachment Removed";
                         notification.Message = $"Attachment: An Attachment was removed from the ticket '{ticket.Title}' by {ticketUser?.FullName}";
                     }
@@ -205,7 +250,7 @@ namespace TurboTicketsMVC.Services
                 IEnumerable<TTUser> admins = await _rolesService.GetUsersInRoleAsync(nameof(TTRoles.Admin), project!.CompanyId);
                 TTUser? projectAdmin = null;
 
-                foreach(TTUser member in project.Members)
+                foreach (TTUser member in project.Members)
                 {
                     if (await _rolesService.IsUserInRoleAsync(member, nameof(TTRoles.Admin)))
                     {
@@ -223,7 +268,8 @@ namespace TurboTicketsMVC.Services
                 if (projectUserId == projectAdmin!.Id && projectManager != null)
                 {
                     recipientId = projectManager!.Id;
-                } else
+                }
+                else
                 {
                     recipientId = projectAdmin.Id;
                 }
@@ -257,14 +303,15 @@ namespace TurboTicketsMVC.Services
                     {
                         notification.Title = "Project Updated";
                         notification.Message = $"Project: {project.Name} was assigned by {projectUser?.FullName}";
-                    } else if (projectNotificationType == "TeamChanged")
+                    }
+                    else if (projectNotificationType == "TeamChanged")
                     {
                         notification.Title = "Project Team Updated";
                         notification.Message = $"Project: Team for '{project.Name}' updated by {projectUser!.FullName}";
                     }
 
-                     await AddNotificationAsync(notification);
-                     await SendEmailNotificationAsync(notification, notification.Title);
+                    await AddNotificationAsync(notification);
+                    await SendEmailNotificationAsync(notification, notification.Title);
 
                     return true;
                 }
@@ -277,7 +324,7 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        
+
         public async Task<bool> SendEmailNotificationByRoleAsync(int? companyId, Notification? notification, string? role)
         {
             try

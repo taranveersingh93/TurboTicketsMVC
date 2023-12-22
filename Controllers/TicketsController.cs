@@ -51,16 +51,23 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // GET: Tickets
-        public async Task<IActionResult> Index()
-        {
-            IEnumerable<Ticket> companyTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
-            return View(companyTickets);
-        }
 
-        public async Task<IActionResult> MyTickets()
+        public async Task<IActionResult> Index()
         {
             IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByUserIdAsync(_userId, _companyId);
             return View(userTickets);
+        }
+
+        [Authorize(Roles = "Admin, ProjectManager")]
+
+        public async Task<IActionResult> AllTickets()
+        {
+            IEnumerable<Ticket> tickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
+            if (User.IsInRole(nameof(TTRoles.ProjectManager)))
+            {
+                tickets = await _ticketService.GetTicketsByPMIdAsync(_userId, _companyId);
+            }
+            return View(tickets);
         }
 
         // GET: Tickets/Details/5
@@ -71,25 +78,29 @@ namespace TurboTicketsMVC.Controllers
                 return NotFound();
             }
             Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
-
+            bool canActOnTicket = await _ticketService.CanActOnTicket(_userId, ticket.Id, _companyId);
             if (ticket == null)
             {
                 return NotFound();
             }
-            IEnumerable<TTUser> projectDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
-            ViewData["Developers"] = new SelectList(projectDevelopers, "Id", "FullName", ticket.DeveloperUserId);
 
-            return View(ticket);
+            if (canActOnTicket)
+            {
+
+                IEnumerable<TTUser> projectDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
+                ViewData["Developers"] = new SelectList(projectDevelopers, "Id", "FullName", ticket.DeveloperUserId);
+
+                return View(ticket);
+            }
+            return NotFound();
         }
 
         // GET: Tickets/Create
         public async Task<IActionResult> Create()
         {
             int companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Project> companyProjects = await _projectService.GetProjectsByCompanyIdAsync(companyId);
-            IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
-            ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
-            ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
+            IEnumerable<Project> userProjects = await _projectService.GetUserProjectsAsync(_userId);
+            ViewData["Projects"] = new SelectList(userProjects, "Id", "Name");
             return View();
         }
 
@@ -98,10 +109,15 @@ namespace TurboTicketsMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Description,Archived,ArchivedByProject,ProjectId,TicketType,TicketStatus,TicketPriority,DeveloperUserId")] Ticket ticket)
+        public async Task<IActionResult> Create([Bind("Title,Description,Archived,ArchivedByProject,ProjectId,TicketType,TicketStatus,TicketPriority")] Ticket ticket)
         {
             ModelState.Remove("SubmitterUserId");
-            if (ModelState.IsValid)
+            bool canMakeTickets = false;
+            if (ticket.ProjectId != null)
+            {
+                canMakeTickets = await _ticketService.CanMakeTickets(_userId, ticket.ProjectId, _companyId);
+            }
+            if (ModelState.IsValid && canMakeTickets)
             {
                 ticket.CreatedDate = DateTimeOffset.Now;
                 ticket.SubmitterUserId = _userManager.GetUserId(User);
@@ -116,10 +132,10 @@ namespace TurboTicketsMVC.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(_companyId);
+            IEnumerable<Project> userProjects = await _projectService.GetUserProjectsAsync(_userId);
             IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
             ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
-            ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
+            ViewData["Projects"] = new SelectList(userProjects, "Id", "Name");
             return View(ticket);
         }
 
@@ -131,17 +147,27 @@ namespace TurboTicketsMVC.Controllers
                 return NotFound();
             }
 
-            var ticket = await _context.Tickets.FindAsync(id);
-            if (ticket == null)
+            bool canActOnTicket = await _ticketService.CanActOnTicket(_userId, id, _companyId);
+
+            if (canActOnTicket)
+            {
+                Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+                if (ticket == null)
+                {
+                    return NotFound();
+                }
+                int companyId = User.Identity!.GetCompanyId();
+                IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
+                IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+                ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
+                ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
+                return View(ticket);
+
+            }
+            else
             {
                 return NotFound();
             }
-            int companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
-            IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
-            ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
-            ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
-            return View(ticket);
         }
 
         // POST: Tickets/Edit/5
@@ -156,33 +182,39 @@ namespace TurboTicketsMVC.Controllers
                 return NotFound();
             }
 
+
             if (ModelState.IsValid)
             {
                 Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
-                try
+                bool canActOnTicket = await _ticketService.CanActOnTicket(_userId, oldTicket.Id, _companyId);
+                if (canActOnTicket)
                 {
-                    ticket.UpdatedDate = DateTimeOffset.Now;
-
-                    await _ticketService.UpdateTicketAsync(ticket);
-                    Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
-
-                    //history
-                    await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
-
-                    //notification
-                    await _notificationService.TicketUpdateNotificationAsync(ticket.Id, _userId, nameof(TTTicketNotificationTypes.UpdateTicket));
-
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!TicketExists(ticket.Id))
+                    try
                     {
-                        return NotFound();
+                        ticket.UpdatedDate = DateTimeOffset.Now;
+
+                        await _ticketService.UpdateTicketAsync(ticket);
+                        Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
+
+                        //history
+                        await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+
+                        //notification
+                        await _notificationService.TicketUpdateNotificationAsync(ticket.Id, _userId, nameof(TTTicketNotificationTypes.UpdateTicket));
+
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!TicketExists(ticket.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
+
                 }
                 return RedirectToAction(nameof(Details), new { id = ticket.Id });
             }
@@ -203,21 +235,27 @@ namespace TurboTicketsMVC.Controllers
                 return NotFound();
             }
             Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
-            IEnumerable<TTUser> availableDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
+            bool canAssignDeveloper = await _ticketService.CanAssignDeveloper(_userId, ticket.Id, _companyId);
 
-            AssignTicketViewModel assignTicketViewModel = new AssignTicketViewModel()
+            if (canAssignDeveloper)
             {
-                Ticket = ticket,
-                DeveloperId = String.Empty,
-                Developers = new SelectList(availableDevelopers, "Id", "FullName", ticket.DeveloperUserId),
-                DevelopersAvailable = availableDevelopers.Count() > 0
-            };
+                IEnumerable<TTUser> availableDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
 
-            if (ticket.DeveloperUserId != null)
-            {
-                assignTicketViewModel.DeveloperId = ticket.DeveloperUserId;
+                AssignTicketViewModel assignTicketViewModel = new AssignTicketViewModel()
+                {
+                    Ticket = ticket,
+                    DeveloperId = String.Empty,
+                    Developers = new SelectList(availableDevelopers, "Id", "FullName", ticket.DeveloperUserId),
+                    DevelopersAvailable = availableDevelopers.Count() > 0
+                };
+
+                if (ticket.DeveloperUserId != null)
+                {
+                    assignTicketViewModel.DeveloperId = ticket.DeveloperUserId;
+                }
+                return View(assignTicketViewModel);
             }
-            return View(assignTicketViewModel);
+            return NotFound();
         }
 
         // POST: Tickets/AssignTicketView/
@@ -271,22 +309,32 @@ namespace TurboTicketsMVC.Controllers
          //multiple active result sets
 
             Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketId, _companyId);
+            bool canAssignDeveloper = await _ticketService.CanAssignDeveloper(_userId, ticketId, _companyId);
+
             try
             {
-                if (ticketId != null && developerId != null)
+                if (canAssignDeveloper)
                 {
-                    await _ticketService.AssignTicketAsync(ticketId, developerId);
+                    if (ticketId != null && developerId != null)
+                    {
+                        await _ticketService.AssignTicketAsync(ticketId, developerId);
 
-                    //Add History
-                    Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketId, _companyId);
-                    await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+                        //Add History
+                        Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketId, _companyId);
+                        await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
 
-                    //Notify
-                    await _notificationService.TicketUpdateNotificationAsync(ticketId, developerId, nameof(TTTicketNotificationTypes.AssignedTicket));
+                        //Notify
+                        await _notificationService.TicketUpdateNotificationAsync(ticketId, developerId, nameof(TTTicketNotificationTypes.AssignedTicket));
+                    }
+
+
+                    return RedirectToAction(nameof(Details), new { id = ticketId });
+
                 }
-
-
-                return RedirectToAction(nameof(Details), new { id = ticketId });
+                else
+                {
+                    return NotFound();
+                }
 
             }
             catch (Exception)
@@ -302,18 +350,23 @@ namespace TurboTicketsMVC.Controllers
         //needs controller logic for PM
         public async Task<IActionResult> Archive(int? id)
         {
+            bool userAuthorized = await _ticketService.CanAssignDeveloper(_userId, id, _companyId);
             if (id == null || _context.Tickets == null)
             {
                 return NotFound();
             }
-
-            Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
-            if (ticket == null)
+            if (userAuthorized)
             {
-                return NotFound();
-            }
+                Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+                if (ticket == null)
+                {
+                    return NotFound();
+                }
 
-            return View(ticket);
+                return View(ticket);
+
+            }
+            return NotFound();
         }
 
         // POST: Tickets/Archive/5
@@ -323,17 +376,19 @@ namespace TurboTicketsMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ArchiveConfirmed(int id)
         {
-            if (_context.Tickets == null)
+            bool userAuthorized = await _ticketService.CanAssignDeveloper(_userId, id, _companyId);
+            if (userAuthorized)
             {
-                return Problem("Entity set 'ApplicationDbContext.Tickets'  is null.");
-            }
-            Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
-            if (ticket != null)
-            {
-                await _ticketService.ArchiveTicketAsync(ticket);
-            }
+                Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+                if (ticket != null)
+                {
+                    await _ticketService.ArchiveTicketAsync(ticket);
+                }
 
-            return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
+
+            }
+            return NotFound();
         }
 
         // GET: Tickets/Restore/5
@@ -341,18 +396,22 @@ namespace TurboTicketsMVC.Controllers
 
         public async Task<IActionResult> Restore(int? id)
         {
+            bool userAuthorized = await _ticketService.CanAssignDeveloper(_userId, id, _companyId);
             if (id == null || _context.Tickets == null)
             {
                 return NotFound();
             }
-
-            Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
-            if (ticket == null)
+            if (userAuthorized)
             {
-                return NotFound();
-            }
+                Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+                if (ticket == null)
+                {
+                    return NotFound();
+                }
 
-            return View(ticket);
+                return View(ticket);
+            }
+            return NotFound();
         }
 
         // POST: Tickets/RestoreConfirmed/5
@@ -362,17 +421,20 @@ namespace TurboTicketsMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RestoreConfirmed(int id)
         {
-            if (_context.Tickets == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Tickets'  is null.");
-            }
-            Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
-            if (ticket != null)
-            {
-                await _ticketService.RestoreTicketAsync(ticket);
-            }
+            bool userAuthorized = await _ticketService.CanAssignDeveloper(_userId, id, _companyId);
 
-            return RedirectToAction(nameof(Index));
+            if (userAuthorized)
+            {
+
+                Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+                if (ticket != null)
+                {
+                    await _ticketService.RestoreTicketAsync(ticket);
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            return NotFound();
         }
 
         [HttpPost]
@@ -381,9 +443,11 @@ namespace TurboTicketsMVC.Controllers
         {
             Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketAttachment.TicketId, _companyId);
 
+            bool canActOnTicket = await _ticketService.CanActOnTicket(_userId, ticketAttachment.TicketId, _companyId);
+
             string statusMessage;
             ModelState.Remove("TTUserId");
-            if (ModelState.IsValid && ticketAttachment.ImageFormFile != null)
+            if (ModelState.IsValid && ticketAttachment.ImageFormFile != null && canActOnTicket)
 
             {
                 ticketAttachment.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(ticketAttachment.ImageFormFile);
@@ -400,7 +464,7 @@ namespace TurboTicketsMVC.Controllers
                 await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
 
                 //Notify
-                await _notificationService.TicketUpdateNotificationAsync(ticketAttachment.TicketId, _userId, nameof(TTTicketNotificationTypes.UpdateTicket));
+                await _notificationService.TicketUpdateNotificationAsync(ticketAttachment.TicketId, _userId, nameof(TTTicketNotificationTypes.AttachmentAdded));
             }
             else
             {
@@ -413,14 +477,18 @@ namespace TurboTicketsMVC.Controllers
 
         public async Task<IActionResult> RemoveTicketAttachment(int? Id)
         {
+            bool canActOnTicket = false;
             TicketAttachment? ticketAttachment = new();
             if (Id != null)
             {
                 ticketAttachment = await _ticketService.GetTicketAttachmentByIdAsync(Id);
+                canActOnTicket = await _ticketService.CanActOnTicket(_userId, ticketAttachment!.TicketId, _companyId);
             }
 
+
+
             Ticket? oldTicket = new();
-            if (ticketAttachment != null)
+            if (ticketAttachment != null && canActOnTicket)
             {
                 oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketAttachment.TicketId, _companyId);
                 await _ticketService.RemoveTicketAttachmentAsync(ticketAttachment);
@@ -445,8 +513,9 @@ namespace TurboTicketsMVC.Controllers
         public async Task<IActionResult> AddTicketComment([Bind("Id, Comment,TicketId,UserId")] TicketComment ticketComment)
         {
             Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketComment.TicketId, _companyId);
+            bool canActOnTicket = await _ticketService.CanActOnTicket(_userId, ticketComment.TicketId, _companyId);
 
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && canActOnTicket)
             {
                 ticketComment.CreatedDate = DateTimeOffset.Now;
                 await _ticketService.AddTicketCommentAsync(ticketComment);
@@ -486,7 +555,7 @@ namespace TurboTicketsMVC.Controllers
             {
                 Notification? notification = await _notificationService.GetNotificationAsync(id);
                 await _notificationService.MarkNotificationRead(notification);
-                return RedirectToAction(nameof(Details), new {id = notification.TicketId});
+                return RedirectToAction(nameof(Details), new { id = notification.TicketId });
             }
             else
             {

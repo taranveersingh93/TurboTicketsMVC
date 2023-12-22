@@ -1,8 +1,14 @@
-﻿@using TurboTicketsMVC.Models.Enums;
+﻿@using Microsoft.AspNetCore.Identity;
+@using TurboTicketsMVC.Models.Enums;
+@using TurboTicketsMVC.Services.Interfaces;
 @model TurboTicketsMVC.Models.Ticket
+@inject ITTTicketService _TicketService;
+@inject UserManager<TTUser> _UserManager
 
 @{
     ViewData["Title"] = "Edit";
+    string? userId = _UserManager.GetUserId(User);
+    bool canAssignDeveloper = await _TicketService.CanAssignDeveloper(userId, Model.Id, Model.Project!.CompanyId);
 }
 
 
@@ -69,10 +75,17 @@
                             <select asp-for="TicketPriority" class="form-select" asp-items="@Html.GetEnumSelectList<TTTicketPriorities>()"></select>
                             <span asp-validation-for="TicketPriority" class="text-danger"></span>
                         </div>
-                        <div class="form-group">
-                            <label asp-for="DeveloperUserId" class="control-label">Developer</label>
-                            <select asp-for="DeveloperUserId" class="form-control" asp-items="ViewBag.DeveloperUsers"></select>
-                        </div>
+                        @if (canAssignDeveloper)
+                        {
+                            <div class="form-group">
+                                <label asp-for="DeveloperUserId" class="control-label">Developer</label>
+                                <select asp-for="DeveloperUserId" class="form-control" asp-items="ViewBag.DeveloperUsers"></select>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" value="@Model.DeveloperUserId" asp-for="DeveloperUserId" />
+                        }
 
                         <div class="form-group">
                             <input type="submit" value="Save" class="btn btn-primary" />

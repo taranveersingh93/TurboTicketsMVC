@@ -21,6 +21,9 @@ namespace TurboTicketsMVC.Services.Interfaces
         public Task MarkNotificationRead(Notification? notification);
         public Task<Notification> GetNotificationAsync(int? id);
 
+        public Task<bool> NotifyDeveloper(Ticket? ticket, TTUser? ticketUser);
+
+
 
     }
 }

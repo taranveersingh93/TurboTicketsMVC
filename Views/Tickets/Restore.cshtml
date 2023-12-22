@@ -3,91 +3,39 @@
 @{
     ViewData["Title"] = "Restore";
 }
+<div class="content">
+    <div class="page-header">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h3>Restore Ticket</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Tickets" asp-action="Details" asp-route-id="@Model.Id">Ticket Details</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Restore Ticket</li>
+                    </ol>
+                </nav>
 
-<h1>Restore</h1>
+            </div>
+        </div>
+    </div>
 
-<h3>Are you sure you want to restore this?</h3>
-<div>
-    <h4>Ticket</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedDate)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedDate)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Archived)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Archived)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.ArchivedByProject)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.ArchivedByProject)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.TicketType)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.TicketType)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.TicketStatus)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.TicketStatus)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.TicketPriority)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.TicketPriority)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Project)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Project.Description)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.DeveloperUser)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.DeveloperUser.Id)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.SubmitterUser)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.SubmitterUser.Id)
-        </dd>
-    </dl>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body d-flex justify-content-center align-items-center flex-column">
+                    <h4 class="text-center text-muted">Restore the ticket "@Model.Title"?</h4>
+                    <form asp-action="RestoreConfirmed" method="Post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="submit" value="Restore" class="btn btn-primary" />
+                    </form>
+                </div>
+            </div>
 
-    <form asp-action="ArchiveConfirmed" method="Post">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Restore" class="btn btn-primary" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+        </div>
+    </div>
 </div>

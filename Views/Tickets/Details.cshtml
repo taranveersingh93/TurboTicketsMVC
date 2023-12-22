@@ -11,7 +11,8 @@
 @{
     ViewData["Title"] = "Details";
     string? userId = _UserManager.GetUserId(User);
-    bool isUserAuthorized = await _TicketService.IsUserAuthorized(userId, Model.Id, Model.Project!.CompanyId);
+    bool canAssignDeveloper = await _TicketService.CanAssignDeveloper(userId, Model.Id, Model.Project!.CompanyId);
+    bool canActOnTicket = await _TicketService.CanActOnTicket(userId, Model.Id, Model.Project!.CompanyId);
     var start = Model.Project.StartDate;
     var end = Model.Project.EndDate;
     var today = DateTimeOffset.Now;
@@ -21,7 +22,7 @@
 
 
 <div class="content ">
-    <div class="page-header">
+    <div class="page-header d-flex justify-content-between">
         <div class="d-flex justify-content-between">
             <div>
                 <h3>Ticket Details</h3>
@@ -39,6 +40,10 @@
 
             </div>
         </div>
+        @if (canActOnTicket)
+        {
+            <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@Model.Id" role="button" class="btn btn-primary">Edit Ticket</a>
+        }
     </div>
     <div class="row">
         <div class="col-12 mt-5">
@@ -80,13 +85,23 @@
                                 <li><strong>Priority:</strong> <span class="">  @Model.TicketPriority</span></li>
                                 @*Ticket status*@
                                 <li><strong>Status:</strong> <span class="">  @Model.TicketStatus</span></li>
+                                @if(Model.Archived) {
+                                <li><h5 class="text-muted text-center m-4">Archived</h5></li>
+
+                                }
+                                @if (Model.ArchivedByProject)
+                                {
+                                    <li><h5 class="text-muted text-center m-4">Archived By Project</h5></li>
+
+                                }
+
                             </ul>
                         </div>
                     </div>
                 </div>
                 <div class="col-12 col-md-4">
                     <div class="card h-100">
-                        @if (isUserAuthorized)
+                        @if (canAssignDeveloper)
                         {
                             <div class="card-body d-flex flex-column justify-content-center">
                                 @if (Model.DeveloperUserId == null)
@@ -148,7 +163,7 @@
 
                     @*Form and Logic for authorized users to add comments*@
                     <div class="comment-respond">
-                        @if (User.Identity!.IsAuthenticated)
+                        @if (canActOnTicket)
                         {
                             <h4 class="title">Post a comment</h4>
                             @* "Comment,CreatedDate,TicketId,UserId" *@
@@ -220,7 +235,7 @@
                                 @foreach (TicketAttachment item in Model.Attachments)
                                 {
                                     <div class="col col-sm-3 col-lg-2">
-                                        @if (isUserAuthorized)
+                                        @if (canActOnTicket)
                                         {
                                             <div class="w-100 d-flex justify-content-end">
                                                 <a asp-controller="Tickets" asp-action="RemoveTicketAttachment" asp-route-Id="@item.Id">
@@ -251,6 +266,9 @@
                     </div>
 
                     <hr />
+                    @if(canActOnTicket)
+                    {
+                        
                     <h6>Add Attachments</h6>
                     <div class="row clearfix">
                         <div>
@@ -273,6 +291,7 @@
                             </form>
                         </div>
                     </div>
+                    }
                 </div>
                 <div class="card-footer">
                 </div>

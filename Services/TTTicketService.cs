@@ -134,7 +134,8 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
-        public async Task<IEnumerable<Ticket>> GetAllTicketsByCompanyIdAsync(int? companyId) {
+        public async Task<IEnumerable<Ticket>> GetAllTicketsByCompanyIdAsync(int? companyId)
+        {
 
             try
             {
@@ -143,6 +144,29 @@ namespace TurboTicketsMVC.Services
                             .Include(t => t.History)
                                 .ThenInclude(h => h.User)
                             .Include(t => t.Project)
+                                .ThenInclude(p => p.Members)
+                            .Include(t => t.SubmitterUser)
+                            .Where(t => t.Project!.CompanyId == companyId).ToListAsync();
+                return companyTickets;
+
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<IEnumerable<Ticket>> GetTicketsByCompanyIdAsync(int? companyId) {
+
+            try
+            {
+                IEnumerable<Ticket> companyTickets = await _context.Tickets
+                            .Include(t => t.DeveloperUser)
+                            .Include(t => t.History)
+                                .ThenInclude(h => h.User)
+                            .Include(t => t.Project)
+                                .ThenInclude(p => p.Members)
                             .Include(t => t.SubmitterUser)
                             .Where(t => t.Project!.CompanyId == companyId && t.ArchivedByProject == false && t.Archived == false ).ToListAsync();
                 return companyTickets;
@@ -165,6 +189,8 @@ namespace TurboTicketsMVC.Services
                 ticket = await _context.Tickets
                                   .Include(t => t.DeveloperUser)
                                   .Include(t => t.Project)
+                                  .Include(t => t.History)
+                                    .ThenInclude(h => h.User)
                                   .Include(t => t.SubmitterUser)
                                   .Include(t => t.Attachments)
                                     .ThenInclude(a => a.TTUser)
@@ -172,7 +198,6 @@ namespace TurboTicketsMVC.Services
                                       .ThenInclude(c => c.User)
                                   .AsNoTracking()
                                   .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
-
                 }
                 return ticket!;
             }
@@ -244,7 +269,7 @@ namespace TurboTicketsMVC.Services
             try
             {
 
-                IEnumerable<Ticket> companyTickets = await GetAllTicketsByCompanyIdAsync(companyId); 
+                IEnumerable<Ticket> companyTickets = await GetTicketsByCompanyIdAsync(companyId); 
                 if (userId != null && companyId != null)
                 {
 					IEnumerable<Ticket> userTickets = Enumerable.Empty<Ticket>();
@@ -276,6 +301,17 @@ namespace TurboTicketsMVC.Services
 
                 throw;
             }
+
+        }
+
+        public async Task<IEnumerable<Ticket>> GetTicketsByPMIdAsync(string? userId, int? companyId)
+        {
+            TTUser user = (await _context.Users.FirstOrDefaultAsync(u => u.Id == userId))!;
+
+            IEnumerable<Ticket> companyTickets = await GetAllTicketsByCompanyIdAsync(companyId);
+            IEnumerable<Ticket> userTickets = companyTickets.Where(t => t.Project!.Members.Contains(user));
+
+            return userTickets;
 
         }
         public Task<IEnumerable<TicketPriority>> GetTicketPrioritiesAsync() {
@@ -356,13 +392,13 @@ namespace TurboTicketsMVC.Services
 
         }
 
-        public async Task<bool> IsUserAuthorized(string? userId, int? ticketId, int? companyId)
+        public async Task<bool> CanAssignDeveloper(string? userId, int? ticketId, int? companyId)
         {
             try
             {
                 bool isUserAuthorized = false;
                 TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-                Ticket? ticket = await GetTicketByIdAsync(ticketId, companyId);
+                Ticket? ticket = ticket = await GetTicketAsNoTrackingAsync(ticketId, companyId);
                 TTUser? projectManager = await _projectService.GetProjectManagerAsync(ticket.ProjectId);
                 bool isProjectManager = user?.Id == projectManager?.Id;
                 bool isAdmin = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin));
@@ -372,6 +408,53 @@ namespace TurboTicketsMVC.Services
                     isUserAuthorized = true;
                 }
                 return isUserAuthorized;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<bool> CanActOnTicket(string? userId, int? ticketId, int? companyId)
+        {
+            try
+            {
+                bool canActOnTicket = false;
+                TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                Ticket? ticket = await GetTicketAsNoTrackingAsync(ticketId, companyId);
+                bool isProjectManager = await _projectService.IsUserPmAsync(ticket.ProjectId, userId!);
+                bool isAdmin = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin));
+                bool isDeveloper = ticket.DeveloperUserId == userId;
+                bool isSubmitter = ticket.SubmitterUserId == userId;
+                if (isAdmin || isDeveloper || isProjectManager || isSubmitter) {
+                    canActOnTicket = true;
+                }
+                return canActOnTicket;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<bool> CanMakeTickets(string? userId, int? projectId, int? companyId)
+        {
+            try
+            {
+                bool canMakeTickets = false;
+                if (projectId != null)
+                {
+                    TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                    Project project = await _projectService.GetProjectByIdAsync(projectId, companyId);
+                    bool isAdmin = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin));
+                    bool isMember = project.Members.Any(m => m.Id == userId);
+                    if (isAdmin || isMember)
+                    {
+                        canMakeTickets = true;
+                    }
+                }
+                return canMakeTickets;
             }
             catch (Exception)
             {

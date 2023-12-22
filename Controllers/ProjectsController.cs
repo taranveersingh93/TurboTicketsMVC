@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -24,18 +25,20 @@ namespace TurboTicketsMVC.Controllers
         private readonly ITTProjectService _projectService;
         private readonly ITTRolesService _roleService;
         private readonly ITTNotificationService _notificationService;
-
+        private readonly UserManager<TTUser> _userManager;
         public ProjectsController(ApplicationDbContext context,
                                   ITTFileService fileService,
                                   ITTProjectService projectService,
                                   ITTRolesService roleService,
-                                  ITTNotificationService notificationService)
+                                  ITTNotificationService notificationService,
+                                  UserManager<TTUser> userManager)
         {
             _fileService = fileService;
             _context = context;
             _projectService = projectService;
             _roleService = roleService;
             _notificationService = notificationService;
+            _userManager = userManager;
         }
 
         [Authorize]
@@ -45,17 +48,18 @@ namespace TurboTicketsMVC.Controllers
             if (!string.IsNullOrEmpty(swalMessage))
             {
                 ViewData["SwalMessage"] = swalMessage;
-            } 
-            IEnumerable<Project> projects = (await _projectService.GetProjectsByCompanyIdAsync(_companyId))!;
+            }
+            IEnumerable<Project> projects = (await _projectService.GetUserProjectsAsync(_userId))!;
             return View(projects);
         }
 
-        public async Task<IActionResult> MyProjects()
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> AllProjects()
         {
-            IEnumerable<Project> userProjects = (await _projectService.GetUserProjectsAsync(_userId))!;
-            return View(userProjects);
+            IEnumerable<Project> allProjects = (await _projectService.GetAllProjectsByCompanyIdAsync(_companyId))!;
+            return View(allProjects);
         }
-
+        [Authorize]
         // GET: Projects/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -72,43 +76,48 @@ namespace TurboTicketsMVC.Controllers
             // This is the only modification necessary for this method/action.     
 
             Project? project = await _projectService.GetProjectByIdAsync(id, _companyId);
-
+            bool canViewProject = await _projectService.CanViewProject(id, _userId, _companyId);
 
             if (project == null)
             {
                 return NotFound();
             }
-            IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
-            IEnumerable<TTUser> developers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
-            IEnumerable<TTUser> submitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
-            IEnumerable<TTUser> selectedDevelopers = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Developer), _companyId);
-            IEnumerable<TTUser> selectedSubmitters = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Submitter), _companyId);
-            TTUser? projectManager = await _projectService.GetProjectManagerAsync(project.Id);
-            string? projectManagerId = string.Empty;
-            if (projectManager != null)
+
+            if (canViewProject)
             {
-                projectManagerId = projectManager.Id;
+                IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
+                IEnumerable<TTUser> developers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+                IEnumerable<TTUser> submitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
+                IEnumerable<TTUser> selectedDevelopers = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Developer), _companyId);
+                IEnumerable<TTUser> selectedSubmitters = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Submitter), _companyId);
+                TTUser? projectManager = await _projectService.GetProjectManagerAsync(project.Id);
+                string? projectManagerId = string.Empty;
+                if (projectManager != null)
+                {
+                    projectManagerId = projectManager.Id;
+                }
+
+                IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
+                IEnumerable<string> submitterIds = selectedSubmitters.Select(s => s.Id);
+
+
+                ViewData["ProjectManagers"] = new SelectList(projectManagers, "Id", "FullName", projectManagerId);
+                ViewData["Developers"] = new MultiSelectList(developers, "Id", "FullName", developerIds);
+                ViewData["Submitters"] = new MultiSelectList(submitters, "Id", "FullName", submitterIds);
+                return View(project);
             }
-
-            IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
-            IEnumerable<string> submitterIds = selectedSubmitters.Select(s => s.Id);
-            
-
-            ViewData["ProjectManagers"] = new SelectList(projectManagers, "Id", "FullName", projectManagerId);
-            ViewData["Developers"] = new MultiSelectList(developers, "Id", "FullName", developerIds);
-            ViewData["Submitters"] = new MultiSelectList(submitters, "Id", "FullName", submitterIds);
-            return View(project);
+            return NotFound();
         }
+
+
         [Authorize(Roles = "Admin, ProjectManager")]
-
-
         // GET: Projects/Create
         public async Task<IActionResult> Create()
         {
-            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name");
             IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
 
             ViewData["ProjectManagers"] = new SelectList(projectManagers, "Id", "FullName");
+
             return View();
         }
 
@@ -126,7 +135,7 @@ namespace TurboTicketsMVC.Controllers
             {
                 project.CompanyId = User.Identity!.GetCompanyId();
                 project.CreatedDate = DateTimeOffset.Now;
-     
+
                 if (project.ImageFormFile != null)
                 {
                     project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
@@ -137,11 +146,12 @@ namespace TurboTicketsMVC.Controllers
                 bool pmAdded = false;
                 bool projectNotificationConfirmation = false;
                 bool pmNotificationConfirmation = false;
-                
+
                 if (selectedProjectManagerId == "(Project Creator)" && User.IsInRole("ProjectManager"))
                 {
                     pmAdded = await _projectService.AddProjectManagerAsync(_userId, project.Id);
-                } else
+                }
+                else
                 {
                     pmAdded = await _projectService.AddProjectManagerAsync(selectedProjectManagerId, project.Id);
                 }
@@ -165,7 +175,7 @@ namespace TurboTicketsMVC.Controllers
         //POST: EditTeam
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles ="Admin,ProjectManager")]
+        [Authorize(Roles = "Admin,ProjectManager")]
         public async Task<IActionResult> EditTeam(
             IEnumerable<string> DeveloperIds,
             IEnumerable<string> SubmitterIds,
@@ -174,36 +184,47 @@ namespace TurboTicketsMVC.Controllers
             string? redirect
             )
         {
-            TTUser? oldPM = await _projectService.GetProjectManagerAsync(projectId);
-            bool pmChanged = false;
-            bool pmAssigned = oldPM == null && ProjectManagerId != null;
-            if (oldPM != null && ProjectManagerId != null)
-            {
-                pmChanged = oldPM.Id != ProjectManagerId;
-            }
-            await _projectService.RemoveMembersFromProjectAsync(projectId, _companyId);
-            await _projectService.AddProjectManagerAsync(ProjectManagerId, projectId);
-            await _projectService.AddMembersToProjectAsync(DeveloperIds, projectId, _companyId);
-            await _projectService.AddMembersToProjectAsync(SubmitterIds, projectId, _companyId);
+            TTUser? user = await _userManager.GetUserAsync(User);
+            bool isAdmin = await _roleService.IsUserInRoleAsync(user, "Admin");
+            bool isUserPm = await _projectService.IsUserPmAsync(projectId, _userId!);
 
-            if (pmChanged || pmAssigned)
+            if (isAdmin || isUserPm)
             {
-                await _notificationService.ProjectUpdateNotificationAsync(projectId, _userId, nameof(TTProjectNotificationTypes.AssignedProject));
+                TTUser? oldPM = await _projectService.GetProjectManagerAsync(projectId);
+                bool pmChanged = false;
+                bool pmAssigned = oldPM == null && ProjectManagerId != null;
+                if (oldPM != null && ProjectManagerId != null)
+                {
+                    pmChanged = oldPM.Id != ProjectManagerId;
+                }
+                await _projectService.RemoveMembersFromProjectAsync(projectId, _companyId);
+                await _projectService.AddProjectManagerAsync(ProjectManagerId, projectId);
+                await _projectService.AddMembersToProjectAsync(DeveloperIds, projectId, _companyId);
+                await _projectService.AddMembersToProjectAsync(SubmitterIds, projectId, _companyId);
+
+                if (pmChanged || pmAssigned)
+                {
+                    await _notificationService.ProjectUpdateNotificationAsync(projectId, _userId, nameof(TTProjectNotificationTypes.AssignedProject));
+                }
+                bool teamChangeNotification = await _notificationService.ProjectUpdateNotificationAsync(projectId, _userId, nameof(TTProjectNotificationTypes.TeamChanged));
+                if (teamChangeNotification)
+                {
+                    return RedirectToAction(redirect, new { id = projectId });
+                }
+                else
+                {
+                    string? swalMessage = "Action failed, something went wrong";
+                    return RedirectToAction(nameof(Index), new { swalMessage });
+                }
             }
-            bool teamChangeNotification = await _notificationService.ProjectUpdateNotificationAsync(projectId, _userId, nameof(TTProjectNotificationTypes.TeamChanged));
-            if (teamChangeNotification)
+            else
             {
-                return RedirectToAction(redirect, new {id = projectId});
-            } else
-            {
-                string? swalMessage = "Action failed, something went wrong";
-                return RedirectToAction(nameof(Index), new { swalMessage });
+                return NotFound();
             }
         }
 
         // GET: Projects/Edit/5
         [Authorize(Roles = "Admin, ProjectManager")]
-
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Projects == null)
@@ -216,25 +237,41 @@ namespace TurboTicketsMVC.Controllers
             {
                 return NotFound();
             }
-            IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
-            IEnumerable<TTUser> developers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
-            IEnumerable<TTUser> submitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
-            IEnumerable<TTUser> selectedDevelopers = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Developer), _companyId);
-            IEnumerable<TTUser> selectedSubmitters = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Submitter), _companyId);
-            TTUser? projectManager = await _projectService.GetProjectManagerAsync(project.Id);
-            string? projectManagerId = string.Empty;
-            if (projectManager != null)
+            bool isUserPm = false;
+            bool isAdmin = false;
+            if (id != null)
             {
-                projectManagerId = projectManager.Id;
+                isUserPm = await _projectService.IsUserPmAsync(id, _userId!);
+                TTUser? user = await _userManager.GetUserAsync(User);
+                isAdmin = await _roleService.IsUserInRoleAsync(user, "Admin");
             }
-            IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
-            IEnumerable<string> submitterIds = selectedSubmitters.Select(s => s.Id);
+
+            if (isAdmin || isUserPm)
+            {
+                IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
+                IEnumerable<TTUser> developers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+                IEnumerable<TTUser> submitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
+                IEnumerable<TTUser> selectedDevelopers = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Developer), _companyId);
+                IEnumerable<TTUser> selectedSubmitters = await _projectService.GetProjectMembersByRoleAsync(project.Id, nameof(TTRoles.Submitter), _companyId);
+                TTUser? projectManager = await _projectService.GetProjectManagerAsync(project.Id);
+                string? projectManagerId = string.Empty;
+                if (projectManager != null)
+                {
+                    projectManagerId = projectManager.Id;
+                }
+                IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
+                IEnumerable<string> submitterIds = selectedSubmitters.Select(s => s.Id);
 
 
-            ViewData["ProjectManagers"] = new SelectList(projectManagers, "Id", "FullName", projectManagerId);
-            ViewData["Developers"] = new MultiSelectList(developers, "Id", "FullName", developerIds);
-            ViewData["Submitters"] = new MultiSelectList(submitters, "Id", "FullName", submitterIds);
-            return View(project);
+                ViewData["ProjectManagers"] = new SelectList(projectManagers, "Id", "FullName", projectManagerId);
+                ViewData["Developers"] = new MultiSelectList(developers, "Id", "FullName", developerIds);
+                ViewData["Submitters"] = new MultiSelectList(submitters, "Id", "FullName", submitterIds);
+                return View(project);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         // POST: Projects/Edit/5
@@ -251,39 +288,52 @@ namespace TurboTicketsMVC.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    if (project.ImageFormFile != null)
-                    {
-                        project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
-                        project.ImageFileType = project.ImageFormFile.ContentType;
-                    }
 
-                    await _projectService.UpdateProjectAsync(project);
-                    bool updateNotification = await _notificationService.ProjectUpdateNotificationAsync(id, _userId, nameof(TTProjectNotificationTypes.UpdateProject));
-                    string? swalMessage = "Action succeeded";
-                    if (updateNotification)
-                    {
-                        return RedirectToAction(nameof(Index), new { swalMessage });
-                    }
-                }
-                catch (DbUpdateConcurrencyException)
+            bool isUserPm = await _projectService.IsUserPmAsync(project.Id, _userId!);
+            TTUser? user = await _userManager.GetUserAsync(User);
+            bool isAdmin = await _roleService.IsUserInRoleAsync(user, "Admin");
+
+            if (isUserPm || isAdmin)
+            {
+
+                if (ModelState.IsValid)
                 {
-                    if (!ProjectExists(project.Id))
+                    try
                     {
-                        return NotFound();
+                        if (project.ImageFormFile != null)
+                        {
+                            project.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(project.ImageFormFile);
+                            project.ImageFileType = project.ImageFormFile.ContentType;
+                        }
+
+                        await _projectService.UpdateProjectAsync(project);
+                        bool updateNotification = await _notificationService.ProjectUpdateNotificationAsync(id, _userId, nameof(TTProjectNotificationTypes.UpdateProject));
+                        string? swalMessage = "Action succeeded";
+                        if (updateNotification)
+                        {
+                            return RedirectToAction(nameof(Index), new { swalMessage });
+                        }
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!ProjectExists(project.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
+                    return RedirectToAction(nameof(Index));
                 }
-                return RedirectToAction(nameof(Index));
+                ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", project.CompanyId);
+                return View(project);
             }
-            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", project.CompanyId);
-            return View(project);
+            else
+            {
+                return NotFound();
+            }
         }
 
         [HttpGet]

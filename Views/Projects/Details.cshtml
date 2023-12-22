@@ -18,7 +18,6 @@
     bool pmAvailable = Enumerable.Count(ViewBag.ProjectManagers) > 0;
     bool developersAvailable = Enumerable.Count(ViewBag.Developers) > 0;
     bool submittersAvailable = Enumerable.Count(ViewBag.Submitters) > 0;
-
 }
 
 <link rel="stylesheet" href="~/gogi/vendors/dataTable/datatables.min.css" type="text/css">
@@ -104,9 +103,11 @@
             <div class="border border-dark card h-100 m-1 p-2">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5>Project Team</h5>
+                    @if (isAdmin || isPm) {
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editTeamModal">
                         Edit Team
                     </button>
+                    } 
                 </div>
                 <div class="card-body list-group list-group-flush" style="overflow-y:auto;height:300px;">
                     @if(Model.Members.Count() > 0)
@@ -226,7 +227,7 @@
                                         <td>@ticket.SubmitterUser?.FullName</td>
                                         @if (string.IsNullOrEmpty(ticket.DeveloperUser?.FullName))
                                         {
-                                            <td>
+                                            <td class="text-center">
                                                 <div class="badge rounded-pill bg-danger">
                                                     Unassigned
                                                 </div>
@@ -234,7 +235,7 @@
                                         }
                                         else
                                         {
-                                            <td>@ticket.DeveloperUser?.FullName</td>
+                                            <td class="text-center">@ticket.DeveloperUser?.FullName</td>
                                         }
                                     @if(ticket.TicketStatus == TTTicketStatuses.New)
                                     {
@@ -287,7 +288,8 @@
 </div>
 
 
-
+@if(isAdmin || isPm)
+{
 <div class="modal fade" id="editTeamModal" tabindex="-1" aria-labelledby="editTeamModal" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -312,7 +314,7 @@
                             } 
                         </div>
                     }
-                    else
+                    @if(isPm)
                     {
                         <input type="hidden" name="ProjectManagerId" value="@projectManager.Id" />
                     }
@@ -347,6 +349,7 @@
         </div>
     </div>
 </div>
+}
 
 @section scripts {
     <!-- DataTable -->

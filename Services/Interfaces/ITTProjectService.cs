@@ -25,6 +25,8 @@ namespace TurboTicketsMVC.Services.Interfaces
         public Task RemoveProjectManagerAsync(int? projectId);
         public Task<bool> RemoveMemberFromProjectAsync(TTUser? member, int? projectId);
         public Task UpdateProjectAsync(Project? project);
-        public Task<bool> IsUserPmAsync(int projectId, string userId);
+        public Task<bool> IsUserPmAsync(int? projectId, string userId);
+        public Task<bool> CanViewProject(int? projectId, string userId, int? companyId);
+
     }
 }
