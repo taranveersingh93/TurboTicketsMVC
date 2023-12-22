@@ -1,0 +1,211 @@
+﻿@{
+    bool isAdmin = User.IsInRole("Admin");
+    bool isPM = User.IsInRole("ProjectManager");
+}
+
+<div class="content">
+    <div class="page-header d-flex justify-content-between">
+        <div class="d-flex">
+            <div class="d-flex flex-column justify-content-center">
+                <h3 class="text-start mb-1">Getting Started</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+
+                        <li class="breadcrumb-item active" aria-current="page">Getting Started</li>
+                    </ol>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div>
+                                <figure class="avatar avatar-sm mr-3 bring-forward">
+                                    <span class="avatar-title bg-primary-bright text-primary rounded-circle">1</span>
+                                </figure>
+                            </div>
+                            <div>
+                                <h6 class="d-flex">
+                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
+                                </h6>
+                                <div class="row no-gutters border card flex-row border-radius-1">
+
+                                    <div class="col-12 px-5 py-4">
+                                        <h5 class="text-primary">Admin signs up</h5>
+                                        <p class="m-0">
+                                            When a user signs up on Turbo Tickets without an invitation, an admin and a new company are created.
+                                            No company can exist without an admin and vice versa. So at the very beginning, admin is the first and only company member.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div>
+                                <figure class="avatar avatar-sm mr-3 bring-forward">
+                                    <span class="avatar-title bg-primary-bright text-primary rounded-circle">2</span>
+                                </figure>
+                            </div>
+                            <div>
+                                <h6 class="d-flex">
+                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
+                                </h6>
+                                <div class="row no-gutters border card flex-row border-radius-1">
+
+                                    <div class="col-12 px-5 py-4">
+                                        <h5 class="text-primary">Admin invites other members</h5>
+                                        <p class="m-0">
+                                            The only way to add a second member to the same company is if the admin of that company invites another user.
+                                            Whenever the invitees join the company, they become a <strong>submitter</strong>.
+                                        </p>
+                                            @if (isAdmin)
+                                            {
+                                                <div class="d-flex pt-3 justify-content-center">
+                                                    <a role="button" class="btn btn-primary" asp-controller="Invites" asp-action="Create">Create Invite</a>
+
+                                                </div>
+                                            }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div>
+                                <figure class="avatar avatar-sm mr-3 bring-forward">
+                                    <span class="avatar-title bg-primary-bright text-primary rounded-circle">3</span>
+                                </figure>
+                            </div>
+                            <div>
+                                <h6 class="d-flex">
+                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
+                                </h6>
+                                <div class="row no-gutters border card flex-row border-radius-1">
+
+                                    <div class="col-12 px-5 py-4">
+                                        <h5 class="text-primary">Admin manages roles for new users</h5>
+                                        <p class="m-0">
+                                            Since any new user in a company starts off just as a submitter, an admin can reassign the roles for those users.
+                                            All users in a company, given their roles, are available to be rostered in for that role in any project in the company.
+                                        </p>
+                                            @if (isAdmin)
+                                            {
+                                                <div class="d-flex pt-3 justify-content-center">
+                                                    <a role="button" class="btn btn-primary" asp-controller="Companies" asp-action="ManageUserRoles">Manage User Roles</a>
+                                                </div>
+                                            }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div>
+                                <figure class="avatar avatar-sm mr-3 bring-forward">
+                                    <span class="avatar-title bg-primary-bright text-primary rounded-circle">4</span>
+                                </figure>
+                            </div>
+                            <div>
+                                <h6 class="d-flex">
+                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
+                                    <span class="badge rounded-pill dark-bg me-2">Project Manager</span>
+
+                                </h6>
+                                <div class="row no-gutters border card flex-row border-radius-1">
+
+                                    <div class="col-12 px-5 py-4">
+                                        <h5 class="text-primary">Admin or Project Manager creates a project</h5>
+                                        <p class="m-0">
+                                            An admin or a project manager are the only roles that can create a project. While creating a project, a team has to be
+                                             selected for the roles of Project Manager, Developer and Submitter. There can only be one PM and one developer in a project.
+                                             If an admin creates a project, they can select any of the available project managers to be the PM. If left unselected, the project 
+                                             is marked <strong>unassigned</strong>. If a PM creates a project, they are automatically assigned as the project PM.
+                                             Both admin and project manager can edit their projects and the team.
+                                        </p>
+                                            @if (isAdmin || isPM)
+                                            {
+                                                <div class="d-flex pt-3 justify-content-center">
+                                                    <a role="button" class="btn btn-primary" asp-controller="Projects" asp-action="Create">Create Project</a>
+                                                </div>
+                                            }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div>
+                                <figure class="avatar avatar-sm mr-3 bring-forward">
+                                    <span class="avatar-title bg-primary-bright text-primary rounded-circle">5</span>
+                                </figure>
+                            </div>
+                            <div>
+                                <h6 class="d-flex">
+                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
+                                    <span class="badge rounded-pill dark-bg me-2">Project Manager</span>
+                                    <span class="badge rounded-pill secondary-bg me-2">Developer</span>
+                                    <span class="badge rounded-pill warning-bg me-2">Submitter</span>
+
+                                </h6>
+                                <div class="row no-gutters border card flex-row border-radius-1">
+
+                                    <div class="col-12 px-5 py-4">
+                                        <h5 class="text-primary">Any member of the project creates a ticket</h5>
+                                        <p class="m-0">
+                                           At this point, any user can create a ticket for a project they're a member of.
+                                           An admin does not need to be a part of the project to create a ticket.
+                                        </p>
+                                           
+                                                <div class="d-flex pt-3 justify-content-center">
+                                                    <a role="button" class="btn btn-primary" asp-controller="Tickets" asp-action="Create">Create Ticket</a>
+                                                </div>
+                                            
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div>
+                                <figure class="avatar avatar-sm mr-3 bring-forward">
+                                    <span class="avatar-title bg-primary-bright text-primary rounded-circle">6</span>
+                                </figure>
+                            </div>
+                            <div>
+                                <h6 class="d-flex">
+                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
+                                    <span class="badge rounded-pill dark-bg me-2">Project Manager</span>
+                                    <span class="badge rounded-pill secondary-bg me-2">Developer</span>
+                                    <span class="badge rounded-pill warning-bg me-2">Submitter</span>
+
+                                </h6>
+                                <div class="row no-gutters border card flex-row border-radius-1">
+
+                                    <div class="col-12 px-5 py-4">
+                                        <h5 class="text-primary">Ticket owner actions</h5>
+                                        <p class="m-0">
+                                           Any user who created the ticket, can edit their ticket, add a comment and add attachments.
+                                           A developer can edit all tickets they created or were assigned to.
+                                           A project manager can edit any ticket that belongs to their projects.
+                                           An admin can edit any ticket.
+                                        </p>
+                                            <div class="d-flex pt-3 justify-content-center">
+                                                <a role="button" class="btn btn-primary" asp-controller="Tickets" asp-action="Index">Tickets</a>
+                                            </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

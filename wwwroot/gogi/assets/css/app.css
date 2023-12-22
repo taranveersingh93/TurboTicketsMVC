@@ -78,6 +78,7 @@ Author URL:   https://themeforest.net/user/laborasyon/portfolio
     --color-gray: #d4d4d4;
     --color-danger-light: #B80000;
     --color-light-gray: #f3f3f3;
+    --color-warning: #ffcc3e;
 }
 .opacity-0 {
   opacity: 0 !important;

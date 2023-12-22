@@ -70,6 +70,11 @@ namespace TurboTicketsMVC.Controllers
             return View(dashboardViewModel);
         }
 
+        public ViewResult GetStarted()
+        {
+            return View();
+        }
+
 		public async Task<JsonResult> TicketsDevelopersChart()
 		{
             TicketsDevelopersData ticketsDevelopersData = new();

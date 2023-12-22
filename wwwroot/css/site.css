@@ -13,6 +13,7 @@ html {
     --color-gray: #d4d4d4;
     --color-danger-light: #B80000;
     --color-light-gray: #f3f3f3;
+    --color-warning: #ffcc3e;
 }
 
 
@@ -73,8 +74,18 @@ body {
 }
 
 .secondary-bg {
-    color: var(--color-dark);
-    background-color: var(--color-orange);
+    color: white;
+    background-color: var(--color-secondary);
+}
+
+.warning-bg {
+    color:var(--color-dark);
+    background-color: var(--color-warning);
+}
+
+.danger-bg {
+    color: white;
+    background-color: var(--color-danger);
 }
 
 .dark-bg {
