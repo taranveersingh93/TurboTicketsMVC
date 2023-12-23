@@ -63,10 +63,7 @@ namespace TurboTicketsMVC.Controllers
         public async Task<IActionResult> AllTickets()
         {
             IEnumerable<Ticket> tickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
-            if (User.IsInRole(nameof(TTRoles.ProjectManager)))
-            {
-                tickets = await _ticketService.GetTicketsByPMIdAsync(_userId, _companyId);
-            }
+
             return View(tickets);
         }
 
@@ -78,13 +75,14 @@ namespace TurboTicketsMVC.Controllers
                 return NotFound();
             }
             Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+            bool canViewTicket = User.IsInRole("ProjectManager");
             bool canActOnTicket = await _ticketService.CanActOnTicket(_userId, ticket.Id, _companyId);
             if (ticket == null)
             {
                 return NotFound();
             }
 
-            if (canActOnTicket)
+            if (canActOnTicket || canViewTicket)
             {
 
                 IEnumerable<TTUser> projectDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
