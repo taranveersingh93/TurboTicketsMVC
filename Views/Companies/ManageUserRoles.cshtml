@@ -53,24 +53,24 @@
 
                                                     @if (viewModel.SelectedRole == "Admin")
                                                     {
-                                                    <div class="badge rounded-pill bg-dark">@viewModel.SelectedRole</div>
+                                                    <div class="badge rounded-pill danger-bg">@viewModel.SelectedRole</div>
                                                     }
                                                     else if (viewModel.SelectedRole == "Developer")
                                                     {
-                                                    <div class="badge rounded-pill bg-success text-dark">@viewModel.SelectedRole</div>
+                                                    <div class="badge rounded-pill secondary-bg">@viewModel.SelectedRole</div>
                                                     }
                                                     else if (viewModel.SelectedRole == "Submitter")
                                                     {
-                                                    <div class="badge rounded-pill bg-info text-dark">@viewModel.SelectedRole</div>
+                                                    <div class="badge rounded-pill warning-bg">@viewModel.SelectedRole</div>
                                                     }
                                                     else
                                                     {
-                                                    <div class="badge rounded-pill bg-primary">Project Manager</div>
+                                                    <div class="badge rounded-pill dark-bg">Project Manager</div>
                                                     }
 
                                                     @if (viewModel.IsDemoUser)
                                                     {
-                                                    <div class="badge rounded-pill bg-warning text-dark">Demo User</div>
+                                                    <div class="badge rounded-pill bg-primary text-dark">Demo User</div>
 
                                                     }
 

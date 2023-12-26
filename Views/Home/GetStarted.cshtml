@@ -126,10 +126,9 @@
                                     <div class="col-12 px-5 py-4">
                                         <h5 class="text-primary">Admin or Project Manager creates a project</h5>
                                         <p class="m-0">
-                                            An admin or a project manager are the only roles that can create a project. While creating a project, a team has to be
-                                             selected for the roles of Project Manager, Developer and Submitter. There can only be one PM and one developer in a project.
+                                            An admin or a project manager are the only roles that can create a project. While creating a project, a project manager can be assigned.
                                              If an admin creates a project, they can select any of the available project managers to be the PM. If left unselected, the project 
-                                             is marked <strong>unassigned</strong>. If a PM creates a project, they are automatically assigned as the project PM.
+                                             is marked <strong>unassigned</strong>. However, if a PM creates a project, they are automatically assigned as the project PM.
                                              Both admin and project manager can edit their projects and the team.
                                         </p>
                                             @if (isAdmin || isPM)

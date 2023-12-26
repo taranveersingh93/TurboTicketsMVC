@@ -43,7 +43,7 @@
     <nav class="navbar">
         <div class="container d-flex justify-content-start mx-1">
             <a class="navbar-brand" asp-controller="Home" asp-action="Landing">
-                <img src="~/img/turbotickets_white_wide.svg" style="width: auto; height: 65px;"/>
+                <img src="~/img/turbotickets_white_wide.svg" style="width: auto; height: 65px;" />
             </a>
         </div>
     </nav>
@@ -57,7 +57,8 @@
                 <div class="col-lg-6 col-md-10 col-12 d-flex flex-column justify-content-center align-items-center">
                     <div class="hero-text">
 
-                        <h1 class="text-white" data-aos="fade-up">We know just what it takes</h1>
+                        <h1 class="text-white" data-aos="fade-up">How will we help you build great projects?</h1>
+                        <h2 class="text-secondary">One ticket at a time</h2>
 
                         <a href="#about" class="custom-btn p-2 btn-bg btn mt-3 mx-2" data-aos="fade-up" data-aos-delay="100" style="scroll-behavior:smooth;">Know more</a>
                         <a asp-area="Identity" asp-page="/Account/Login" class="custom-btn p-2 btn-bg btn mt-3" data-aos="fade-up" data-aos-delay="100">Login</a>
@@ -72,7 +73,7 @@
                            target="_blank"
                            data-bs-toggle="tooltip"
                            data-bs-title="Web Illustrations by Storyset">
-                        <img src="~/img/collaborate.svg" class="img-fluid" alt="working team">
+                            <img src="~/img/collaborate.svg" class="img-fluid" alt="working team">
 
                         </a>
                     </div>
@@ -95,7 +96,7 @@
                         <h2 class="mb-4 text-primary" data-aos="fade-up">Why use Turbo Tickets?</h2>
 
                         <p class="mb-0" data-aos="fade-up">
-                            Turbo Tickets is a centralized issue tracker. It enables you to achieve a streamlined workflow by letting you create, update, archive and track work tickets. 
+                            Turbo Tickets is a centralized issue tracker. It enables you to achieve a streamlined workflow by letting you create, update, archive and track work tickets.
                             Turbo Tickets connects all the layers and stakeholders behind the scenes so that you can enjoy noise free navigation of a user friendly interface.
                             <br><br>
                             Other users can only join your company via invites. All access privileges are based on the roles you assign your team members.
@@ -107,7 +108,7 @@
                            target="_blank"
                            data-bs-toggle="tooltip"
                            data-bs-title="Web Illustrations by Storyset">
-                        <img src="~/img/computerScreen.svg" class="img-fluid" alt="computer" style="height: 350px; width: auto;">
+                            <img src="~/img/computerScreen.svg" class="img-fluid" alt="computer" style="height: 350px; width: auto;">
 
                         </a>
                     </div>
@@ -126,53 +127,65 @@
                 <div class="col-lg-12 col-12">
 
                     <h2 class="mb-5 text-center text-white" data-aos="fade-up">
-                        Explore the app with our 
+                        Explore the app with our
                         <strong>demo logins</strong>
                     </h2>
 
                     <div class="owl-carousel owl-theme" id="project-slide">
-                        <div class="item project-wrapper" data-aos="fade-up" data-aos-delay="100">
+
+                        <div class="item project-wrapper" data-aos="fade-up">
                             <img src="~/img/admin.jpg" class="img-fluid" alt="project image">
 
                             <div class="project-info">
-                                <small>Oversees the company</small>
+                                <form asp-area="Identity" asp-page="/Account/Login" method="post">
+                                    <small>Oversees the company</small>
+                                    <h3>
+                                        <button class="border-0" type="submit" name="demoEmail" value="DemoAdminEmail">
+                                            <span class="text-primary">Admin</span>
+                                            <i class="fa fa-angle-right project-icon"></i>
+                                        </button>
+                                    </h3>
 
-                                <h3>
-                                    <a asp-area="Identity" asp-page="/Account/Login">
-                                        <span>Admin</span>
-                                        <i class="fa fa-angle-right project-icon"></i>
-                                    </a>
-                                </h3>
+                                </form>
+
                             </div>
                         </div>
+
 
                         <div class="item project-wrapper" data-aos="fade-up">
                             <img src="~/img/projectManager.jpg" class="img-fluid" alt="project image">
 
                             <div class="project-info">
-                                <small>Supervises Projects</small>
+                                <form asp-area="Identity" asp-page="/Account/Login" method="post">
+                                    <small>Supervises Projects</small>
+                                    <h3>
+                                        <button class="border-0" type="submit" name="demoEmail" value="DemoPMEmail">
+                                            <span class="text-primary">Project Manager</span>
+                                            <i class="fa fa-angle-right project-icon"></i>
+                                        </button>
+                                    </h3>
 
-                                <h3>
-                                    <a asp-area="Identity" asp-page="/Account/Login">
-                                        <span>Project Manager</span>
-                                        <i class="fa fa-angle-right project-icon"></i>
-                                    </a>
-                                </h3>
+                                </form>
+
                             </div>
                         </div>
+
 
                         <div class="item project-wrapper" data-aos="fade-up">
                             <img src="~/img/developer.jpg" class="img-fluid" alt="project image">
 
                             <div class="project-info">
-                                <small>Responsible for Ticket Progress</small>
+                                <form asp-area="Identity" asp-page="/Account/Login" method="post">
+                                    <small>Responsible for Ticket Progress</small>
+                                    <h3>
+                                        <button class="border-0" type="submit" name="demoEmail" value="DemoDevEmail">
+                                            <span class="text-primary">Developer</span>
+                                            <i class="fa fa-angle-right project-icon"></i>
+                                        </button>
+                                    </h3>
 
-                                <h3>
-                                    <a asp-area="Identity" asp-page="/Account/Login">
-                                        <span>Developer</span>
-                                        <i class="fa fa-angle-right project-icon"></i>
-                                    </a>
-                                </h3>
+                                </form>
+
                             </div>
                         </div>
 
@@ -180,18 +193,21 @@
                             <img src="~/img/submitter.jpg" class="img-fluid" alt="project image">
 
                             <div class="project-info">
-                                <small>Ticket Creator</small>
+                                <form asp-area="Identity" asp-page="/Account/Login" method="post">
+                                    <small>Ticket Creator</small>
+                                    <h3>
+                                        <button class="border-0" type="submit" name="demoEmail" value="DemoSubEmail">
+                                            <span class="text-primary">Submitter</span>
+                                            <i class="fa fa-angle-right project-icon"></i>
+                                        </button>
+                                    </h3>
 
-                                <h3>
-                                    <a asp-area="Identity" asp-page="/Account/Login">
-                                        <span>Submitter</span>
-                                        <i class="fa fa-angle-right project-icon"></i>
-                                    </a>
-                                </h3>
+                                </form>
+
                             </div>
                         </div>
 
-                  
+
                     </div>
                 </div>
 
@@ -212,7 +228,7 @@
                            data-bs-toggle="tooltip"
                            data-bs-title="Web Illustrations by Storyset">
 
-                        <img src="~/img/workdesk.svg" class="img-fluid" alt="website">
+                            <img src="~/img/workdesk.svg" class="img-fluid" alt="website">
                         </a>
                     </div>
                 </div>
@@ -222,7 +238,7 @@
 
                     <div class="quote" data-aos="fade-up" data-aos-delay="200"></div>
 
-                    <h2 class="mb-4" data-aos="fade-up" data-aos-delay="300">
+                    <h2 class="mb-4 text-secondary" data-aos="fade-up" data-aos-delay="300">
                         This app was built using C# .NET with the MVC pattern. The app has both authentication and role based authorization. I implemented a service layer that handles all the database operations and injected different services in my controllers where needed.
                     </h2>
 

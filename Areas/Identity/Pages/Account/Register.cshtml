@@ -7,13 +7,18 @@
 
 }
 
-<h1 class="text-muted">@ViewData["Title"]</h1>
+<!-- logo -->
+<div id="logo">
+    <img src="~/img/turbotickets_wide_primary.svg" style="height: 70px; width: auto;" alt="image">
+</div>
+<!-- ./ logo -->
+
+<h5>Register</h5>
+            <hr />
 
 <div class="row">
     <div class="col-12">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <h2>Create a new account.</h2>
-            <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.FirstName" class="form-control" autocomplete="firstname" aria-required="true" placeholder="First Name" />

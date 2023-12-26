@@ -148,3 +148,7 @@ card-link:hover {
 .custom-tooltip {
     --bs-tooltip-bg: var(--color-primary);
 }
+
+.project-wrapper .project-info button {
+    background-color: none;
+}
