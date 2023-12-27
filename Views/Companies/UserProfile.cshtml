@@ -1,2 +1,229 @@
-﻿@model TTUser
-<h1>@Model.FullName</h1>
+﻿@using TurboTicketsMVC.Models.Enums;
+@using TurboTicketsMVC.Services.Interfaces;
+@model TTUser
+@inject ITTProjectService _ProjectService;
+@inject ITTTicketService _TicketService;
+@inject ITTRolesService _RoleService;
+@inject ITTFileService _FileService;
+
+@{
+    string? userEmail = Model.Email;
+    IEnumerable<Project> companyProjects = await _ProjectService.GetAllProjectsByCompanyIdAsync(Model.CompanyId);
+    IEnumerable<Ticket> companyTickets = await _TicketService.GetAllTicketsByCompanyIdAsync(Model.CompanyId);
+    IEnumerable<string> userRoles = (await _RoleService.GetUserRolesAsync(Model))!;
+    IEnumerable<Ticket> userTickets = (await _TicketService.GetTicketsByUserIdAsync(Model.Id, Model.CompanyId));
+    IEnumerable<Project> userProjects = (await _ProjectService.GetUserProjectsAsync(Model.Id))!;
+    int newTickets = (userTickets.Where(t => t.TicketStatus == TTTicketStatuses.New)).Count();
+    int developmentTickets = (userTickets.Where(t => t.TicketStatus == TTTicketStatuses.Development)).Count();
+    int testingTickets = (userTickets.Where(t => t.TicketStatus == TTTicketStatuses.Testing)).Count();
+    int resolvedTickets = (userTickets.Where(t => t.TicketStatus == TTTicketStatuses.Resolved)).Count();
+    double newPercent = Math.Round(((double)(newTickets) / (double)(userTickets.Count())) * 100, 2);
+    double developmentPercent = Math.Round(((double)(developmentTickets) / (double)(userTickets.Count())) * 100, 2);
+    double testingPercent = Math.Round(((double)(testingTickets) / (double)(userTickets.Count())) * 100, 2);
+    double resolvedPercent = Math.Round(((double)(resolvedTickets) / (double)(userTickets.Count())) * 100, 2);
+    string? userId = Model.Id;
+}
+
+<div class="content">
+    <div class="page-header d-md-flex justify-content-center">
+        <div class="row w-100">
+
+            <h3 class="text-center">@Model.FullName</h3>
+            <p class="text-muted text-center mb-4">@userEmail</p>
+            <div class="col-12 text-center mb-3">
+                @foreach (string role in userRoles)
+                {
+                    if (role == "Admin")
+                    {
+                        <span class="badge rounded-pill danger-bg">@role</span>
+                    }
+                    if (role == "ProjectManager")
+                    {
+                        <span class="badge rounded-pill dark-bg">@role</span>
+                    }
+                    if(role == "Developer")
+                    {
+                        <span class="badge rounded-pill secondary-bg">@role</span>
+                    }
+                    if(role == "Submitter")
+                    {
+                        <span class="badge rounded-pill warning-bg">@role</span>
+
+                    }
+                    if(role == "DemoUser")
+                    {
+                        <span class="badge rounded-pill bg-light border border-dark">@role</span>
+
+                    }
+                }
+            </div>
+
+        </div>
+    </div>
+    <div class="row mb-5">
+        @if (userTickets.Count() > 0)
+        {
+
+            <div class="col-12 col-md-6">
+                <div class="card border border-dark h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-4">
+                            <div>
+                                <h6 class="card-title card-secondary mb-1">My Tickets by Status</h6>
+                                <p class="small text-muted">Status Rates</p>
+                            </div>
+
+                        </div>
+                        <div id="ticketsStatusChart"></div>
+                        <ul class="list-inline text-center">
+                            <li class="list-inline-item">
+                                <i class="fa fa-circle mr-1" style="color:#f1c612;"></i> New<br>
+                                <small class="text-muted">@newPercent%</small>
+                            </li>
+                            <li class="list-inline-item">
+                                <i class="fa fa-circle mr-1" style="color:#FE7922;"></i> Development<br>
+                                <small class="text-muted">@developmentPercent%</small>
+                            </li>
+                            <li class="list-inline-item">
+                                <i class="fa fa-circle mr-1" style="color:#5066e1;"></i> Testing<br>
+                                <small class="text-muted">@testingPercent%</small>
+                            </li>
+                            <li class="list-inline-item">
+                                <i class="fa fa-circle mr-1" style="color:#15A51C;"></i> Resolved<br>
+                                <small class="text-muted">@resolvedPercent%</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        }
+        else
+        {
+            <div class="col-12 col-md-6">
+                <div class="card border border-dark h-100">
+                    <div class="card-body">
+                        <h4 class="text-muted text-center">
+                            User has no tickets
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="col-12 col-md-6">
+            <div class="card border border-dark h-100">
+                <img class="img-fluid" src="@_FileService.ConvertByteArrayToFile(Model.ImageFileData, Model.ImageFileType, DefaultImage.BTUserImage)" />
+                <hr />
+                <div class="card-header d-flex justify-content-between">
+                    <h3 class="text-center text-primary">@Model.FullName</h3>
+                    <a class="btn btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@userEmail">
+                        Email @Model.FirstName
+                    </a>
+                </div>
+          
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card border border-dark text-center">
+                                <div class="body">
+                                    <div class="p-1 rounded primary-bg">
+                                        <h3 class="mt-2 mb-0">@userProjects.Count()</h3>
+                                        <span class="mt-1 mb-3">User Projects</span>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card border border-dark text-center">
+                                <div class="body">
+                                    <div class="p-1 rounded primary-bg">
+
+                                        <h3 class="mt-2 mb-0">@userTickets.Count()</h3>
+                                        <span class="mt-1 mb-3">User Tickets</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+
+                            <div class="card border border-dark text-center">
+                                <div class="body">
+                                    <div class="p-1 rounded dark-bg">
+                                        <h3 class="mt-2 mb-0">@companyProjects.Count()</h3>
+                                        <span class="mt-1 mb-3">Company Projects</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-6">
+
+
+                            <div class="card border border-dark text-center">
+                                <div class="body">
+                                    <div class="p-1 rounded dark-bg">
+                                        <h3 class="mt-2 mb-0">@companyTickets.Count()</h3>
+                                        <span class="mt-1 mb-3">Company Tickets</span>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var options = {
+            series: [@newPercent, @developmentPercent, @testingPercent, @resolvedPercent],
+            chart: {
+                type: 'donut',
+            },
+            colors: ['#F1C612', "#FE7922", '#5066e1', '#15A51C'],
+            labels: ['New Tickets', 'Development Tickets', 'Testing Tickets', "Resolved Tickets"],
+            track: {
+                background: "#cccccc"
+            },
+            dataLabels: {
+                enabled: false
+            },
+
+            plotOptions: {
+                pie: {
+                    expandOnClick: true,
+                    donut: {
+                        labels: {
+                            show: true,
+                            value: {
+                                formatter: function (val) {
+                                    return val + "%";
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                shared: false,
+                y: {
+                    formatter: function (val) {
+                        return val + "%";
+                    }
+                }
+            },
+            legend: {
+                show: false
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#ticketsStatusChart"), options);
+        chart.render();
+    </script>
+    }

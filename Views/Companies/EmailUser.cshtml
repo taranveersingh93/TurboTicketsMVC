@@ -1,2 +1,71 @@
-﻿@model TTUser
-<h1>@Model.FullName</h1>
+﻿@using Microsoft.AspNetCore.Identity;
+@model EmailData
+@inject UserManager<TTUser> _UserManager;
+@using TurboTicketsMVC.Models.ViewModels;
+
+<div class="content">
+    <div class="page-header">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h3>Email <span class="text-primary">@Model.Recipient</span></h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Companies" asp-action="Details">Company Info</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(Model.EmailAddress)">User Profile</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Create Invite</li>
+                    </ol>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="EmailUser" asp-controller="Companies" method="post">
+                        <input type="hidden" asp-for="Recipient" value="@Model.Recipient"/> @*Reference the Group Name*@
+                        <div class="row row-cols-1">
+                            <div class="col-12 mt-3">
+                                <label asp-for="EmailAddress" class="form-label">To:</label> @* Reference the EmailData's email address*@
+                                <textarea type="email" readonly class="form-control" asp-for="EmailAddress" rows="3"></textarea> @* Reference the EmailData's email address*@
+                            </div>
+                            <div class="col-12 mt-3">
+                                <label asp-for="EmailSubject" class="form-label">Subject:</label> @* Reference the EmailData's email subject*@
+                                <input type="text" class="form-control" asp-for="EmailSubject" /> @* Reference the EmailData's email subject*@
+                            </div>
+                            <div class="form-group mt-3">
+                                <label asp-for="EmailBody" class="control-label"></label>
+                                <textarea asp-for="EmailBody" id="editor" class="editor form-control"></textarea>
+                                <span asp-validation-for="EmailBody" class="text-danger"></span>
+                            </div>
+                            <div class="col-12 text-end mt-3">
+                                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill btnLink start-0">Cancel</a>
+                                <button class="btn btn-primary rounded-pill btnlinks" type="submit">Send</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#editor'))
+            .catch(error => {
+                console.error(error);
+            });
+    </script>
+}                 

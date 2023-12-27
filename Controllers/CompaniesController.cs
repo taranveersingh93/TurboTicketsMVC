@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using TurboTicketsMVC.Data;
 using TurboTicketsMVC.Models;
 using TurboTicketsMVC.Models.Enums;
 using TurboTicketsMVC.Models.ViewModels;
+using TurboTicketsMVC.Services;
 using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Controllers
@@ -20,14 +22,20 @@ namespace TurboTicketsMVC.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ITTCompanyService _companyService;
         private readonly ITTRolesService _rolesService;
+        private readonly IEmailSender _emailService;
+        private readonly UserManager<TTUser> _userManager;
         public CompaniesController(ApplicationDbContext context,
                                    ITTCompanyService companyService,
-                                   ITTRolesService rolesService
+                                   ITTRolesService rolesService,
+                                   IEmailSender emailService,
+                                   UserManager<TTUser> userManager
                                   )
         {
             _context = context;
             _companyService = companyService;
             _rolesService = rolesService;
+            _emailService = emailService;
+            _userManager = userManager;
         }
 
         //// GET: Companies
@@ -38,7 +46,7 @@ namespace TurboTicketsMVC.Controllers
         //                  Problem("Entity set 'ApplicationDbContext.Companies'  is null.");
         //}
 
- 
+
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -118,13 +126,18 @@ namespace TurboTicketsMVC.Controllers
         }
         // GET: Companies/Details/5
         [Authorize]
-        public async Task<IActionResult> Details()
+        public async Task<IActionResult> Details(string? swalMessage)
         {
             Company? company = await _companyService.GetCompanyInfoAsync(_companyId);
 
             if (company == null)
             {
                 return NotFound();
+            }
+            if (!string.IsNullOrEmpty(swalMessage))
+            {
+
+                ViewData["SwalMessage"] = swalMessage;
             }
             return View(company);
         }
@@ -260,7 +273,50 @@ namespace TurboTicketsMVC.Controllers
                 return NotFound();
             }
             TTUser? user = await _companyService.GetUserByEmail(email, _companyId);
-            return View(user);
+            if (user != null && user.CompanyId == _companyId)
+            {
+                EmailData emailData = new()
+                {
+                    EmailAddress = email,
+                    EmailBody = "",
+                    EmailSubject = "",
+                    Recipient = user!.FullName
+                };
+                return View(emailData);
+
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EmailUser(EmailData emailData)
+        {
+            try
+            {
+                string? swalMessage = string.Empty;
+                if (ModelState.IsValid)
+                {
+                    string? signature = (await _userManager.GetUserAsync(User))!.FullName;
+                    string? subject = emailData.EmailSubject;
+                    subject += $" - sent by: {signature}";
+                    string? recipientEmail = emailData.EmailAddress;
+                    string? body = emailData.EmailBody;
+                    await _emailService.SendEmailAsync(recipientEmail!, subject!, body!);
+                    swalMessage = "Success! Email sent.";
+                }
+                else
+                {
+                    swalMessage = "Email failed. Something went wrong";
+                }
+
+                return RedirectToAction(nameof(Details), new { swalMessage });
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         private bool CompanyExists(int id)
         {

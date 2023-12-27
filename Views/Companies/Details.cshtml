@@ -13,6 +13,8 @@
     List<TTUser> projectManagers = new List<TTUser>();
     List<TTUser> developers = new List<TTUser>();
     List<TTUser> submitters = new List<TTUser>();
+    string? swalMessage = ViewBag.SwalMessage;
+
 
     foreach (TTUser member in Model.Members)
     {
@@ -181,4 +183,35 @@
 @section Scripts {
     <script src="~/gogi/vendors/dataTable/datatables.min.js"></script>
     <script src="~/gogi/assets/js/examples/datatable.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        var swalMessage = "@swalMessage";
+        if (swalMessage) {
+            if (swalMessage.includes("sent")) {
+                Swal.fire(
+                    {
+                        title: 'Success',
+                        text: '@swalMessage',
+                        icon: 'success',
+                        confirmButtonText: 'ok',
+                        color: '#5066e1'
+                    }
+                )
+            }
+
+            if (swalMessage.includes("failed")) {
+                Swal.fire(
+                    {
+                        title: 'Sorry',
+                        text: '@swalMessage',
+                        icon: 'error',
+                        confirmButtonText: 'ok',
+                        color: '#820300'
+                    }
+                )
+            }
+
+        }
+    </script>
 }

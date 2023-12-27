@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TurboTicketsMVC.Models
+namespace TurboTicketsMVC.Models.ViewModels
 {
+
     public class EmailData
     {
         [Required]
@@ -10,9 +11,8 @@ namespace TurboTicketsMVC.Models
         public string? EmailSubject { get; set; }
         [Required]
         public string? EmailBody { get; set; }
+        [Required]
+        public string? Recipient { get; set; }
 
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
-        public string? GroupName { get; set; }
     }
 }
