@@ -26,7 +26,7 @@ namespace TurboTicketsMVC.Services
                 Company? company = new Company();
                 if (companyId != null)
                 {
-                    company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == companyId);
+                    company = await _context.Companies.Include(c => c.Members).FirstOrDefaultAsync(c => c.Id == companyId);
                 }
                 return company!;
             }
@@ -90,6 +90,26 @@ namespace TurboTicketsMVC.Services
 				}
 				return invites;
 			}
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<TTUser?> GetUserByEmail(string? email, int? companyId)
+        {
+            try
+            {
+                if (email == null || companyId == null)
+                {
+                    return null;
+                } else
+                {
+                    TTUser? user = await _context.Users
+                        .FirstOrDefaultAsync(u => u.Email == email && u.CompanyId == companyId);
+                    return user;
+                }
+            }
             catch (Exception)
             {
 

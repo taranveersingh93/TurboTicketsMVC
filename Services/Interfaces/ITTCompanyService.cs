@@ -11,5 +11,6 @@ namespace TurboTicketsMVC.Services.Interfaces
         public Task<IEnumerable<Project>> GetProjectsAsync(int? companyId);
 
         public Task<IEnumerable<Invite>> GetInvitesAsync(int? companyId);
+        public Task<TTUser?> GetUserByEmail(string? email, int? companyId);
     }
 }

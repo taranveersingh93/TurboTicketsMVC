@@ -20,10 +20,10 @@ namespace TurboTicketsMVC.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ITTCompanyService _companyService;
         private readonly ITTRolesService _rolesService;
-
         public CompaniesController(ApplicationDbContext context,
                                    ITTCompanyService companyService,
-                                   ITTRolesService rolesService)
+                                   ITTRolesService rolesService
+                                  )
         {
             _context = context;
             _companyService = companyService;
@@ -37,6 +37,8 @@ namespace TurboTicketsMVC.Controllers
         //                  View(await _context.Companies.ToListAsync()) :
         //                  Problem("Entity set 'ApplicationDbContext.Companies'  is null.");
         //}
+
+ 
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -115,20 +117,15 @@ namespace TurboTicketsMVC.Controllers
             //navigate
         }
         // GET: Companies/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [Authorize]
+        public async Task<IActionResult> Details()
         {
-            if (id == null || _context.Companies == null)
-            {
-                return NotFound();
-            }
+            Company? company = await _companyService.GetCompanyInfoAsync(_companyId);
 
-            var company = await _context.Companies
-                .FirstOrDefaultAsync(m => m.Id == id);
             if (company == null)
             {
                 return NotFound();
             }
-
             return View(company);
         }
 
@@ -242,6 +239,29 @@ namespace TurboTicketsMVC.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> UserProfile(string? email)
+        {
+            if (email == null)
+            {
+                return NotFound();
+            }
+            TTUser? user = await _companyService.GetUserByEmail(email, _companyId);
+            return View(user);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> EmailUser(string? email)
+        {
+            if (email == null)
+            {
+                return NotFound();
+            }
+            TTUser? user = await _companyService.GetUserByEmail(email, _companyId);
+            return View(user);
+        }
         private bool CompanyExists(int id)
         {
             return (_context.Companies?.Any(e => e.Id == id)).GetValueOrDefault();

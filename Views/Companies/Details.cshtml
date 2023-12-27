@@ -1,42 +1,184 @@
-﻿@model TurboTicketsMVC.Models.Company
+﻿@using Microsoft.AspNetCore.Identity;
+@using TurboTicketsMVC.Models.Enums;
+@using TurboTicketsMVC.Services.Interfaces;
+@model TurboTicketsMVC.Models.Company
+@inject ITTFileService _FileService;
+@inject ITTRolesService _RoleService;
+@inject UserManager<TTUser> _UserManager;
 
 @{
     ViewData["Title"] = "Details";
+    bool isAdmin = User.IsInRole("Admin");
+    List<TTUser> admins = new List<TTUser>();
+    List<TTUser> projectManagers = new List<TTUser>();
+    List<TTUser> developers = new List<TTUser>();
+    List<TTUser> submitters = new List<TTUser>();
+
+    foreach (TTUser member in Model.Members)
+    {
+        if (await _RoleService.IsUserInRoleAsync(member, nameof(TTRoles.Admin)))
+        {
+            admins.Add(member);
+        }
+        else if (await _RoleService.IsUserInRoleAsync(member, nameof(TTRoles.ProjectManager)))
+        {
+            projectManagers.Add(member);
+        }
+        else if (await _RoleService.IsUserInRoleAsync(member, nameof(TTRoles.Developer)))
+        {
+            developers.Add(member);
+        }
+        else if (await _RoleService.IsUserInRoleAsync(member, nameof(TTRoles.Submitter)))
+        {
+            submitters.Add(member);
+        }
+    }
 }
+<link rel="stylesheet" href="~/gogi/vendors/dataTable/datatables.min.css" type="text/css">
 
-<h1>Details</h1>
 
-<div>
-    <h4>Company</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageFormData)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageFormData)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageFormType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageFormType)
-        </dd>
-    </dl>
+<div class="content">
+    <div class="page-header">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h3>Company Details</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Company Details</li>
+                    </ol>
+                </nav>
+            </div>
+            @if (isAdmin)
+            {
+                <a asp-controller="Companies" asp-action="Edit" asp-route-id="@Model.Id">
+                    <div class="btn btn-primary">
+                        Edit
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <div class="card border border-dark">
+                <div class="card-body">
+                    <img class="img-fluid" src="@_FileService.ConvertByteArrayToFile(Model.ImageFormData, Model.ImageFormType, DefaultImage.CompanyImage)" />
+                    <hr />
+                    <p class="m-1"><span class="text-muted">Name: </span>@Model.Name</p>
+                    <p class="m-1"><span class="text-muted">Description: </span>@Model.Description</p>
+                    <hr />                 
+                </div>
+            </div>
+
+        </div>
+        <div class="col-12 col-md-8">
+            @if (Model.Members.Count() > 0)
+            {
+                <h3>Members</h3>
+                <table id="example1" class="table table-striped table-bordered" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>
+                                Name
+                            </th>
+                            <th>
+                                Roles
+                            </th>
+                            <th>
+
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (TTUser member in admins)
+                        {
+                            <tr>
+                                <td>@member.FullName</td>
+                                <td class="text-center">
+                                    <div class="badge rounded-pill danger-bg">Admin</div>
+                                </td>
+                                <td class="d-flex flex-column flex-md-row align-items-center justify-content-center">
+                                    <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                        Profile
+                                    </a>
+                                    <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                        Email
+                                    </a>
+                                    
+                                </td>
+                            </tr>
+                        }
+                        @foreach (TTUser member in projectManagers)
+                        {
+                            <tr>
+                                <td>@member.FullName</td>
+                                <td class="text-center">
+                                    <div class="badge rounded-pill dark-bg">Project Manager</div>
+                                </td>
+                                <td class="d-flex flex-column flex-md-row align-items-center justify-content-center">
+                                    <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                        Profile
+                                    </a>
+                                    <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                        Email
+                                    </a>
+                                    
+                                </td>
+                            </tr>
+                        }
+                        @foreach (TTUser member in developers)
+                        {
+                            <tr>
+                                <td>@member.FullName</td>
+                                <td class="text-center">
+                                    <div class="badge rounded-pill secondary-bg">Developer</div>
+                                </td>
+                                <td class="d-flex flex-column flex-md-row align-items-center justify-content-center">
+                                    <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                        Profile
+                                    </a>
+                                    <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                        Email
+                                    </a>
+                                    
+                                </td>
+                            </tr>
+                        }
+                        @foreach (TTUser member in submitters)
+                        {
+                            <tr>
+                                <td>@member.FullName</td>
+                                <td class="text-center">
+                                    <div class="badge rounded-pill warning-bg">Submitter</div>
+                                </td>
+                                <td class="d-flex flex-column flex-md-row align-items-center justify-content-center">
+                                    <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                        Profile
+                                    </a>
+                                    <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                        Email
+                                    </a>
+                                    
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <h4 class="text-muted text-center">No members</h4>
+            }
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+
+@section Scripts {
+    <script src="~/gogi/vendors/dataTable/datatables.min.js"></script>
+    <script src="~/gogi/assets/js/examples/datatable.js"></script>
+}
