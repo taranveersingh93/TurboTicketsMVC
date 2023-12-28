@@ -60,7 +60,12 @@
                                 }
                                 else
                                 {
-                                    <h6 class="text-center text-muted my-2">No Project Manager Assigned</h6>
+                                        <h6 class="text-center text-muted mb-2">No Project Manager Assigned</h6>
+                                    <div class="d-flex flex-column justify-content-evenly align-items-center">
+                                        <a class="btn btn-warning btn-sm" role="button" asp-controller="Projects" asp-action="AssignPM" asp-route-id="@project.Id">Assign PM</a>
+                                    </div>
+
+
                                 }
                             </div>
                             <div class="py-3 border-bottom-gray">

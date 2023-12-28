@@ -337,6 +337,7 @@ namespace TurboTicketsMVC.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AssignPM(int? id)
         {
             if (id == null)
@@ -368,6 +369,8 @@ namespace TurboTicketsMVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> AssignPM(AssignPMViewModel viewModel)
         {
             if (!string.IsNullOrEmpty(viewModel.PMId))
