@@ -1,8 +1,22 @@
-﻿@using TurboTicketsMVC.Models.ViewModels;
+﻿@using Microsoft.AspNetCore.Identity;
+@using TurboTicketsMVC.Models.ViewModels;
+@using TurboTicketsMVC.Services.Interfaces;
 @model AssignTicketViewModel
-
+@inject ITTProjectService _ProjectService;
+@inject UserManager<TTUser> _UserManager;
 @{
-
+    TTUser? user = await _UserManager.GetUserAsync(User);
+    TTUser? projectManager = await _ProjectService.GetProjectManagerAsync(Model.Ticket!.ProjectId);
+    bool isAdmin = User.IsInRole("Admin");
+    bool isPm = false;
+    if (projectManager != null)
+    {
+        isPm = user!.Id == projectManager.Id;
+    }
+    bool pmAvailable = Enumerable.Count(ViewBag.ProjectManagers) > 0;
+    bool developersAvailable = Enumerable.Count(ViewBag.Developers) > 0;
+    bool submittersAvailable = Enumerable.Count(ViewBag.Submitters) > 0;
+    Project project = await _ProjectService.GetProjectByIdAsync(Model.Ticket!.ProjectId, user.CompanyId);
 }
 
 <div class="content">
@@ -27,13 +41,13 @@
     </div>
 
     <div class="row">
-        <div class="col-12">
+        <div class="col-12 col-md-6">
             <div class="card">
                 <div class="card-body">
                     @if (Model.DevelopersAvailable) {
                     <form method="post" asp-action="AssignTicket" asp-controller="Tickets">
                         <input asp-for="@Model.Ticket!.Id" hidden />
-                        <p>Description:  @Model.Ticket.Description</p>
+                            <h5>Title:  <span class="text-primary">@Model.Ticket.Title</span></h5>
                         <div class="form-group">
                             <label class="col-form-label">Select Developer</label>
                             <select required asp-for="DeveloperId" class="form-control" asp-items="@Model.Developers">
@@ -50,11 +64,9 @@
                         @if(User.IsInRole("Admin")) {
                             <div class="d-flex justify-content-center">
 
-                            <a asp-controller="Companies" asp-action="ManageUserRoles">
-                                <div class="btn btn-warning">
-                                    Manage Roles
-                                </div>
-                            </a>
+                            <button class="btn btn-warning" id="editTeam" data-bs-toggle="modal" data-bs-target="#editTeamModal">
+                                    Edit Team
+                            </button>
                             </div>
                         }
                     }
@@ -66,3 +78,71 @@
 </div>
 
 
+@if (isAdmin || isPm)
+{
+    <div class="modal fade" id="editTeamModal" tabindex="-1" aria-labelledby="editTeamModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="EditTeam" asp-controller="Projects" method="Post">
+                    <input type="hidden" value="@project.Id" name="ProjectId" />
+                    <input type="hidden" value="Details" name="redirect" />
+
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Team</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if (isAdmin)
+                        {
+                            <div class="form-group">
+                                <label for="projectManagerSelect" class="control-label">Project Manager</label>
+                                @if (pmAvailable)
+                                {
+                                    <select name="projectManagerId" id="projectManagerSelect" class="form-control dropdown-toggle" asp-items="ViewBag.ProjectManagers"></select>
+                                }
+                                else
+                                {
+                                    <h6 class="text-muted text-center">No company member, with a PM role, available.</h6>
+                                }
+                            </div>
+                        }
+                        @if (isPm)
+                        {
+                            <input type="hidden" name="ProjectManagerId" value="@projectManager!.Id" />
+                        }
+                        <div class="form-group">
+                            <label for="developerTeamSelect" class="control-label">Developers</label>
+                            @if (developersAvailable)
+                            {
+                                <select name="DeveloperIds" id="developerTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Developers" multiple></select>
+                            }
+                            else
+                            {
+                                <h6 class="text-muted text-center">No company member, with a developer role, available.</h6>
+                            }
+                        </div>
+                        <div class="form-group">
+                            <label for="submitterTeamSelect" class="control-label">Submitters</label>
+                            @if (submittersAvailable)
+                            {
+                                <select name="SubmitterIds" id="submitterTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Submitters" multiple></select>
+                            }
+                            else
+                            {
+                                <h6 class="text-muted text-center">No company member, with a submitter role, available.</h6>
+                            }
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        @if (isAdmin)
+                        {
+                            <a role="button" class="btn btn-secondary" asp-controller="Companies" asp-action="ManageUserRoles">Manage Roles</a>
+                        }
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

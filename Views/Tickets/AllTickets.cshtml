@@ -6,7 +6,9 @@
 @inject ITTTicketService _TicketService;
 @{
     ViewData["Title"] = "All Tickets";
-    string? userId = _UserManager.GetUserId(User);
+    TTUser? user = await _UserManager.GetUserAsync(User)!;
+    string? userId = user!.Id;
+    int? companyId = user.CompanyId;
 }
 <link rel="stylesheet" href="~/gogi/vendors/dataTable/datatables.min.css" type="text/css">
 
@@ -160,10 +162,19 @@
                                         else
                                         {
                                             <td class="text-center">
-                                                <div class="badge badge-pill bg-danger">
-                                                    Unassigned
+                                                @if (await _TicketService.CanAssignDeveloper(userId, item.Id, companyId))
+                                                {
+                                                    <a class="btn btn-sm btn-warning" asp-controller="Tickets" asp-action="AssignTicket" asp-route-id="@item.Id">
+                                                        Assign Ticket
+                                                    </a>
+                                                }
+                                                else
+                                                {
 
-                                                </div>
+                                                    <div class="badge badge-pill bg-danger">
+                                                        Unassigned
+                                                    </div>
+                                                }
                                             </td>
                                         }
                                         <td>

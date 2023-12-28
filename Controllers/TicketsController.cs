@@ -84,10 +84,28 @@ namespace TurboTicketsMVC.Controllers
 
             if (canActOnTicket || canViewTicket)
             {
-
+                //assigning dev
                 IEnumerable<TTUser> projectDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
-                ViewData["Developers"] = new SelectList(projectDevelopers, "Id", "FullName", ticket.DeveloperUserId);
+                ViewData["ProjectDevelopers"] = new SelectList(projectDevelopers, "Id", "FullName", ticket.DeveloperUserId);
+                //editing project team modal
+                IEnumerable<TTUser> companyManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
+                IEnumerable<TTUser> companyDevelopers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+                IEnumerable<TTUser> companySubmitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
+                IEnumerable<TTUser> selectedDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
+                IEnumerable<TTUser> selectedSubmitters = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Submitter), _companyId);
+                TTUser? projectManager = await _projectService.GetProjectManagerAsync(ticket.ProjectId);
+                string? projectManagerId = string.Empty;
+                if (projectManager != null)
+                {
+                    projectManagerId = projectManager.Id;
+                }
+                IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
+                IEnumerable<string> submitterIds = selectedSubmitters.Select(s => s.Id);
 
+
+                ViewData["CompanyManagers"] = new SelectList(companyManagers, "Id", "FullName", projectManagerId);
+                ViewData["CompanyDevelopers"] = new MultiSelectList(companyDevelopers, "Id", "FullName", developerIds);
+                ViewData["CompanySubmitters"] = new MultiSelectList(companySubmitters, "Id", "FullName", submitterIds);
                 return View(ticket);
             }
             return NotFound();
@@ -251,6 +269,26 @@ namespace TurboTicketsMVC.Controllers
                 {
                     assignTicketViewModel.DeveloperId = ticket.DeveloperUserId;
                 }
+
+                //Data for Viewbag for edit team modal
+                IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
+                IEnumerable<TTUser> developers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
+                IEnumerable<TTUser> submitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
+                IEnumerable<TTUser> selectedDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
+                IEnumerable<TTUser> selectedSubmitters = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Submitter), _companyId);
+                TTUser? projectManager = await _projectService.GetProjectManagerAsync(ticket.ProjectId);
+                string? projectManagerId = string.Empty;
+                if (projectManager != null)
+                {
+                    projectManagerId = projectManager.Id;
+                }
+                IEnumerable<string> developerIds = selectedDevelopers.Select(d => d.Id);
+                IEnumerable<string> submitterIds = selectedSubmitters.Select(s => s.Id);
+
+
+                ViewData["ProjectManagers"] = new SelectList(projectManagers, "Id", "FullName", projectManagerId);
+                ViewData["Developers"] = new MultiSelectList(developers, "Id", "FullName", developerIds);
+                ViewData["Submitters"] = new MultiSelectList(submitters, "Id", "FullName", submitterIds);
                 return View(assignTicketViewModel);
             }
             return NotFound();
