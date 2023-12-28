@@ -165,39 +165,45 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // GET: Companies/Edit/5
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Companies == null)
             {
                 return NotFound();
             }
-
-            var company = await _context.Companies.FindAsync(id);
-            if (company == null)
+            if (id == _companyId)
             {
-                return NotFound();
+                Company company = await _companyService.GetCompanyInfoAsync(_companyId);
+
+                if (company == null)
+                {
+                    return NotFound();
+                }
+                return View(company);
             }
-            return View(company);
+            return NotFound();
+
         }
 
         // POST: Companies/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,ImageFormData,ImageFormType")] Company company)
+        public async Task<IActionResult> Edit(Company? company)
         {
-            if (id != company.Id)
+            string? swalMessage = "Changes failed";
+            if (ModelState.IsValid && company != null)
             {
-                return NotFound();
-            }
 
-            if (ModelState.IsValid)
-            {
                 try
                 {
-                    _context.Update(company);
-                    await _context.SaveChangesAsync();
+                    await _companyService.UpdateCompanyAsync(company);
+                    swalMessage = "Changes successful";
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -210,9 +216,8 @@ namespace TurboTicketsMVC.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            return View(company);
+            return RedirectToAction(nameof(Details), new { swalMessage });
         }
 
         // GET: Companies/Delete/5
@@ -309,6 +314,7 @@ namespace TurboTicketsMVC.Controllers
                 {
                     swalMessage = "Email failed. Something went wrong";
                 }
+
 
                 return RedirectToAction(nameof(Details), new { swalMessage });
             }

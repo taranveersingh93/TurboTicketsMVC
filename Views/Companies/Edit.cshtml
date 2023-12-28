@@ -1,48 +1,77 @@
-﻿@model TurboTicketsMVC.Models.Company
+﻿@using TurboTicketsMVC.Models.Enums;
+@using TurboTicketsMVC.Services.Interfaces;
+@model TurboTicketsMVC.Models.Company
+@inject ITTFileService _fileService;
 
 @{
     ViewData["Title"] = "Edit";
 }
+<div class="content">
+    <div class="page-header">
+        <div class="d-flex justify-content-between">
+            <div>
+                <h3>Edit Company</h3>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Companies" asp-action="Details" asp-route-id="@Model.Id">Company Details</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Edit Company</li>
+                    </ol>
+                </nav>
 
-<h1>Edit</h1>
+            </div>
+        </div>
+    </div>
 
-<h4>Company</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="Edit" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" value="@Model.Id" />
+                        <input type="hidden" asp-for="Members" value="@Model.Members" />
+                        <input type="hidden" asp-for="Projects" value="@Model.Projects" />
+                        <input type="hidden" asp-for="Invites" value="@Model.Invites" />
+
+                        <div class="form-group">
+                            @* <label asp-for="Input.ImageData" style="width: 100%;"></label> *@
+
+                            <img id="userImage" class="img-fluid img-thumbnail rounded" src="@_fileService.ConvertByteArrayToFile(Model.ImageFormData,Model.ImageFormType,DefaultImage.CompanyImage)" />
+
+                            <input type="file" asp-for="@Model.ImageFormFile" class="form-control" accept=".png,.jpg,.jpeg,.gif,.tif"
+                                   style="border:0px!important;padding: 0px;padding-top: 10px;padding-bottom: 30px;"
+                                   onchange="document.getElementById('userImage').src = window.URL.createObjectURL(this.files[0])" />
+
+                            <span asp-validation-for="@Model.ImageFormFile" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label">Company Name</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label"></label>
+                            <textarea asp-for="Description" id="editor" class="form-control form-control-lg" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                       
+
+                        <div class="form-group">
+                            <input type="submit" value="Save" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageFormData" class="control-label"></label>
-                <input asp-for="ImageFormData" class="form-control" />
-                <span asp-validation-for="ImageFormData" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageFormType" class="control-label"></label>
-                <input asp-for="ImageFormType" class="form-control" />
-                <span asp-validation-for="ImageFormType" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

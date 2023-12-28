@@ -188,7 +188,7 @@
     <script>
         var swalMessage = "@swalMessage";
         if (swalMessage) {
-            if (swalMessage.includes("sent")) {
+            if (swalMessage.includes("sent") || swalMessage.includes("successful")) {
                 Swal.fire(
                     {
                         title: 'Success',

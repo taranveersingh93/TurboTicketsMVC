@@ -10,14 +10,17 @@ namespace TurboTicketsMVC.Services
         private readonly ApplicationDbContext _context;
         private readonly ITTProjectService _projectService;
         private readonly ITTInviteService _inviteService;
+        private readonly ITTFileService _fileService;
 
         public TTCompanyService(ApplicationDbContext context,
                                 ITTProjectService projectService,
-                                ITTInviteService inviteService)
+                                ITTInviteService inviteService,
+                                ITTFileService fileService)
         {
             _inviteService = inviteService;
             _projectService = projectService;
             _context = context;
+            _fileService = fileService;
         }
         public async Task<Company> GetCompanyInfoAsync(int? companyId)
         {
@@ -108,6 +111,28 @@ namespace TurboTicketsMVC.Services
                     TTUser? user = await _context.Users
                         .FirstOrDefaultAsync(u => u.Email == email && u.CompanyId == companyId);
                     return user;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task UpdateCompanyAsync(Company? company)
+        {
+            try
+            {
+                if(company != null)
+                {
+                    if (company.ImageFormFile != null)
+                    {
+                        company.ImageFormData = await _fileService.ConvertFileToByteArrayAsync(company.ImageFormFile);
+                        company.ImageFormType = company.ImageFormFile.ContentType;
+                    }
+                    _context.Update(company);
+                   await _context.SaveChangesAsync();
                 }
             }
             catch (Exception)
