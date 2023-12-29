@@ -33,7 +33,7 @@ namespace TurboTicketsMVC.Services.Interfaces
 
         public Task<IEnumerable<Ticket>> GetTicketsByPMIdAsync(string? userId, int? companyId);
         public Task ChangeTicketStatus(int? ticketId, int? companyId, TTTicketStatuses status);
-
+        public Task ResolveTicketAsync(Ticket? ticket);
 
     }
 }

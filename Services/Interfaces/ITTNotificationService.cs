@@ -16,7 +16,7 @@ namespace TurboTicketsMVC.Services.Interfaces
 
         public Task<bool> SendEmailNotificationAsync(Notification? notification, string? emailSubject);
 
-        public Task<bool> TicketUpdateNotificationAsync(int? ticketId, string? ticketUserId, string? ticketNotificationType);
+        public Task<bool> TicketUpdateNotificationAsync(int? ticketId, string? ticketUserId, string? ticketNotificationType, string? assignerId);
         public Task<bool> ProjectUpdateNotificationAsync(int? projectId, string? projectUserId, string projectNotificationType);
         public Task MarkNotificationRead(Notification? notification);
         public Task<Notification> GetNotificationAsync(int? id);

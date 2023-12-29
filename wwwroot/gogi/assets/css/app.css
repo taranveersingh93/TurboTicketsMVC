@@ -1545,7 +1545,7 @@ textarea {
 
 .bg-success {
   background: #34cd86 !important;
-  color: white !important;
+  color: var(--color-dark) !important;
 }
 
 .bg-success.bg-hover {
@@ -2383,7 +2383,7 @@ a.btn[href="#previous"]:hover {
 }
 
 .btn.btn-success {
-  color: white !important;
+  color: white ;
   background: #34cd86;
   border-color: #34cd86;
   cursor: pointer;

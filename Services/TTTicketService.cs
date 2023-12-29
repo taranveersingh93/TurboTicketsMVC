@@ -217,7 +217,7 @@ namespace TurboTicketsMVC.Services
 				ticket = await _context.Tickets
 	                            .Include(t => t.DeveloperUser)
 	                            .Include(t => t.Project)
-								.Include(t => t.History)
+								.Include(t => t.History.OrderByDescending(h => h.CreatedDate))
                                     .ThenInclude(h => h.User)
 								.Include(t => t.SubmitterUser)
                                 .Include(t => t.Attachments)
@@ -470,6 +470,25 @@ namespace TurboTicketsMVC.Services
                 ticket.TicketStatus = status;
                 await UpdateTicketAsync(ticket);
             }
+        }
+        public async Task ResolveTicketAsync(Ticket? ticket)
+        {
+            try
+            {
+                if (ticket != null)
+                {
+                    ticket.TicketStatus = TTTicketStatuses.Resolved;
+                    await UpdateTicketAsync(ticket);
+                }
+
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
         }
     }
 }

@@ -24,7 +24,6 @@ namespace TurboTicketsMVC.Services
         #region Add History 1
         public async Task AddHistoryAsync(Ticket? oldTicket, Ticket? newTicket, string? userId) {
             TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            // NEW TICKET HAS BEEN ADDED
             if (oldTicket == null && newTicket != null)
             {
                 TicketHistory history = new()
@@ -127,6 +126,22 @@ namespace TurboTicketsMVC.Services
                         CreatedDate = DateTimeOffset.Now,
                         UserId = userId,
                         Description = $"New ticket Type: {newTicket?.TicketType!.ToString()}"
+                    };
+                    await _context.TicketHistories.AddAsync(history);
+                }
+
+                //Check Ticket archival
+                if (oldTicket?.Archived != newTicket?.Archived)
+                {
+                    TicketHistory? history = new()
+                    {
+                        TicketId = newTicket!.Id,
+                        PropertyName = "Archive Status",
+                        OldValue = oldTicket!.Archived.ToString(),
+                        NewValue = newTicket.Archived.ToString(),
+                        CreatedDate = DateTimeOffset.Now,
+                        UserId = userId,
+                        Description = $"Ticket Archive status changed: {newTicket?.Archived!.ToString()}"
                     };
                     await _context.TicketHistories.AddAsync(history);
                 }

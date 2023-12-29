@@ -357,6 +357,18 @@
                                     else if (history.PropertyName!.Equals("Ticket Attachment Removed"))
                                     {
                                         <p>A Ticket attachment was removed by <b>@history.User.FullName</b></p>
+                                    } else if(history.PropertyName.Equals("Archive Status"))
+                                    {
+                                        if(history.OldValue == "False") {
+                                            <p>The Ticket was archived by <b>@history.User.FullName</b></p>
+
+                                        } else
+                                        {
+                                            <p>The ticket was restored by <b>@history.User.FullName</b></p>
+
+                                        }
+
+                                        
                                     }
                                     else
                                     {

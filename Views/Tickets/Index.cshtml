@@ -191,9 +191,9 @@
                                                 {
                                                     <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id" class="btn btn-sm btn-danger" role="button">Archive</a>
                                                 }
-                                                @if(User.IsInRole("Developer"))
+                                                @if(User.IsInRole("Developer") && item.TicketStatus != TTTicketStatuses.Resolved )
                                                 {
-                                                    <a asp-controller="Tickets" asp-action="Resolve" asp-route-id="@item.Id" class="btn btn-sm btn-success" role="button">Resolve</a>
+                                                    <a asp-controller="Tickets" asp-action="Resolve" asp-route-id="@item.Id" class="btn btn-sm btn-success text-dark" role="button">Resolve</a>
 
                                                 }
                                             }
