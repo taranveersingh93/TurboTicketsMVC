@@ -133,6 +133,27 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
+
+        public async Task<bool> NotifyDeveloperOfAssignment(Notification? notification, TTUser? ticketUser)
+        {
+            try
+            {
+                if (notification != null && ticketUser != null)
+                {        
+                    await AddNotificationAsync(notification);
+                    await SendEmailNotificationAsync(notification, notification.Title);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
         //an update notification to PM if one exists or the sender.
         //WHAT IF SENDER AND PM unassigned?. Should we send it to the developer?
         //when will devId be used?
@@ -180,10 +201,11 @@ namespace TurboTicketsMVC.Services
                     }
                     else if (ticketNotificationType == "AssignedTicket")
                     {
-                        notification.Title = "Ticket Updated";
-                        notification.Message = $"Ticket: {ticket.Title} was assigned by {projectManager?.FullName ?? admin?.FullName}";
+                        notification.Title = "Ticket Assigned";
+                        notification.Message = $"Ticket: {ticket.Title} was assigned to you by {projectManager?.FullName ?? admin?.FullName}";
                         notification.SenderId = projectManager?.Id ?? admin?.Id;
                         notification.RecipientId = ticketUserId;
+                        await NotifyDeveloperOfAssignment(notification, ticketUser);
                         
                     }
                     else if (ticketNotificationType == "CommentAdded")

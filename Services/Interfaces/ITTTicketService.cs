@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Models.Enums;
 
 namespace TurboTicketsMVC.Services.Interfaces
 {
@@ -31,6 +32,8 @@ namespace TurboTicketsMVC.Services.Interfaces
         public Task<bool> CanMakeTickets(string? userId, int? projectId, int? companyId);
 
         public Task<IEnumerable<Ticket>> GetTicketsByPMIdAsync(string? userId, int? companyId);
+        public Task ChangeTicketStatus(int? ticketId, int? companyId, TTTicketStatuses status);
+
 
     }
 }

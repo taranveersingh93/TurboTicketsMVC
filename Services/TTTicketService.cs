@@ -462,5 +462,14 @@ namespace TurboTicketsMVC.Services
                 throw;
             }
         }
+        public async Task ChangeTicketStatus(int? ticketId,int? companyId, TTTicketStatuses status)
+        {
+            if(ticketId != null && companyId != null)
+            {
+                Ticket? ticket = await GetTicketByIdAsync(ticketId, companyId);
+                ticket.TicketStatus = status;
+                await UpdateTicketAsync(ticket);
+            }
+        }
     }
 }

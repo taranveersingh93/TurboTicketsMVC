@@ -307,17 +307,30 @@ namespace TurboTicketsMVC.Controllers
          //multiple active result sets
 
             Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(assignTicketViewModel.Ticket!.Id, _companyId);
+            bool canAssignDeveloper = await _ticketService.CanAssignDeveloper(_userId, oldTicket.Id, _companyId);
             try
             {
-                if (assignTicketViewModel != null && assignTicketViewModel.Ticket != null && assignTicketViewModel.DeveloperId != null)
+                if (canAssignDeveloper && assignTicketViewModel != null && assignTicketViewModel.Ticket != null && assignTicketViewModel.DeveloperId != null)
                 {
                     Ticket ticket = assignTicketViewModel.Ticket;
+                    if (ticket.TicketStatus == TTTicketStatuses.New)
+                    {
+                        await _ticketService.ChangeTicketStatus(ticket.Id, _companyId, TTTicketStatuses.Development);
+                        //Add History
+                        Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
+                        await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+
+                        //Notify
+                        await _notificationService.TicketUpdateNotificationAsync(ticket.Id, _userId, nameof(TTTicketNotificationTypes.UpdateTicket));
+
+                        //Reassign old ticket
+                        oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(assignTicketViewModel.Ticket!.Id, _companyId);
+                    }
                     ticket.DeveloperUserId = assignTicketViewModel.DeveloperId;
                     await _ticketService.AssignTicketAsync(ticket.Id, ticket.DeveloperUserId);
-
                     //Add History
-                    Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
-                    await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+                    Ticket? newerTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticket.Id, _companyId);
+                    await _ticketHistoryService.AddHistoryAsync(oldTicket, newerTicket, _userId);
 
                     //Notify
                     await _notificationService.TicketUpdateNotificationAsync(ticket.Id, assignTicketViewModel.DeveloperId, nameof(TTTicketNotificationTypes.AssignedTicket));
@@ -353,11 +366,25 @@ namespace TurboTicketsMVC.Controllers
                 {
                     if (ticketId != null && developerId != null)
                     {
+                        if (oldTicket.TicketStatus == TTTicketStatuses.New)
+                        {
+                            await _ticketService.ChangeTicketStatus(oldTicket.Id, _companyId, TTTicketStatuses.Development);
+                            //Add History
+                            Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(oldTicket.Id, _companyId);
+                            await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+
+                            //Notify
+                            await _notificationService.TicketUpdateNotificationAsync(newTicket.Id, _userId, nameof(TTTicketNotificationTypes.UpdateTicket));
+
+                            //Reassign old ticket
+                            oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(newTicket.Id, _companyId);
+                        }
+
                         await _ticketService.AssignTicketAsync(ticketId, developerId);
 
                         //Add History
-                        Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketId, _companyId);
-                        await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+                        Ticket? newerTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketId, _companyId);
+                        await _ticketHistoryService.AddHistoryAsync(oldTicket, newerTicket, _userId);
 
                         //Notify
                         await _notificationService.TicketUpdateNotificationAsync(ticketId, developerId, nameof(TTTicketNotificationTypes.AssignedTicket));

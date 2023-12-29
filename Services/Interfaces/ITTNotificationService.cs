@@ -23,6 +23,7 @@ namespace TurboTicketsMVC.Services.Interfaces
 
         public Task<bool> NotifyDeveloper(Ticket? ticket, TTUser? ticketUser);
 
+        public Task<bool> NotifyDeveloperOfAssignment(Notification? notification, TTUser? ticketUser);
 
 
     }

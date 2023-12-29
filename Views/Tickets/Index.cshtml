@@ -191,6 +191,11 @@
                                                 {
                                                     <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id" class="btn btn-sm btn-danger" role="button">Archive</a>
                                                 }
+                                                @if(User.IsInRole("Developer"))
+                                                {
+                                                    <a asp-controller="Tickets" asp-action="Resolve" asp-route-id="@item.Id" class="btn btn-sm btn-success" role="button">Resolve</a>
+
+                                                }
                                             }
                                         </td>
                                     </tr>
