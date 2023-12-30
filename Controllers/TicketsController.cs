@@ -58,13 +58,65 @@ namespace TurboTicketsMVC.Controllers
             return View(userTickets);
         }
 
+        public async Task<IActionResult> ActiveTickets()
+        {
+            IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByCompanyIdAsync(_companyId);
+            IEnumerable<Ticket> activeTickets = userTickets.Where(t => t.TicketStatus != TTTicketStatuses.Resolved).ToList();
+
+            return View(activeTickets);
+        }
+
+        public async Task<IActionResult> ResolvedTickets()
+        {
+            IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByCompanyIdAsync(_companyId);
+            IEnumerable<Ticket> resolvedTickets = userTickets.Where(t => t.TicketStatus == TTTicketStatuses.Resolved).ToList();
+
+            return View(resolvedTickets);
+        }
+
         [Authorize(Roles = "Admin, ProjectManager")]
 
         public async Task<IActionResult> AllTickets()
         {
-            IEnumerable<Ticket> tickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
+            IEnumerable<Ticket> allTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
 
-            return View(tickets);
+            return View(allTickets);
+        }
+
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> ArchivedTickets()
+        {
+            IEnumerable<Ticket> allTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
+            IEnumerable<Ticket> archivedTickets = allTickets.Where(t => t.Archived || t.ArchivedByProject).ToList();
+
+            return View(archivedTickets);
+        }
+
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> UnarchivedTickets()
+        {
+            IEnumerable<Ticket> allTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
+            IEnumerable<Ticket> unarchivedTickets = allTickets.Where(t => !t.Archived && !t.ArchivedByProject).ToList();
+
+            return View(unarchivedTickets);
+        }
+
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> UnassignedTickets()
+        {
+            IEnumerable<Ticket> allTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
+            IEnumerable<Ticket> unassignedTickets = allTickets.Where(t => t.DeveloperUserId == null).ToList();
+
+            return View(unassignedTickets);
+        }
+
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> AssignedTickets()
+        {
+            IEnumerable<Ticket> allTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
+            IEnumerable<Ticket> assignedTickets = allTickets.Where(t => t.DeveloperUserId != null).ToList();
+
+            return View(assignedTickets);
         }
 
         // GET: Tickets/Details/5

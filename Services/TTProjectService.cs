@@ -478,6 +478,35 @@ namespace TurboTicketsMVC.Services
             }
             return false;
         }
+
+        public async Task<IEnumerable<Project>> GetAssignedProjects(int? companyId)
+        {
+            IEnumerable<Project> allProjects = await GetAllProjectsByCompanyIdAsync(companyId);
+            List<Project> assignedProjects = new();
+            foreach(Project project in allProjects)
+            {
+                if ((await GetProjectManagerAsync(project.Id)) != null) {
+                    assignedProjects.Add(project);
+                }
+            }
+            IEnumerable<Project> projects = assignedProjects;
+            return projects;
+        }
+
+        public async Task<IEnumerable<Project>> GetUnassignedProjects(int? companyId)
+        {
+            IEnumerable<Project> allProjects = await GetAllProjectsByCompanyIdAsync(companyId);
+            List<Project> unassignedProjects = new();
+            foreach (Project project in allProjects)
+            {
+                if ((await GetProjectManagerAsync(project.Id)) == null)
+                {
+                    unassignedProjects.Add(project);
+                }
+            }
+            IEnumerable<Project> projects = unassignedProjects;
+            return projects;
+        }
     }
 }
 

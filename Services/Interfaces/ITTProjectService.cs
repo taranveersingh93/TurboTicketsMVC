@@ -27,6 +27,8 @@ namespace TurboTicketsMVC.Services.Interfaces
         public Task UpdateProjectAsync(Project? project);
         public Task<bool> IsUserPmAsync(int? projectId, string userId);
         public Task<bool> CanViewProject(int? projectId, string userId, int? companyId);
+        public Task<IEnumerable<Project>> GetAssignedProjects(int? companyId);
+        public Task<IEnumerable<Project>> GetUnassignedProjects(int? companyId);
 
     }
 }

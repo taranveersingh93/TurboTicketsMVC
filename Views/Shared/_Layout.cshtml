@@ -375,43 +375,79 @@
                             </a>
                         </li>
                         <li>
-                            <a class="navigation-item" id="nav-Tickets" asp-controller="Tickets" asp-action="Index">
+                            <a href="#">
                                 <span class="nav-link-icon">
                                     <i class="bi bi-file-earmark-check"></i>
                                 </span>
                                 <span>Tickets</span>
                             </a>
+       
+                            <ul>
+                                @if (isPM || isAdmin)
+                                {
+                                    <li>
+                                        <a asp-controller="Tickets" asp-action="AllTickets">All Tickets</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Tickets" asp-action="ArchivedTickets">Archived Tickets</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Tickets" asp-action="UnarchivedTickets">Unarchived Tickets</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Tickets" asp-action="AssignedTickets">Assigned Tickets</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Tickets" asp-action="UnassignedTickets">Unassigned Tickets</a>
+                                    </li>
+                                } else
+                                {
+                                    <li>
+                                        <a asp-controller="Tickets" asp-action="Index">My Tickets</a>
+                                    </li>
+                                }
+                                <li>
+                                    <a asp-controller="Tickets" asp-action="ActiveTickets">Active Tickets</a>
+                                </li>
+                                <li>
+                                    <a asp-controller="Tickets" asp-action="ResolvedTickets">Resolved Tickets</a>
+                                </li>
+             
+                            </ul>
                         </li>
-                        @if (isAdmin || isPM)
-                        {
-                            <li>
-                                <a class="navigation-item" id="nav-AllTickets" asp-controller="Tickets" asp-action="AllTickets">
-                                    <span class="nav-link-icon">
-                                        <i class="bi bi-file-earmark-check"></i>
-                                    </span>
-                                    <span>All Tickets</span>
-                                </a>
-                            </li>
-                        }
+
                         <li>
-                            <a class="navigation-item" id="nav-Projects" asp-controller="Projects" asp-action="Index">
+                            <a href="#">
                                 <span class="nav-link-icon">
                                     <i class="bi bi-folder"></i>
                                 </span>
                                 <span>Projects</span>
                             </a>
+                            <ul>
+                                @if (isPM || isAdmin)
+                                {
+                                    <li>
+                                        <a asp-controller="Projects" asp-action="AllProjects">All Projects</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Projects" asp-action="ArchivedProjects">Archived Projects</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Projects" asp-action="UnarchivedProjects">Unarchived Projects</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Projects" asp-action="AssignedProjects">Assigned Projects</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Projects" asp-action="UnassignedProjects">Unassigned Projects</a>
+                                    </li>
+                                }
+                                <li>
+                                    <a asp-controller="Projects" asp-action="Index">My Projects</a>
+                                </li>
+
+                            </ul>
                         </li>
-                        @if(isAdmin || isPM)
-                        {
-                            <li>
-                                <a class="navigation-item" id="nav-AllProjects" asp-controller="Projects" asp-action="AllProjects">
-                                    <span class="nav-link-icon">
-                                        <i class="bi bi-folder"></i>
-                                    </span>
-                                    <span>All Projects</span>
-                                </a>
-                            </li>
-                        }
                         <li>
                             <a class="navigation-item" id="nav-Invites" asp-controller="Invites" asp-action="Index">
                                 <span class="nav-link-icon">
@@ -456,10 +492,7 @@
                                 }
                             </ul>
                         </li>
-                        @if(isAdmin)
-                        {
-                                          
-                        }
+
                     </ul>
                 </div>
             </div>

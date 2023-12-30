@@ -59,6 +59,37 @@ namespace TurboTicketsMVC.Controllers
             IEnumerable<Project> allProjects = (await _projectService.GetAllProjectsByCompanyIdAsync(_companyId))!;
             return View(allProjects);
         }
+
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> ArchivedProjects()
+        {
+            IEnumerable<Project> allProjects = (await _projectService.GetAllProjectsByCompanyIdAsync(_companyId))!;
+            IEnumerable<Project> archivedProjects = allProjects.Where(p => p.Archived).ToList();
+            return View(archivedProjects);
+        }
+
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> UnarchivedProjects()
+        {
+            IEnumerable<Project> allProjects = (await _projectService.GetAllProjectsByCompanyIdAsync(_companyId))!;
+            IEnumerable<Project> unarchivedProjects = allProjects.Where(p => p.Archived == false).ToList();
+            return View(unarchivedProjects);
+        }
+
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> AssignedProjects()
+        {
+            IEnumerable<Project> assignedProjects = await _projectService.GetAssignedProjects(_companyId);
+            return View(assignedProjects);
+        }
+
+        [Authorize(Roles = "Admin, ProjectManager")]
+        public async Task<IActionResult> UnassignedProjects()
+        {
+            IEnumerable<Project> unassignedProjects = await _projectService.GetUnassignedProjects(_companyId);
+            return View(unassignedProjects);
+        }
+
         [Authorize]
         // GET: Projects/Details/5
         public async Task<IActionResult> Details(int? id)

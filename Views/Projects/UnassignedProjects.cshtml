@@ -8,7 +8,7 @@
 @inject UserManager<TTUser> _UserManager;
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Unassigned Projects";
     string swalMessage = ViewBag.SwalMessage;
 }
 
@@ -16,13 +16,13 @@
     <div class="page-header">
         <div class="d-flex justify-content-between">
             <div>
-                <h3>User Projects</h3>
+                <h3>Unassigned Projects</h3>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
                             <a asp-controller="Home" asp-action="Dashboard">Dashboard</a>
                         </li>
-                        <li class="breadcrumb-item active" aria-current="page">User Projects</li>
+                        <li class="breadcrumb-item active" aria-current="page">Unassigned Projects</li>
                     </ol>
                 </nav>
             </div>
