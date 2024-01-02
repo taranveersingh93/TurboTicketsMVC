@@ -18,7 +18,6 @@ using Microsoft.CodeAnalysis;
 
 namespace TurboTicketsMVC.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class InvitesController : TTBaseController
     {
         private readonly ApplicationDbContext _context;
@@ -47,6 +46,7 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // GET: Invites
+        [Authorize]
         public async Task<IActionResult> Index(string? swalMessage)
         {
             if (!string.IsNullOrEmpty(swalMessage))
@@ -57,29 +57,9 @@ namespace TurboTicketsMVC.Controllers
             return View(companyInvites);
         }
 
-        // GET: Invites/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Invites == null)
-            {
-                return NotFound();
-            }
-
-            var invite = await _context.Invites
-                .Include(i => i.Company)
-                .Include(i => i.Invitee)
-                .Include(i => i.Invitor)
-                .Include(i => i.Project)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (invite == null)
-            {
-                return NotFound();
-            }
-
-            return View(invite);
-        }
-
         // GET: Invites/Create
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Create()
         {
             int? companyId = User.Identity!.GetCompanyId();
@@ -94,6 +74,8 @@ namespace TurboTicketsMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Create([Bind("Id,ProjectId,InviteeEmail,InviteeFirstName,InviteeLastName,Message")] Invite invite)
         {
             ModelState.Remove("InvitorId");
@@ -166,6 +148,8 @@ namespace TurboTicketsMVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> InvalidateInvite(int? id)
         {
             if (id != null)
@@ -190,6 +174,8 @@ namespace TurboTicketsMVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> ResendInvite(int? id)
         {
             
@@ -258,105 +244,7 @@ namespace TurboTicketsMVC.Controllers
      
         }
 
-        // GET: Invites/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Invites == null)
-            {
-                return NotFound();
-            }
 
-            var invite = await _context.Invites.FindAsync(id);
-            if (invite == null)
-            {
-                return NotFound();
-            }
-            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", invite.CompanyId);
-            ViewData["InviteeId"] = new SelectList(_context.Users, "Id", "Id", invite.InviteeId);
-            ViewData["InvitorId"] = new SelectList(_context.Users, "Id", "Id", invite.InvitorId);
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", invite.ProjectId);
-            return View(invite);
-        }
-
-        // POST: Invites/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,InviteDate,JoinDate,CompanyToken,CompanyId,ProjectId,InvitorId,InviteeId,InviteeEmail,InviteeFirstName,InviteeLastName,Message,IsValid")] Invite invite)
-        {
-            if (id != invite.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(invite);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!InviteExists(invite.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", invite.CompanyId);
-            ViewData["InviteeId"] = new SelectList(_context.Users, "Id", "Id", invite.InviteeId);
-            ViewData["InvitorId"] = new SelectList(_context.Users, "Id", "Id", invite.InvitorId);
-            ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", invite.ProjectId);
-            return View(invite);
-        }
-
-        // GET: Invites/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Invites == null)
-            {
-                return NotFound();
-            }
-
-            var invite = await _context.Invites
-                .Include(i => i.Company)
-                .Include(i => i.Invitee)
-                .Include(i => i.Invitor)
-                .Include(i => i.Project)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (invite == null)
-            {
-                return NotFound();
-            }
-
-            return View(invite);
-        }
-
-        // POST: Invites/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Invites == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Invites'  is null.");
-            }
-            var invite = await _context.Invites.FindAsync(id);
-            if (invite != null)
-            {
-                _context.Invites.Remove(invite);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
         [HttpGet]
         [AllowAnonymous]
@@ -404,9 +292,6 @@ namespace TurboTicketsMVC.Controllers
             }
 
         }
-        private bool InviteExists(int id)
-        {
-            return (_context.Invites?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+       
     }
 }

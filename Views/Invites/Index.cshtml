@@ -117,21 +117,18 @@
                                         @if (isAdmin)
                                         {
                                             <td>
-
                                                 <form asp-controller="Invites" asp-action="ResendInvite" method="post">
                                                     <input type="hidden" name="id" value="@item.Id" />
-@*                                                     <input type="hidden" name="projectId" value="@item.ProjectId" />
-                                                    <input type="hidden" name="inviteeEmail" value="@item.InviteeEmail" />
-                                                    <input type="hidden" name="inviteeFirstName" value="@item.InviteeFirstName" />
-                                                    <input type="hidden" name="inviteeLastName" value="@item.InviteeLastName" />
-                                                    <input type="hidden" name="message" value="@item.Message" />  *@
                                                     <button class="btn-sm btn btn-primary" type="submit">Resend Invite</button>
-                                                </form>
+                                                </form>                                                 
+                                                @if(item.IsValid)
+                                                {
                                                 <form asp-controller="Invites" asp-action="InvalidateInvite">
                                                     <input type="hidden" name="id" value="@item.Id"/>
                                                     <button class="btn-sm btn btn-warning" type="submit">Invalidate Invite</button>
 
                                                 </form>
+                                                }
                                                 @* <a class="btn btn-sm btn-warning" asp-action="InvalidateInvite" asp-route-id="@item.Id">Invalidate</a> *@
 
                                             </td>

@@ -175,14 +175,9 @@ namespace TurboTicketsMVC.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CompanyExists(company.Id))
-                    {
+                  
                         return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    
                 }
             }
             return RedirectToAction(nameof(Details), new { swalMessage });

@@ -35,6 +35,20 @@ namespace TurboTicketsMVC.Services
                                                      .Include(i => i.Project)
                                                      .Where(i => i.CompanyId == companyId).ToListAsync();
 
+                    //time validity check
+                    foreach(Invite invite in companyInvites)
+                    {
+                        DateTime inviteDate = invite.InviteDate.DateTime;
+
+                        bool validDate = (DateTime.Now - inviteDate).TotalDays <= 7;
+                        if (!validDate)
+                        {
+                            invite.IsValid = false;
+                            _context.Update(invite);
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+
                 }
                 return companyInvites;
             }

@@ -46,16 +46,6 @@ namespace TurboTicketsMVC.Controllers
 			_logger = logger;
 		}
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
 		[Authorize]
         public async Task<IActionResult> Dashboard()
         {
@@ -70,6 +60,7 @@ namespace TurboTicketsMVC.Controllers
             return View(dashboardViewModel);
         }
 
+        [Authorize]
         public ViewResult GetStarted()
         {
             return View();

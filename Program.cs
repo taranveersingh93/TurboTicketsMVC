@@ -66,13 +66,14 @@ else
 }
 
 app.Use(async (context, next) =>
+
 {
     await next();
     if (context.Response.StatusCode == 404)
     {
         context.Request.Path = "/Home/NotFoundError";
         await next();
-    } else if(context.Response.StatusCode != 200)
+    } else if(context.Response.StatusCode == 500)
     {
         context.Request.Path = "/Home/GenericError";
         await next();
