@@ -17,11 +17,17 @@
 <hr />
 <!-- form -->
 <form id="account" method="post">
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     <div class="form-group">
         <input asp-for="Input.Email" class="form-control" placeholder="Username or email" required autofocus>
+        <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
     <div class="form-group">
         <input asp-for="Input.Password" class="form-control" placeholder="Password" required>
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+
     </div>
     <div class="form-group d-flex justify-content-between">
         <div class="custom-control custom-checkbox">
@@ -35,7 +41,9 @@
     <hr>
 </form>
     <p class="text-muted">Or use a Demo Login</p>
-    <form class="" id="account" method="post">
+    <form class="" id="demoAccount" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
         <div class="form-group">
                 <div class="btn-block">
                     <button type="submit" style="width:inherit;height:min-content" class="btn btn-dark p-10 my-2 d-flex justify-content-center align-items-center" name="demoEmail" value="DemoAdminEmail">Demo Admin</button>
