@@ -117,6 +117,20 @@ namespace TurboTicketsMVC.Controllers
 			return View();
 		}
 
+        public IActionResult AccessDeniedError()
+        {
+            return View();
+        }
+
+        public IActionResult GenericError()
+        {
+            return View();
+        }
+        public IActionResult NotFoundError()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
