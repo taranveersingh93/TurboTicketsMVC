@@ -103,7 +103,17 @@
                                         @Html.Raw(project.Description)
                                     </div>
                                     <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary">Details</a>
-
+                            @if (isAdmin || (await _ProjectService.IsUserPmAsync(project.Id, userId!)))
+                            {
+                                @if (project.Archived)
+                                {
+                                    <a asp-controller="Projects" asp-action="Restore" asp-route-id="@project.Id" class="btn btn-warning">Restore</a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Projects" asp-action="Archive" asp-route-id="@project.Id" class="btn btn-danger">Archive</a>
+                                }
+                            }
                         </div>
                     </div>               
                 </div>
