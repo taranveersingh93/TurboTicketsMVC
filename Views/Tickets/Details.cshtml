@@ -334,7 +334,7 @@
                     <h2>History</h2>
                     <hr />
                 </div>
-                <div class="card-body" style="overflow-y:auto;max-height:500px; height:auto;">
+                <div class="card-body px-0" style="overflow-y:auto;max-height:500px; height:auto;">
                     @*Loop to show the history entries for the Ticket*@
                     @if (Model.History.Count() > 0)
                     {
@@ -350,7 +350,7 @@
                                     {
                                         <p>A ticket was added.</p>
                                     }
-                                    else if (history.PropertyName!.Equals("Latest Comment") || history.PropertyName.Equals("Ticket Attachment"))
+                                    else if (history.PropertyName!.Equals("Ticket Comment") || history.PropertyName.Equals("Ticket Attachment"))
                                     {
                                         <p>A new @history.PropertyName was added by <b>@history.User.FullName</b></p>
                                     }
