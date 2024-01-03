@@ -41,8 +41,9 @@ namespace TurboTicketsMVC.Services
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -69,8 +70,9 @@ namespace TurboTicketsMVC.Services
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -98,8 +100,9 @@ namespace TurboTicketsMVC.Services
                 return sortedNotifications;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -127,8 +130,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -139,15 +143,16 @@ namespace TurboTicketsMVC.Services
             try
             {
                 if (notification != null && ticketUser != null)
-                {        
+                {
                     await AddNotificationAsync(notification);
                     await SendEmailNotificationAsync(notification, notification.Title);
                     return true;
                 }
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -207,7 +212,7 @@ namespace TurboTicketsMVC.Services
                         notification.SenderId = assigner?.Id ?? admin?.Id;
                         notification.RecipientId = ticketUserId;
                         await NotifyDeveloperOfAssignment(notification, ticketUser);
-                        
+
                     }
                     else if (ticketNotificationType == "CommentAdded")
                     {
@@ -256,9 +261,9 @@ namespace TurboTicketsMVC.Services
 
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -341,9 +346,9 @@ namespace TurboTicketsMVC.Services
 
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -366,8 +371,9 @@ namespace TurboTicketsMVC.Services
 
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -393,8 +399,9 @@ namespace TurboTicketsMVC.Services
 
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -402,20 +409,37 @@ namespace TurboTicketsMVC.Services
 
         public async Task<Notification> GetNotificationAsync(int? id)
         {
-            if (id != null)
+            try
             {
-                Notification? notification = await _context.Notifications.FirstOrDefaultAsync(n => n.Id == id);
-                return notification!;
+                if (id != null)
+                {
+                    Notification? notification = await _context.Notifications.FirstOrDefaultAsync(n => n.Id == id);
+                    return notification!;
+                }
+                return null!;
             }
-            return null!;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                throw;
+            }
         }
         public async Task MarkNotificationRead(Notification? notification)
         {
-            if (notification != null && !notification.HasBeenViewed)
+            try
             {
-                notification.HasBeenViewed = true;
-                _context.Update(notification);
-                await _context.SaveChangesAsync();
+                if (notification != null && !notification.HasBeenViewed)
+                {
+                    notification.HasBeenViewed = true;
+                    _context.Update(notification);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
             }
         }
 
