@@ -36,7 +36,7 @@ namespace TurboTicketsMVC.Services
                                                      .Where(i => i.CompanyId == companyId).ToListAsync();
 
                     //time validity check
-                    foreach(Invite invite in companyInvites)
+                    foreach (Invite invite in companyInvites)
                     {
                         DateTime inviteDate = invite.InviteDate.DateTime;
 
@@ -52,9 +52,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return companyInvites;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
 
@@ -79,9 +79,9 @@ namespace TurboTicketsMVC.Services
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -95,22 +95,23 @@ namespace TurboTicketsMVC.Services
             {
                 if (invite != null)
                 {
-                    if(await IsInviteEmailValid(invite))
+                    if (await IsInviteEmailValid(invite))
                     {
                         await InvalidateExistingCompanyInvites(invite);
                         await _context.AddAsync(invite);
                         await _context.SaveChangesAsync();
                         return true;
-                    } else
+                    }
+                    else
                     {
                         return false;
                     }
                 }
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -132,9 +133,9 @@ namespace TurboTicketsMVC.Services
                 bool isEmailValid = !invalidEmail;
                 return isEmailValid;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -161,9 +162,9 @@ namespace TurboTicketsMVC.Services
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -178,9 +179,9 @@ namespace TurboTicketsMVC.Services
                                                     .AnyAsync(i => i.CompanyToken == token && i.InviteeEmail == email);
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -205,9 +206,9 @@ namespace TurboTicketsMVC.Services
                 return invite!;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -228,9 +229,9 @@ namespace TurboTicketsMVC.Services
                 return invite!;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -239,34 +240,43 @@ namespace TurboTicketsMVC.Services
         #region Validate Invite Code
         public async Task<bool> ValidateInviteCodeAsync(Guid? token)
         {
-            if (token == null)
+            try
             {
-                return false;
-            }
-
-            bool result = false;
-
-
-            Invite? invite = await _context.Invites.FirstOrDefaultAsync(i => i.CompanyToken == token);
-
-
-            if (invite != null)
-            {
-                // Determine invite date
-                DateTime inviteDate = invite.InviteDate.DateTime;
-
-                // Custom validation of invite based on the date it was issued
-                // In this case we are allowing an invite to be valid for 7 days
-                bool validDate = (DateTime.Now - inviteDate).TotalDays <= 7;
-
-                if (validDate)
+                if (token == null)
                 {
-                    result = invite.IsValid;
+                    return false;
                 }
 
+                bool result = false;
+
+
+                Invite? invite = await _context.Invites.FirstOrDefaultAsync(i => i.CompanyToken == token);
+
+
+                if (invite != null)
+                {
+                    // Determine invite date
+                    DateTime inviteDate = invite.InviteDate.DateTime;
+
+                    // Custom validation of invite based on the date it was issued
+                    // In this case we are allowing an invite to be valid for 7 days
+                    bool validDate = (DateTime.Now - inviteDate).TotalDays <= 7;
+
+                    if (validDate)
+                    {
+                        result = invite.IsValid;
+                    }
+
+
+                }
+                return result;
 
             }
-            return result;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
         }
 
         #endregion
