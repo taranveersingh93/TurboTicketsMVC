@@ -97,17 +97,10 @@ namespace TurboTicketsMVC.Controllers
             if (id == null)
             {
                 return NotFound();
-            }
-
-            // Remember that the _context should not be used directly in the controller so....     
-
-            // Edit the following code to use the service layer. 
-            // Your goal is to return the 'project' from the databse
-            // with the Id equal to the parameter passed in.               
-            // This is the only modification necessary for this method/action.     
+            }    
 
             Project? project = await _projectService.GetProjectByIdAsync(id, _companyId);
-            bool canViewProject = await _projectService.CanViewProject(id, _userId, _companyId);
+            bool canViewProject = await _projectService.CanViewProject(id, _userId!, _companyId);
 
             if (project == null)
             {
@@ -258,18 +251,20 @@ namespace TurboTicketsMVC.Controllers
         [Authorize(Roles = "Admin, ProjectManager")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Projects == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var project = await _context.Projects.FindAsync(id);
+            Project? project = await _projectService.GetProjectByIdAsync(id, _companyId);
             if (project == null)
             {
                 return NotFound();
             }
+
             bool isUserPm = false;
             bool isAdmin = false;
+
             if (id != null)
             {
                 isUserPm = await _projectService.IsUserPmAsync(id, _userId!);
@@ -279,6 +274,7 @@ namespace TurboTicketsMVC.Controllers
 
             if (isAdmin || isUserPm)
             {
+                //Viewbag for editing the team
                 IEnumerable<TTUser> projectManagers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.ProjectManager), _companyId);
                 IEnumerable<TTUser> developers = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
                 IEnumerable<TTUser> submitters = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Submitter), _companyId);
