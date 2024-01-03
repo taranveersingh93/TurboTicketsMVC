@@ -97,7 +97,7 @@ namespace TurboTicketsMVC.Controllers
             if (id == null)
             {
                 return NotFound();
-            }    
+            }
 
             Project? project = await _projectService.GetProjectByIdAsync(id, _companyId);
             bool canViewProject = await _projectService.CanViewProject(id, _userId!, _companyId);
@@ -420,7 +420,7 @@ namespace TurboTicketsMVC.Controllers
             return View(viewModel);
         }
         // GET: Projects/Archive/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, ProjectManager")]
 
         public async Task<IActionResult> Archive(int? id)
         {
@@ -430,17 +430,27 @@ namespace TurboTicketsMVC.Controllers
             }
 
             Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
+            bool isUserPm = await _projectService.IsUserPmAsync(project.Id, _userId!);
+            TTUser? user = await _userManager.GetUserAsync(User);
+            bool isAdmin = await _roleService.IsUserInRoleAsync(user, "Admin");
             if (project == null)
             {
                 return NotFound();
             }
 
-            return View(project);
+            if (isAdmin || isUserPm)
+            {
+                return View(project);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         // POST: Projects/Delete/5
         [HttpPost, ActionName("ArchiveConfirmed")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, ProjectManager")]
 
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ArchiveConfirmed(int id)
@@ -450,17 +460,28 @@ namespace TurboTicketsMVC.Controllers
                 return Problem("Entity set 'ApplicationDbContext.Projects'  is null.");
             }
             Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
+            bool isUserPm = await _projectService.IsUserPmAsync(project.Id, _userId!);
+            TTUser? user = await _userManager.GetUserAsync(User);
+            bool isAdmin = await _roleService.IsUserInRoleAsync(user, "Admin");
+
             if (project != null)
             {
                 await _projectService.ArchiveProjectAsync(project, _companyId);
             }
 
-            return RedirectToAction(nameof(Index));
+            if (isAdmin || isUserPm)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
 
         // GET: Projects/Restore/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, ProjectManager")]
 
         public async Task<IActionResult> Restore(int? id)
         {
@@ -470,17 +491,28 @@ namespace TurboTicketsMVC.Controllers
             }
 
             Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
+            bool isUserPm = await _projectService.IsUserPmAsync(project.Id, _userId!);
+            TTUser? user = await _userManager.GetUserAsync(User);
+            bool isAdmin = await _roleService.IsUserInRoleAsync(user, "Admin");
+
             if (project == null)
             {
                 return NotFound();
             }
 
-            return View(project);
+            if (isAdmin || isUserPm)
+            {
+                return View(project);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         // POST: Projects/Delete/5
         [HttpPost, ActionName("RestoreConfirmed")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, ProjectManager")]
 
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RestoreConfirmed(int id)
@@ -490,12 +522,24 @@ namespace TurboTicketsMVC.Controllers
                 return Problem("Entity set 'ApplicationDbContext.Projects'  is null.");
             }
             Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
+            bool isUserPm = await _projectService.IsUserPmAsync(project.Id, _userId!);
+            TTUser? user = await _userManager.GetUserAsync(User);
+            bool isAdmin = await _roleService.IsUserInRoleAsync(user, "Admin");
+
             if (project != null)
             {
                 await _projectService.RestoreProjectAsync(project, _companyId);
             }
 
-            return RedirectToAction(nameof(Index));
+            if (isUserPm || isAdmin)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                return NotFound();
+            }
+
         }
 
 
