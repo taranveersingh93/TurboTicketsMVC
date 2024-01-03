@@ -41,7 +41,6 @@ namespace TurboTicketsMVC.Controllers
             _userManager = userManager;
         }
 
-        [Authorize]
         // GET: Projects
         public async Task<IActionResult> Index(string? swalMessage)
         {
@@ -90,7 +89,6 @@ namespace TurboTicketsMVC.Controllers
             return View(unassignedProjects);
         }
 
-        [Authorize]
         // GET: Projects/Details/5
         public async Task<IActionResult> Details(int? id)
         {

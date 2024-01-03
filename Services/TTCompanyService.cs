@@ -33,9 +33,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return company!;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -51,12 +51,11 @@ namespace TurboTicketsMVC.Services
                     companyMembers = await _context.Users.Where(u => u.CompanyId == companyId)                                                       
                                                           .ToListAsync();
                 }
-
                 return companyMembers;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -73,9 +72,9 @@ namespace TurboTicketsMVC.Services
                 return projects;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -93,9 +92,9 @@ namespace TurboTicketsMVC.Services
 				}
 				return invites;
 			}
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -113,9 +112,9 @@ namespace TurboTicketsMVC.Services
                     return user;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -135,9 +134,9 @@ namespace TurboTicketsMVC.Services
                    await _context.SaveChangesAsync();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }

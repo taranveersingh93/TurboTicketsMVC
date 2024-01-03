@@ -42,116 +42,147 @@ namespace TurboTicketsMVC.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ManageUserRoles()
         {
-            //add an inst of viewModel as a list(model)
-            List<ManageUserRolesViewModel> model = new List<ManageUserRolesViewModel>();
-            //get companyId
-            int? companyId = _companyId;
-            //get all companyUsers
-            IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(companyId);
-            IEnumerable<IdentityRole> prodRoles = await _rolesService.GetProdRoles();
-            //loop over users to populate the model.
-            foreach (TTUser user in companyUsers)
+            try
             {
-                //more comprehensive than user.Id == _userId
-                if (string.Compare(user.Id, _userId) != 0)
+                List<ManageUserRolesViewModel> model = new List<ManageUserRolesViewModel>();
+                //get all companyUsers
+                IEnumerable<TTUser> companyUsers = await _companyService.GetMembersAsync(_companyId);
+                IEnumerable<IdentityRole> prodRoles = await _rolesService.GetProdRoles();
+                //loop over users to populate the model.
+                foreach (TTUser user in companyUsers)
                 {
+                    //all users that aren't the logged in user
+                    if (string.Compare(user.Id, _userId) != 0)
+                    {
 
-                    ManageUserRolesViewModel viewModel = new ManageUserRolesViewModel();
-                    IEnumerable<string?> currentRoles = await _rolesService.GetUserRolesAsync(user);
+                        ManageUserRolesViewModel viewModel = new ManageUserRolesViewModel();
+                        IEnumerable<string?> currentRoles = await _rolesService.GetUserRolesAsync(user);
 
-                    if (currentRoles!.Contains(nameof(TTRoles.DemoUser)))
-                    {
-                        viewModel.IsDemoUser = true;
+                        if (currentRoles!.Contains(nameof(TTRoles.DemoUser)))
+                        {
+                            viewModel.IsDemoUser = true;
+                        }
+                        else
+                        {
+                            viewModel.IsDemoUser = false;
+                        }
+
+                        if (currentRoles != null)
+                        {
+                            viewModel.SelectedRole = currentRoles.FirstOrDefault(r => r != nameof(TTRoles.DemoUser));
+                        }
+                        viewModel.TTUser = user;
+                        viewModel.Roles = new SelectList(prodRoles, "Name", "Name", viewModel.SelectedRole);
+                        model.Add(viewModel);
                     }
-                    else
-                    {
-                        viewModel.IsDemoUser = false;
-                    }
-                    if (currentRoles != null)
-                    {
-                        viewModel.SelectedRole = currentRoles.FirstOrDefault(r => r != nameof(TTRoles.DemoUser));
-                    }
-                    viewModel.TTUser = user;
-                    viewModel.Roles = new SelectList(prodRoles, "Name", "Name", viewModel.SelectedRole);
-                    model.Add(viewModel);
                 }
-            }
 
-            // loop over users to populate 
-            return View(model);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("GenericError", "Home");
+            }
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ManageUserRoles(ManageUserRolesViewModel viewModel)
         {
-            //get companyid
-            //instantiate user
-            TTUser? ttUser = (await _companyService.GetMembersAsync(_companyId)).FirstOrDefault(u => u.Id == viewModel.TTUser?.Id);
-            //get roles of user
-            IEnumerable<string>? currentRoles = await _rolesService.GetUserRolesAsync(ttUser);
-            //get selected roles of user
-            List<string> selectedRoles = new();
-            selectedRoles.Add(viewModel.SelectedRole!);
-            if (viewModel.IsDemoUser)
+            try
             {
-                selectedRoles.Add(nameof(TTRoles.DemoUser));
-            }
-
-
-            if (selectedRoles!.Count() > 0)
-            {
-                if (await _rolesService.RemoveUserFromRolesAsync(ttUser, currentRoles)) //boolean return
+                //get companyid
+                //instantiate user
+                TTUser? ttUser = (await _companyService.GetMembersAsync(_companyId)).FirstOrDefault(u => u.Id == viewModel.TTUser?.Id);
+                //get roles of user
+                IEnumerable<string>? currentRoles = await _rolesService.GetUserRolesAsync(ttUser);
+                //get selected roles of user
+                List<string> selectedRoles = new();
+                selectedRoles.Add(viewModel.SelectedRole!);
+                if (viewModel.IsDemoUser)
                 {
-                    foreach (string selectedRole in selectedRoles)
+                    selectedRoles.Add(nameof(TTRoles.DemoUser));
+                }
+
+
+                if (selectedRoles!.Count() > 0)
+                {
+                    if (await _rolesService.RemoveUserFromRolesAsync(ttUser, currentRoles)) //boolean return
                     {
-                        await _rolesService.AddUserToRoleAsync(ttUser, selectedRole);
+                        foreach (string selectedRole in selectedRoles)
+                        {
+                            await _rolesService.AddUserToRoleAsync(ttUser, selectedRole);
+                        }
                     }
                 }
+
+                return RedirectToAction(nameof(ManageUserRoles));
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("GenericError", "Home");
             }
 
-            return RedirectToAction(nameof(ManageUserRoles));
-            //save changes
-            //navigate
         }
-        
+
         // GET: Companies/Details
         [Authorize]
         public async Task<IActionResult> Details(string? swalMessage)
         {
-            Company? company = await _companyService.GetCompanyInfoAsync(_companyId);
-
-            if (company == null)
+            try
             {
-                return NotFound();
-            }
-            if (!string.IsNullOrEmpty(swalMessage))
-            {
+                Company? company = await _companyService.GetCompanyInfoAsync(_companyId);
 
-                ViewData["SwalMessage"] = swalMessage;
+                if (company == null)
+                {
+                    return NotFound();
+                }
+                if (!string.IsNullOrEmpty(swalMessage))
+                {
+
+                    ViewData["SwalMessage"] = swalMessage;
+                }
+                return View(company);
+
             }
-            return View(company);
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("GenericError", "Home");
+            }
         }
 
         // GET: Companies/Edit
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Companies == null)
+            try
             {
-                return NotFound();
-            }
-            if (id == _companyId)
-            {
-                Company company = await _companyService.GetCompanyInfoAsync(_companyId);
-
-                if (company == null)
+                if (id == null || _context.Companies == null)
                 {
                     return NotFound();
                 }
-                return View(company);
+                if (id == _companyId)
+                {
+                    Company company = await _companyService.GetCompanyInfoAsync(_companyId);
+
+                    if (company == null)
+                    {
+                        return NotFound();
+                    }
+                    return View(company);
+                }
+                return NotFound();
+
             }
-            return NotFound();
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("GenericError", "Home");
+            }
 
         }
 
@@ -163,60 +194,87 @@ namespace TurboTicketsMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Company? company)
         {
-            string? swalMessage = "Changes failed";
-            if (ModelState.IsValid && company != null)
+            try
             {
-
-                try
+                string? swalMessage = "Changes failed";
+                if (ModelState.IsValid && company != null)
                 {
-                    await _companyService.UpdateCompanyAsync(company);
-                    swalMessage = "Changes successful";
 
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                  
+                    try
+                    {
+                        await _companyService.UpdateCompanyAsync(company);
+                        swalMessage = "Changes successful";
+
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+
                         return NotFound();
-                    
+
+                    }
                 }
+                return RedirectToAction(nameof(Details), new { swalMessage });
+
             }
-            return RedirectToAction(nameof(Details), new { swalMessage });
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("GenericError", "Home");
+            }
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> UserProfile(string? email)
         {
-            if (email == null)
+            try
             {
-                return NotFound();
+                if (email == null)
+                {
+                    return NotFound();
+                }
+                TTUser? user = await _companyService.GetUserByEmail(email, _companyId);
+                return View(user);
+
             }
-            TTUser? user = await _companyService.GetUserByEmail(email, _companyId);
-            return View(user);
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("GenericError", "Home");
+            }
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> EmailUser(string? email)
         {
-            if (email == null)
+            try
             {
-                return NotFound();
-            }
-            TTUser? user = await _companyService.GetUserByEmail(email, _companyId);
-            if (user != null && user.CompanyId == _companyId)
-            {
-                EmailData emailData = new()
+                if (email == null)
                 {
-                    EmailAddress = email,
-                    EmailBody = "",
-                    EmailSubject = "",
-                    Recipient = user!.FullName
-                };
-                return View(emailData);
+                    return NotFound();
+                }
+                TTUser? user = await _companyService.GetUserByEmail(email, _companyId);
+                if (user != null && user.CompanyId == _companyId)
+                {
+                    EmailData emailData = new()
+                    {
+                        EmailAddress = email,
+                        EmailBody = "",
+                        EmailSubject = "",
+                        Recipient = user!.FullName
+                    };
+                    return View(emailData);
+
+                }
+                return NotFound();
 
             }
-            return NotFound();
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("GenericError", "Home");
+            }
         }
 
         [HttpPost]
@@ -245,10 +303,10 @@ namespace TurboTicketsMVC.Controllers
 
                 return RedirectToAction(nameof(Details), new { swalMessage });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                Console.WriteLine(ex.Message);
+                return RedirectToAction("GenericError", "Home");
             }
         }
     }

@@ -1,5 +1,4 @@
-﻿@model DashboardViewModel
-@using TurboTicketsMVC.Data;
+﻿@using TurboTicketsMVC.Data;
 @using TurboTicketsMVC.Services.Interfaces;
 @using TurboTicketsMVC.Models.ViewModels;
 @using Microsoft.AspNetCore.Identity;
@@ -450,8 +449,6 @@
 
 
 @section Scripts {
-    <script src='https://cdn.plot.ly/plotly-2.4.2.min.js'></script>
-
     <script>
 
         var projectNames = @Html.Raw(Json.Serialize(projectNames));
