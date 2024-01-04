@@ -46,7 +46,7 @@
                     @if (Model.Count() > 0)
                     {
 
-                        <table id="example1" class="table table-striped table-bordered" style="width: 100%;">
+                        <table id="example1" class="table table-striped table-bordered" style="max-width: 100%;">
                             <thead>
                                 <tr>
                                     <th>
@@ -79,7 +79,7 @@
                                         <td>
                                             @Html.DisplayFor(modelItem => item.Title)
                                         </td>
-                                        <td>
+                                        <td style="text-wrap:wrap;">
                                             @item.Project.Name
                                         </td>
                                         <td>
@@ -216,7 +216,11 @@
     <script src="https://cdn.ckeditor.com/ckeditor5/37.1.0/classic/ckeditor.js"></script>
     <script>
         ClassicEditor
-            .create(document.querySelector('#editor'))
+            .create(document.querySelector('#editor'), {
+                toolbar: {
+                    shouldNotGroupWhenFull: true
+                }
+            })
             .catch(error => {
                 console.error(error);
             });
