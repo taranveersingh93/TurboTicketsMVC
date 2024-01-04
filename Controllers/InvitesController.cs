@@ -49,12 +49,23 @@ namespace TurboTicketsMVC.Controllers
         [Authorize]
         public async Task<IActionResult> Index(string? swalMessage)
         {
-            if (!string.IsNullOrEmpty(swalMessage))
+            try
             {
-                ViewData["SwalMessage"] = swalMessage;
+                if (!string.IsNullOrEmpty(swalMessage))
+                {
+                    ViewData["SwalMessage"] = swalMessage;
+                }
+                IEnumerable<Invite> companyInvites = await _inviteService.GetCompanyInvites(_companyId);
+                return View(companyInvites);
+
             }
-            IEnumerable<Invite> companyInvites = await _inviteService.GetCompanyInvites(_companyId);
-            return View(companyInvites);
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return RedirectToAction("GenericError", "Home");
+
+            }
         }
 
         // GET: Invites/Create
@@ -62,11 +73,22 @@ namespace TurboTicketsMVC.Controllers
 
         public async Task<IActionResult> Create()
         {
-            int? companyId = User.Identity!.GetCompanyId();
-            IEnumerable<Models.Project> companyProjects = await _projectService.GetProjectsByCompanyIdAsync(companyId);
+            try
+            {
+                int? companyId = User.Identity!.GetCompanyId();
+                IEnumerable<Models.Project> companyProjects = await _projectService.GetProjectsByCompanyIdAsync(companyId);
 
-            ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
-            return View();
+                ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
+                return View();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return RedirectToAction("GenericError", "Home");
+
+            }
         }
 
         // POST: Invites/Create
@@ -133,10 +155,12 @@ namespace TurboTicketsMVC.Controllers
                     // TODO: Possibly use SWAL message
 
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
 
-                    throw;
+                    return RedirectToAction("GenericError", "Home");
+
                 }
             }
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", invite.CompanyId);
@@ -152,23 +176,36 @@ namespace TurboTicketsMVC.Controllers
 
         public async Task<IActionResult> InvalidateInvite(int? id)
         {
-            if (id != null)
+            try
             {
-                Invite? invite = await _inviteService.GetInviteByIdAsync(id, _companyId);
-                if (invite != null)
+                if (id != null)
                 {
-                    await _inviteService.InvalidateExistingCompanyInvites(invite);
-                    string? swalMessage = "Invalidation successful";
+                    Invite? invite = await _inviteService.GetInviteByIdAsync(id, _companyId);
+                    if (invite != null)
+                    {
+                        await _inviteService.InvalidateExistingCompanyInvites(invite);
+                        string? swalMessage = "Invalidation successful";
 
-                    return RedirectToAction(nameof(Index), new { swalMessage});
-                } else
-                {
-                    string? swalMessage = "Invalidation failed";
-                    return RedirectToAction(nameof(Index), new { swalMessage});
+                        return RedirectToAction(nameof(Index), new { swalMessage });
+                    }
+                    else
+                    {
+                        string? swalMessage = "Invalidation failed";
+                        return RedirectToAction(nameof(Index), new { swalMessage });
+                    }
                 }
-            } else
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                Console.WriteLine(ex.Message);
+
+                return RedirectToAction("GenericError", "Home");
+
             }
         }
 
@@ -178,10 +215,10 @@ namespace TurboTicketsMVC.Controllers
 
         public async Task<IActionResult> ResendInvite(int? id)
         {
-            
-                try
-                {
-                    Invite? invite = await _inviteService.GetInviteByIdAsync(id, _companyId);
+
+            try
+            {
+                Invite? invite = await _inviteService.GetInviteByIdAsync(id, _companyId);
 
                 if (invite != null)
                 {
@@ -193,7 +230,7 @@ namespace TurboTicketsMVC.Controllers
                     string email = _protector.Protect(invite.InviteeEmail!);
                     string company = _protector.Protect(_companyId.ToString()!);
 
-                // Save invite in the DB
+                    // Save invite in the DB
                     Invite newInvite = new();
                     newInvite.CompanyToken = guid;
                     newInvite.CompanyId = _companyId;
@@ -237,11 +274,11 @@ namespace TurboTicketsMVC.Controllers
                     return RedirectToAction(nameof(Index), new { swalMessage = "Invite failed, please try another email address" });
                 }
             }
-                catch
-                {
-                 return NotFound();
-                }
-     
+            catch
+            {
+                return NotFound();
+            }
+
         }
 
 
@@ -285,13 +322,15 @@ namespace TurboTicketsMVC.Controllers
 
                 return NotFound();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
-                throw;
+                return RedirectToAction("GenericError", "Home");
+
             }
 
         }
-       
+
     }
 }
