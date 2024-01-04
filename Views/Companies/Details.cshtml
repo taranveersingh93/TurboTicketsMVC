@@ -72,109 +72,114 @@
                     <hr />
                     <p class="m-1"><span class="text-muted">Name: </span>@Model.Name</p>
                     <p class="m-1"><span class="text-muted">Description: </span>@Model.Description</p>
-                    <hr />                 
+                    <hr />
                 </div>
             </div>
 
         </div>
         <div class="col-12 col-md-8">
-            @if (Model.Members.Count() > 0)
-            {
-                <h3>Members</h3>
-                <table id="example1" class="table table-striped table-bordered" style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>
-                                Name
-                            </th>
-                            <th>
-                                Roles
-                            </th>
-                            <th>
+            <div class="card border">
+                <div class="card-body">
 
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (TTUser member in admins)
-                        {
-                            <tr>
-                                <td>@member.FullName</td>
-                                <td class="text-center">
-                                    <div class="badge rounded-pill danger-bg">Admin</div>
-                                </td>
-                                <td class="d-flex flex-column flex-md-row align-items-center justify-content-center">
-                                    <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
-                                        Profile
-                                    </a>
-                                    <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
-                                        Email
-                                    </a>
-                                    
-                                </td>
-                            </tr>
-                        }
-                        @foreach (TTUser member in projectManagers)
-                        {
-                            <tr>
-                                <td>@member.FullName</td>
-                                <td class="text-center">
-                                    <div class="badge rounded-pill dark-bg">Project Manager</div>
-                                </td>
-                                <td class="d-flex flex-column flex-md-row align-items-center justify-content-center">
-                                    <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
-                                        Profile
-                                    </a>
-                                    <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
-                                        Email
-                                    </a>
-                                    
-                                </td>
-                            </tr>
-                        }
-                        @foreach (TTUser member in developers)
-                        {
-                            <tr>
-                                <td>@member.FullName</td>
-                                <td class="text-center">
-                                    <div class="badge rounded-pill secondary-bg">Developer</div>
-                                </td>
-                                <td class="d-flex flex-column flex-md-row align-items-center justify-content-center">
-                                    <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
-                                        Profile
-                                    </a>
-                                    <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
-                                        Email
-                                    </a>
-                                    
-                                </td>
-                            </tr>
-                        }
-                        @foreach (TTUser member in submitters)
-                        {
-                            <tr>
-                                <td>@member.FullName</td>
-                                <td class="text-center">
-                                    <div class="badge rounded-pill warning-bg">Submitter</div>
-                                </td>
-                                <td class="d-flex flex-column flex-md-row align-items-center justify-content-center">
-                                    <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
-                                        Profile
-                                    </a>
-                                    <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
-                                        Email
-                                    </a>
-                                    
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <h4 class="text-muted text-center">No members</h4>
-            }
+                    @if (Model.Members.Count() > 0)
+                    {
+                        <h3>Members</h3>
+                        <table id="example1" class="table table-striped table-bordered" style="max-width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Name
+                                    </th>
+                                    <th>
+                                        Roles
+                                    </th>
+                                    <th>
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (TTUser member in admins)
+                                {
+                                    <tr>
+                                        <td>@member.FullName</td>
+                                        <td class="text-center">
+                                            <div class="badge rounded-pill danger-bg">Admin</div>
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                                Profile
+                                            </a>
+                                            <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                                Email
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                }
+                                @foreach (TTUser member in projectManagers)
+                                {
+                                    <tr>
+                                        <td>@member.FullName</td>
+                                        <td class="text-center">
+                                            <div class="badge rounded-pill dark-bg">Project Manager</div>
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                                Profile
+                                            </a>
+                                            <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                                Email
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                }
+                                @foreach (TTUser member in developers)
+                                {
+                                    <tr>
+                                        <td>@member.FullName</td>
+                                        <td class="text-center">
+                                            <div class="badge rounded-pill secondary-bg">Developer</div>
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                                Profile
+                                            </a>
+                                            <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                                Email
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                }
+                                @foreach (TTUser member in submitters)
+                                {
+                                    <tr>
+                                        <td>@member.FullName</td>
+                                        <td class="text-center">
+                                            <div class="badge rounded-pill warning-bg">Submitter</div>
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-sm btn-primary me-1" role="button" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                                Profile
+                                            </a>
+                                            <a class="btn btn-sm btn-secondary" role="button" asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                                Email
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <h4 class="text-muted text-center">No members</h4>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 </div>
