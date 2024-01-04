@@ -51,9 +51,7 @@
                                 {
                                     <tr>
                                         <td>
-                                            <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(viewModel.TTUser!))">
                                                 <p>@viewModel.TTUser!.FullName<p>
-                                            </a>
 
                                             @if (viewModel.SelectedRole == "Admin")
                                             {
@@ -84,12 +82,12 @@
                                             <form asp-action="ManageUserRoles" asp-controller="Companies" method="post">
                                                 <input type="hidden" asp-for="@viewModel.TTUser!.Id" />
                                                 <select class="form-select" asp-for="@viewModel.SelectedRole" asp-items="@viewModel.Roles"></select>
-                                                <div class="d-flex mt-1 justify-content-around align-items-center">
+                                                <div class="d-flex m-1 flex-column flex-sm-row justify-content-around align-items-center">
                                                     <label class="form-check-label d-flex justify-content-between align-items-center">
                                                         Demo User&nbsp;
                                                         <input asp-for="@viewModel.IsDemoUser" />
                                                     </label>
-                                                    <input type="submit" value="Assign Role" class="btn btn-warning" />
+                                                    <input type="submit" value="Assign Role" class="btn btn-warning mt-2" />
 
                                                 </div>
                                             </form>
