@@ -414,16 +414,16 @@
                                 {
 
                                     <li class="list-group-item d-flex px-0 py-4 history-container">
-                                        <a href="#" class="flex-shrink-0">
+                                        <a data-bs-toggle="tooltip" title="@historyItem.User.FullName" asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(historyItem.User!))" class="flex-shrink-0">
                                             <figure class="avatar mr-3">
-                                                <img src="@_FileService.ConvertByteArrayToFile(historyItem.User?.ImageFileData, historyItem.User?.ImageFileType, DefaultImage.BTUserImage)"
+                                                <img src="@_FileService.ConvertByteArrayToFile(historyItem.User?.ImageFileData!, historyItem.User?.ImageFileType!, DefaultImage.BTUserImage)"
                                                      class="rounded-circle" alt="image">
                                             </figure>
                                         </a>
                                         <div class="flex-grow-1">
                                             <div class="d-flex justify-content-between">
                                                 <a asp-controller="Tickets" asp-action="Details" asp-route-id="@historyItem.TicketId">
-                                                    <h6 class="card-primary">@historyItem.Ticket.Title</h6>
+                                                    <h6 class="card-primary">@historyItem.Ticket!.Title</h6>
                                                 </a>
                                                 <span class="text-muted">@historyItem.CreatedDate.ToString("dd MMM")</span>
                                             </div>
