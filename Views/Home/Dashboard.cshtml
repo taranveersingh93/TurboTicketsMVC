@@ -73,7 +73,7 @@
                 <div class="row">
                     <div class="col-lg-3 col-sm-6">
                         <a asp-action="Index" asp-controller="Projects" style="text-decoration:none">
-                            <div class="card border border-dark text-center">
+                            <div class="card border text-center">
                                 <div class="body">
                                     <div class="p-1 rounded primary-bg">
                                         <h3 class="mt-2 mb-0">@userProjects.Count()</h3>
@@ -86,7 +86,7 @@
                     </div>
                     <div class="col-lg-3 col-sm-6">
                         <a asp-action="Index" asp-controller="Tickets" style="text-decoration:none">
-                            <div class="card border border-dark text-center">
+                            <div class="card border text-center">
                                 <div class="body">
                                     <div class="p-1 rounded primary-bg">
 
@@ -102,7 +102,7 @@
                         {
                             <a asp-action="AllProjects" asp-controller="Projects" style="text-decoration:none">
 
-                                <div class="card border border-dark text-center">
+                                <div class="card border text-center">
                                     <div class="body">
                                         <div class="p-1 rounded dark-bg">
                                             <h3 class="mt-2 mb-0">@companyProjects.Count()</h3>
@@ -114,7 +114,7 @@
                         }
                         else
                         {
-                            <div class="card border border-dark text-center">
+                            <div class="card border text-center">
                                 <div class="body">
                                     <div class="p-1 rounded dark-bg">
                                         <h3 class="mt-2 mb-0">@companyProjects.Count()</h3>
@@ -128,7 +128,7 @@
                         @if (isAdmin || User.IsInRole("ProjectManager"))
                         {
                             <a asp-action="AllTickets" asp-controller="Tickets" style="text-decoration:none">
-                                <div class="card border border-dark text-center">
+                                <div class="card border text-center">
                                     <div class="body">
                                         <div class="p-1 rounded dark-bg">
                                             <h3 class="mt-2 mb-0">@companyTickets.Count()</h3>
@@ -141,7 +141,7 @@
                         }
                         else
                         {
-                            <div class="card border border-dark text-center">
+                            <div class="card border text-center">
                                 <div class="body">
                                     <div class="p-1 rounded dark-bg">
                                         <h3 class="mt-2 mb-0">@companyTickets.Count()</h3>
@@ -162,7 +162,7 @@
     {
         <div class="row mb-5">
             <div class="col-12 col-md-8">
-                <div class="card border border-dark h-100">
+                <div class="card border h-100">
                     <div class="card-body overflow-auto">
                         <h6 class="card-title card-secondary mb-2">Projects: Tickets vs Developers</h6>
                     </div>
@@ -173,7 +173,7 @@
             @if (isAdmin || isPM)
             {
                 <div class="col-12 col-md-4">
-                    <div class="card border border-dark h-100">
+                    <div class="card border h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-4">
                                 <div>
@@ -200,7 +200,7 @@
             else
             {
                 <div class="col-12 col-md-4">
-                    <div class="card border border-dark h-100">
+                    <div class="card border h-100">
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-4">
                                 <div>
@@ -237,7 +237,7 @@
         </div>
         <div class="row">
             <div class="col-12">
-                <div class="card border border-dark">
+                <div class="card border">
                     <div class="card-body">
                         @if (userTickets.Any(t => t.TicketPriority == TTTicketPriorities.High || t.TicketPriority == TTTicketPriorities.Urgent))
                         {
@@ -324,7 +324,7 @@
     }
     <div class="row">
         <div class="col-md-7 equal-height-col col-12">
-            <div class="card border border-dark h-100">
+            <div class="card border h-100">
                 <div class="card-body">
                     <h6 class="card-title card-secondary border-bottom-gray p-2 mb-5">Projects</h6>
                     @if (userProjects.Count() > 0)
@@ -397,7 +397,7 @@
             </div>
         </div>
         <div class="col-md-5 equal-height-col col-12">
-            <div class="card border border-dark h-100">
+            <div class="card border h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <h6 class="card-title card-secondary">Latest Activity</h6>
