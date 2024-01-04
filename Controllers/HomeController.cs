@@ -124,5 +124,33 @@ namespace TurboTicketsMVC.Controllers
                 return RedirectToAction(nameof(GenericError));
             }
         }
+        
+        public async Task<IActionResult> MarkAllNotificationsRead()
+        {
+            try
+            {
+                await _notificationService.MarkAllNotificationsRead(_userId);
+                return RedirectToAction("Dashboard", "Home");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return RedirectToAction(nameof(GenericError));
+            }
+        }
+
+        public async Task<IActionResult> MarkAllNotificationsUnread()
+        {
+            try
+            {
+                await _notificationService.MarkAllNotificationsUnread(_userId);
+                return RedirectToAction("Dashboard", "Home");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return RedirectToAction(nameof(GenericError));
+            }
+        }
     }
 }

@@ -443,5 +443,49 @@ namespace TurboTicketsMVC.Services
             }
         }
 
+        public async Task MarkAllNotificationsRead(string? userId)
+        {
+            try
+            {
+                IEnumerable<Notification> notifications = await GetNotificationsByUserIdAsync(userId);
+                foreach (Notification notification in notifications)
+                {
+                    if (!notification.HasBeenViewed)
+                    {
+                        notification.HasBeenViewed = true;
+                        _context.Update(notification);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        public async Task MarkAllNotificationsUnread(string? userId)
+        {
+            try
+            {
+                IEnumerable<Notification> notifications = await GetNotificationsByUserIdAsync(userId);
+                foreach (Notification notification in notifications)
+                {
+                    if (notification.HasBeenViewed)
+                    {
+                        notification.HasBeenViewed = false;
+                        _context.Update(notification);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
     }
 }

@@ -25,6 +25,8 @@ namespace TurboTicketsMVC.Services.Interfaces
 
         public Task<bool> NotifyDeveloperOfAssignment(Notification? notification, TTUser? ticketUser);
 
+        public Task MarkAllNotificationsRead(string? userId);
+        public Task MarkAllNotificationsUnread(string? userId);
 
     }
 }
