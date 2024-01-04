@@ -36,8 +36,9 @@ namespace TurboTicketsMVC.Services
 
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -60,8 +61,9 @@ namespace TurboTicketsMVC.Services
 
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -76,8 +78,9 @@ namespace TurboTicketsMVC.Services
 				await _context.SaveChangesAsync();
                 }
 			}
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 throw;
             }
         }
@@ -92,8 +95,9 @@ namespace TurboTicketsMVC.Services
                     await _context.SaveChangesAsync();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -108,8 +112,9 @@ namespace TurboTicketsMVC.Services
                     await _context.SaveChangesAsync();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -128,8 +133,9 @@ namespace TurboTicketsMVC.Services
 
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -151,8 +157,9 @@ namespace TurboTicketsMVC.Services
 
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -173,8 +180,9 @@ namespace TurboTicketsMVC.Services
 
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -201,8 +209,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return ticket!;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -228,8 +237,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return ticket!;
 			}
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -243,22 +253,9 @@ namespace TurboTicketsMVC.Services
 				return ticketAttachment;
 
 			}
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
-            }
-
-        }
-        public Task<TTUser?> GetTicketDeveloperAsync(int? ticketId, int? companyId) {
-            try
-            {
-                                throw new NotImplementedException();
-
-
-            }
-            catch (Exception)
-            {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -296,8 +293,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return companyTickets;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -306,6 +304,8 @@ namespace TurboTicketsMVC.Services
 
         public async Task<IEnumerable<Ticket>> GetTicketsByPMIdAsync(string? userId, int? companyId)
         {
+            try
+            {
             TTUser user = (await _context.Users.FirstOrDefaultAsync(u => u.Id == userId))!;
 
             IEnumerable<Ticket> companyTickets = await GetAllTicketsByCompanyIdAsync(companyId);
@@ -313,49 +313,16 @@ namespace TurboTicketsMVC.Services
 
             return userTickets;
 
-        }
-        public Task<IEnumerable<TicketPriority>> GetTicketPrioritiesAsync() {
-            try
-            {
-                                throw new NotImplementedException();
-
-
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
 
         }
-        public Task<IEnumerable<TicketStatus>> GetTicketStatusesAsync() {
 
-            try
-            {
-                                throw new NotImplementedException();
-
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-        public Task<IEnumerable<TicketType>> GetTicketTypesAsync() {
-            try
-            {
-                                throw new NotImplementedException();
-
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-
-        }
 
         public async Task ArchiveTicketAsync(Ticket? ticket) {
 
@@ -367,8 +334,9 @@ namespace TurboTicketsMVC.Services
                     await UpdateTicketAsync(ticket);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -384,8 +352,9 @@ namespace TurboTicketsMVC.Services
 
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -409,8 +378,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return isUserAuthorized;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -432,8 +402,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return canActOnTicket;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -456,19 +427,30 @@ namespace TurboTicketsMVC.Services
                 }
                 return canMakeTickets;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
         }
         public async Task ChangeTicketStatus(int? ticketId,int? companyId, TTTicketStatuses status)
         {
+            try
+            {
             if(ticketId != null && companyId != null)
             {
                 Ticket? ticket = await GetTicketByIdAsync(ticketId, companyId);
                 ticket.TicketStatus = status;
                 await UpdateTicketAsync(ticket);
+            }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                throw;
             }
         }
         public async Task ResolveTicketAsync(Ticket? ticket)
@@ -483,8 +465,9 @@ namespace TurboTicketsMVC.Services
 
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
