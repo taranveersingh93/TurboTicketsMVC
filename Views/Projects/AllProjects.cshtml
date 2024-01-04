@@ -42,52 +42,61 @@
             {
                 <div class="col-12 col-md-4">
                     <div class="card border border-bottom-gray h-100 px-3">
-                        <a asp-asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">
-                            <div class="py-3 mt-1 border-bottom-gray">
-                                @if ((await _ProjectService.GetProjectManagerAsync(project.Id)) != null)
-                                {
-                                    <div class="d-flex align-items-start">
-                                        <div class="pr-3">
+                        <div class="py-3 mt-1 border-bottom-gray">
+                            @if ((await _ProjectService.GetProjectManagerAsync(project.Id)) != null)
+                            {
+                                <div class="d-flex align-items-start">
+                                    <div class="pr-3">
+                                        <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(await _ProjectService.GetProjectManagerAsync(project.Id)))">
                                             <span class="avatar avatar-sm">
                                                 <img src="@_FileService.ConvertByteArrayToFile((await _ProjectService.GetProjectManagerAsync(project.Id)).ImageFileData!, (await _ProjectService.GetProjectManagerAsync(project.Id)).ImageFileType!, DefaultImage.BTUserImage)"
                                                      class="rounded-circle"
                                                      alt="image">
                                             </span>
-                                        </div>
-                                        <div class="flex-grow- 1">
+                                        </a>
+
+                                    </div>
+                                    <div class="flex-grow- 1">
+                                        <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(await _ProjectService.GetProjectManagerAsync(project.Id)))">
                                             <h6 class="mb-1">@((await _ProjectService.GetProjectManagerAsync(project.Id)).FullName)</h6>
-                                            <h6 class="text-muted">Project Manager</h6>
-                                        </div>
+                                        </a>
+                                        <h6 class="text-muted">Project Manager</h6>
                                     </div>
-                                }
-                                else
-                                {
-                                    <h6 class="text-center text-muted mb-2">No Project Manager Assigned</h6>
-                                    <div class="d-flex flex-column justify-content-evenly align-items-center">
-                                        <a class="btn btn-warning btn-sm" role="button" asp-controller="Projects" asp-action="AssignPM" asp-route-id="@project.Id">Assign PM</a>
-                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <h6 class="text-center text-muted mb-2">No Project Manager Assigned</h6>
+                                <div class="d-flex flex-column justify-content-evenly align-items-center">
+                                    <a class="btn btn-warning btn-sm" role="button" asp-controller="Projects" asp-action="AssignPM" asp-route-id="@project.Id">Assign PM</a>
+                                </div>
 
 
-                                }
-                            </div>
+                            }
+                        </div>
+                        <a asp-asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">
                             <div class="py-3 border-bottom-gray">
                                 <img src="@_FileService.ConvertByteArrayToFile(project.ImageFileData!, project.ImageFileType!, DefaultImage.ProjectImage)" class="card-img-top" alt="...">
                             </div>
                         </a>
                         <div class="card-body py-3 px-0">
-                            <h5 class="card-title text-primary mb-2">@project.Name</h5>
-
+                            <a asp-asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id">
+                                <h5 class="card-title text-primary mb-2">@project.Name</h5>
+                            </a>
                             @if (project.Members.Count() > 0)
                             {
                                 <div class="mr-3 d-sm-inline d-none">
                                     <div class="avatar-group">
                                         @foreach (TTUser member in project.Members)
                                         {
+
                                             <figure class="avatar avatar-sm" title="@member.FullName"
                                                     data-toggle="tooltip">
-                                                <img src="@_FileService.ConvertByteArrayToFile(member.ImageFileData!, member.ImageFileType!, DefaultImage.BTUserImage)"
-                                                     class="rounded-circle"
-                                                     alt="image">
+                                                <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                                    <img src="@_FileService.ConvertByteArrayToFile(member.ImageFileData!, member.ImageFileType!, DefaultImage.BTUserImage)"
+                                                         class="rounded-circle"
+                                                         alt="image">
+                                                </a>
                                             </figure>
                                         }
 
@@ -96,13 +105,13 @@
                             }
                             else
                             {
-                                    <h6 class="text-muted">No Members</h6>
+                                <h6 class="text-muted">No Members</h6>
 
                             }
-                                    <div class="line-clamp-3 m-2">
-                                        @Html.Raw(project.Description)
-                                    </div>
-                                    <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary">Details</a>
+                            <div class="line-clamp-3 m-2">
+                                @Html.Raw(project.Description)
+                            </div>
+                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary">Details</a>
                             @if (isAdmin || (await _ProjectService.IsUserPmAsync(project.Id, userId!)))
                             {
                                 @if (project.Archived)
@@ -115,7 +124,7 @@
                                 }
                             }
                         </div>
-                    </div>               
+                    </div>
                 </div>
             }
         }
@@ -133,36 +142,36 @@
 </div>
 
 
-        @section Scripts {
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-            <script>
-                var swalMessage = "@swalMessage";
-                if (swalMessage) {
-                    if (swalMessage.includes("succeeded")) {
-                        Swal.fire(
-                            {
-                                title: 'Success',
-                                text: '@swalMessage',
-                                icon: 'success',
-                                confirmButtonText: 'ok',
-                                color: '#5066e1'
-                            }
-                        )
+    <script>
+        var swalMessage = "@swalMessage";
+        if (swalMessage) {
+            if (swalMessage.includes("succeeded")) {
+                Swal.fire(
+                    {
+                        title: 'Success',
+                        text: '@swalMessage',
+                        icon: 'success',
+                        confirmButtonText: 'ok',
+                        color: '#5066e1'
                     }
+                )
+            }
 
-                    if (swalMessage.includes("failed")) {
-                        Swal.fire(
-                            {
-                                title: 'Sorry',
-                                text: '@swalMessage',
-                                icon: 'error',
-                                confirmButtonText: 'ok',
-                                color: '#820300'
-                            }
-                        )
+            if (swalMessage.includes("failed")) {
+                Swal.fire(
+                    {
+                        title: 'Sorry',
+                        text: '@swalMessage',
+                        icon: 'error',
+                        confirmButtonText: 'ok',
+                        color: '#820300'
                     }
+                )
+            }
 
-                }
-            </script>
+        }
+    </script>
         }
