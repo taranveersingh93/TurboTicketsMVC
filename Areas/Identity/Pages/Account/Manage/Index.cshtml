@@ -55,11 +55,8 @@
                         <div class="app-lists p-4">
                             <form id="profile-form" method="post" enctype="multipart/form-data" class="d-flex flex-column align-items-center">
                                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                                <div class="col-6">
-                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="col-12 col-md-6">
                                     <div class="form-floating">
-                                        @* <label asp-for="Input.ImageData" style="width: 100%;"></label> *@
-
                                         <img id="userImage" class="img-fluid img-thumbnail rounded" src="@_fileService.ConvertByteArrayToFile(Model.Input.ImageFileData,Model.Input.ImageFileType,DefaultImage.BTUserImage)" />
 
                                         <input type="file" asp-for="Input.ImageFormFile" class="form-control" accept=".png,.jpg,.jpeg,.gif,.tif"
@@ -68,8 +65,7 @@
 
                                         <span asp-validation-for="Input.ImageFormFile" class="text-danger"></span>
                                     </div>
-                                </div>
-                                <div class="col-6">
+
                                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     <div class="form-floating mb-1">
                                         <input asp-for="Username" class="form-control" disabled />
