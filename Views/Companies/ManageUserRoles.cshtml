@@ -1,5 +1,7 @@
-﻿@using TurboTicketsMVC.Models.ViewModels;
+﻿@using Microsoft.AspNetCore.Identity;
+@using TurboTicketsMVC.Models.ViewModels;
 @model IEnumerable<ManageUserRolesViewModel>
+@inject UserManager<TTUser> _UserManager;
 
 @{
     ViewData["Title"] = "Manage User Roles";
@@ -49,30 +51,32 @@
                                 {
                                     <tr>
                                         <td>
-                                            <p>@viewModel.TTUser!.FullName<p>
+                                            <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(viewModel.TTUser!))">
+                                                <p>@viewModel.TTUser!.FullName<p>
+                                            </a>
 
-                                                    @if (viewModel.SelectedRole == "Admin")
-                                                    {
-                                                    <div class="badge rounded-pill danger-bg">@viewModel.SelectedRole</div>
-                                                    }
-                                                    else if (viewModel.SelectedRole == "Developer")
-                                                    {
-                                                    <div class="badge rounded-pill secondary-bg">@viewModel.SelectedRole</div>
-                                                    }
-                                                    else if (viewModel.SelectedRole == "Submitter")
-                                                    {
-                                                    <div class="badge rounded-pill warning-bg">@viewModel.SelectedRole</div>
-                                                    }
-                                                    else
-                                                    {
-                                                    <div class="badge rounded-pill dark-bg">Project Manager</div>
-                                                    }
+                                            @if (viewModel.SelectedRole == "Admin")
+                                            {
+                                                <div class="badge rounded-pill danger-bg">@viewModel.SelectedRole</div>
+                                            }
+                                            else if (viewModel.SelectedRole == "Developer")
+                                            {
+                                                <div class="badge rounded-pill secondary-bg">@viewModel.SelectedRole</div>
+                                            }
+                                            else if (viewModel.SelectedRole == "Submitter")
+                                            {
+                                                <div class="badge rounded-pill warning-bg">@viewModel.SelectedRole</div>
+                                            }
+                                            else
+                                            {
+                                                <div class="badge rounded-pill dark-bg">Project Manager</div>
+                                            }
 
-                                                    @if (viewModel.IsDemoUser)
-                                                    {
-                                                    <div class="badge rounded-pill bg-primary text-dark">Demo User</div>
+                                            @if (viewModel.IsDemoUser)
+                                            {
+                                                <div class="badge rounded-pill bg-primary text-dark">Demo User</div>
 
-                                                    }
+                                            }
 
                                         </td>
 
