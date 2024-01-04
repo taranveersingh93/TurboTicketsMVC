@@ -31,8 +31,9 @@ namespace TurboTicketsMVC.Services
                 _context.Add(project);
                 await _context.SaveChangesAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -61,8 +62,9 @@ namespace TurboTicketsMVC.Services
                 return false;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -93,8 +95,9 @@ namespace TurboTicketsMVC.Services
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -122,16 +125,18 @@ namespace TurboTicketsMVC.Services
                             return true;
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        Console.WriteLine(ex.Message);
                         throw;
                     }
                 }
                 return false;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -151,8 +156,9 @@ namespace TurboTicketsMVC.Services
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -172,8 +178,9 @@ namespace TurboTicketsMVC.Services
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -189,8 +196,9 @@ namespace TurboTicketsMVC.Services
                 return companyProjects;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -210,8 +218,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return companyProjects;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -223,8 +232,9 @@ namespace TurboTicketsMVC.Services
                 throw new NotImplementedException();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -251,8 +261,9 @@ namespace TurboTicketsMVC.Services
                 return project!;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -275,8 +286,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return null!;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -294,26 +306,14 @@ namespace TurboTicketsMVC.Services
                 }
                 return users;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
         }
 
-        public Task<IEnumerable<ProjectPriority>> GetProjectPrioritiesAsync()
-        {
-            try
-            {
-                throw new NotImplementedException();
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
         public async Task<IEnumerable<Project>?> GetUserProjectsAsync(string? userId)
         {
             try
@@ -331,8 +331,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return userProjects;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -349,8 +350,9 @@ namespace TurboTicketsMVC.Services
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -377,8 +379,9 @@ namespace TurboTicketsMVC.Services
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -405,8 +408,9 @@ namespace TurboTicketsMVC.Services
                 }
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -423,8 +427,9 @@ namespace TurboTicketsMVC.Services
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -432,80 +437,121 @@ namespace TurboTicketsMVC.Services
 
         public async Task<bool> IsUserPmAsync(int? projectId, string userId)
         {
-            if (projectId != null)
+            try
             {
-                TTUser? projectPM = await GetProjectManagerAsync(projectId);
-                if (projectPM != null)
+                if (projectId != null)
                 {
-                    return projectPM.Id == userId;
+                    TTUser? projectPM = await GetProjectManagerAsync(projectId);
+                    if (projectPM != null)
+                    {
+                        return projectPM.Id == userId;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
                     return false;
                 }
+
             }
-            else
+            catch (Exception ex)
             {
-                return false;
+                Console.WriteLine(ex.Message);
+
+                throw;
             }
         }
 
         public async Task<bool> CanViewProject(int? projectId, string userId, int? companyId)
         {
-            if (projectId != null && companyId != null)
+            try
             {
-                Project? project = await _context.Projects.AsNoTracking()
-                    .Include(p => p.Tickets)
-                        .ThenInclude(t => t.DeveloperUser)
-                    .Include(p => p.Tickets)
-                        .ThenInclude(t => t.SubmitterUser)
-                    .Include(p => p.Tickets)
-                        .ThenInclude(t => t.History)
-                            .ThenInclude(h => h.User)
-                    .Include(p => p.Members)
-                .Include(p => p.Company)
-                    .FirstOrDefaultAsync(project => project.Id == projectId && project.CompanyId == companyId);
 
-                TTUser? user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
-                bool isAdmin = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin));
-                bool isPM = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.ProjectManager));
-                bool isMember = false;
-                if (project != null)
+                if (projectId != null && companyId != null)
                 {
-                 isMember = project!.Members.Any(m => m.Id == userId);
+                    Project? project = await _context.Projects.AsNoTracking()
+                        .Include(p => p.Tickets)
+                            .ThenInclude(t => t.DeveloperUser)
+                        .Include(p => p.Tickets)
+                            .ThenInclude(t => t.SubmitterUser)
+                        .Include(p => p.Tickets)
+                            .ThenInclude(t => t.History)
+                                .ThenInclude(h => h.User)
+                        .Include(p => p.Members)
+                    .Include(p => p.Company)
+                        .FirstOrDefaultAsync(project => project.Id == projectId && project.CompanyId == companyId);
+
+                    TTUser? user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
+                    bool isAdmin = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.Admin));
+                    bool isPM = await _roleService.IsUserInRoleAsync(user, nameof(TTRoles.ProjectManager));
+                    bool isMember = false;
+                    if (project != null)
+                    {
+                        isMember = project!.Members.Any(m => m.Id == userId);
+                    }
+                    return isAdmin || isMember || isPM;
                 }
-                return isAdmin || isMember || isPM;
+                return false;
             }
-            return false;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                throw;
+            }
         }
 
         public async Task<IEnumerable<Project>> GetAssignedProjects(int? companyId)
         {
-            IEnumerable<Project> allProjects = await GetAllProjectsByCompanyIdAsync(companyId);
-            List<Project> assignedProjects = new();
-            foreach(Project project in allProjects)
+            try
             {
-                if ((await GetProjectManagerAsync(project.Id)) != null) {
-                    assignedProjects.Add(project);
+                IEnumerable<Project> allProjects = await GetAllProjectsByCompanyIdAsync(companyId);
+                List<Project> assignedProjects = new();
+                foreach (Project project in allProjects)
+                {
+                    if ((await GetProjectManagerAsync(project.Id)) != null)
+                    {
+                        assignedProjects.Add(project);
+                    }
                 }
+                IEnumerable<Project> projects = assignedProjects;
+                return projects;
+
             }
-            IEnumerable<Project> projects = assignedProjects;
-            return projects;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                throw;
+            }
         }
 
         public async Task<IEnumerable<Project>> GetUnassignedProjects(int? companyId)
         {
-            IEnumerable<Project> allProjects = await GetAllProjectsByCompanyIdAsync(companyId);
-            List<Project> unassignedProjects = new();
-            foreach (Project project in allProjects)
+            try
             {
-                if ((await GetProjectManagerAsync(project.Id)) == null)
+                IEnumerable<Project> allProjects = await GetAllProjectsByCompanyIdAsync(companyId);
+                List<Project> unassignedProjects = new();
+                foreach (Project project in allProjects)
                 {
-                    unassignedProjects.Add(project);
+                    if ((await GetProjectManagerAsync(project.Id)) == null)
+                    {
+                        unassignedProjects.Add(project);
+                    }
                 }
+                IEnumerable<Project> projects = unassignedProjects;
+                return projects;
+
             }
-            IEnumerable<Project> projects = unassignedProjects;
-            return projects;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                throw;
+            }
         }
     }
 }

@@ -18,7 +18,6 @@ namespace TurboTicketsMVC.Services.Interfaces
         public Task<TTUser> GetProjectManagerAsync(int? projectId);
         public Task<IEnumerable<TTUser>> GetProjectMembersByRoleAsync(int? projectId, string? roleName, int? companyId);
 
-        public Task<IEnumerable<ProjectPriority>> GetProjectPrioritiesAsync();
         public Task<IEnumerable<Project>?> GetUserProjectsAsync(string? userId);
         public Task RemoveMembersFromProjectAsync(int? projectId, int? companyId);
 
