@@ -7,7 +7,7 @@ using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Services
 {
-    public class TTTicketHistoryService:ITTTicketHistoryService
+    public class TTTicketHistoryService : ITTTicketHistoryService
     {
         #region Injection
         private readonly ApplicationDbContext _context;
@@ -22,212 +22,208 @@ namespace TurboTicketsMVC.Services
         #endregion
 
         #region Add History 1
-        public async Task AddHistoryAsync(Ticket? oldTicket, Ticket? newTicket, string? userId) {
-            TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (oldTicket == null && newTicket != null)
+        public async Task AddHistoryAsync(Ticket? oldTicket, Ticket? newTicket, string? userId)
+        {
+            try
             {
-                TicketHistory history = new()
-                {
-                    TicketId = newTicket.Id,
-                    PropertyName = "",
-                    OldValue = "",
-                    NewValue = "",
-                    CreatedDate = DateTimeOffset.Now,
-                    UserId = userId,
-                    Description = "New Ticket Created"
-                };
 
-                try
+                TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (oldTicket == null && newTicket != null)
                 {
+                    TicketHistory history = new()
+                    {
+                        TicketId = newTicket.Id,
+                        PropertyName = "",
+                        OldValue = "",
+                        NewValue = "",
+                        CreatedDate = DateTimeOffset.Now,
+                        UserId = userId,
+                        Description = "New Ticket Created"
+                    };
                     await _context.TicketHistories.AddAsync(history);
                     await _context.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
 
-                    throw;
+                }
+                else
+                {
+                    //Check Ticket Title
+                    if (oldTicket?.Title != newTicket?.Title)
+                    {
+                        TicketHistory? history = new()
+                        {
+                            TicketId = newTicket!.Id,
+                            PropertyName = "Title",
+                            OldValue = oldTicket?.Title,
+                            NewValue = newTicket?.Title,
+                            CreatedDate = DateTimeOffset.Now,
+                            UserId = userId,
+                            Description = $"New ticket title: {newTicket?.Title}"
+                        };
+                        await _context.TicketHistories.AddAsync(history);
+                    }
+
+                    //Check Ticket Description
+                    if (oldTicket?.Description != newTicket?.Description)
+                    {
+                        TicketHistory? history = new()
+                        {
+                            TicketId = newTicket!.Id,
+                            PropertyName = "Description",
+                            OldValue = oldTicket?.Description,
+                            NewValue = newTicket?.Description,
+                            CreatedDate = DateTimeOffset.Now,
+                            UserId = userId,
+                            Description = $"New ticket description: {newTicket?.Description}"
+                        };
+                        await _context.TicketHistories.AddAsync(history);
+                    }
+
+                    //Check Ticket Priority
+                    if (oldTicket?.TicketPriority != newTicket?.TicketPriority)
+                    {
+                        TicketHistory? history = new()
+                        {
+                            TicketId = newTicket!.Id,
+                            PropertyName = "TicketPriority",
+                            OldValue = oldTicket?.TicketPriority.ToString(),
+                            NewValue = newTicket?.TicketPriority.ToString(),
+                            CreatedDate = DateTimeOffset.Now,
+                            UserId = userId,
+                            Description = $"New ticket priority: {newTicket?.TicketPriority!.ToString()}"
+                        };
+                        await _context.TicketHistories.AddAsync(history);
+                    }
+
+                    //Check Ticket Status
+                    if (oldTicket?.TicketStatus != newTicket?.TicketStatus)
+                    {
+                        TicketHistory? history = new()
+                        {
+                            TicketId = newTicket!.Id,
+                            PropertyName = "TicketStatus",
+                            OldValue = oldTicket?.TicketStatus!.ToString(),
+                            NewValue = newTicket?.TicketStatus!.ToString(),
+                            CreatedDate = DateTimeOffset.Now,
+                            UserId = userId,
+                            Description = $"New ticket Status: {newTicket?.TicketStatus!.ToString()}"
+                        };
+                        await _context.TicketHistories.AddAsync(history);
+                    }
+
+                    //Check Ticket Type
+                    if (oldTicket?.TicketType != newTicket?.TicketType)
+                    {
+                        TicketHistory? history = new()
+                        {
+                            TicketId = newTicket!.Id,
+                            PropertyName = "TicketTypeId",
+                            OldValue = oldTicket?.TicketType!.ToString(),
+                            NewValue = newTicket?.TicketType!.ToString(),
+                            CreatedDate = DateTimeOffset.Now,
+                            UserId = userId,
+                            Description = $"New ticket Type: {newTicket?.TicketType!.ToString()}"
+                        };
+                        await _context.TicketHistories.AddAsync(history);
+                    }
+
+                    //Check Ticket archival
+                    if (oldTicket?.Archived != newTicket?.Archived)
+                    {
+                        TicketHistory? history = new()
+                        {
+                            TicketId = newTicket!.Id,
+                            PropertyName = "Archive Status",
+                            OldValue = oldTicket!.Archived.ToString(),
+                            NewValue = newTicket.Archived.ToString(),
+                            CreatedDate = DateTimeOffset.Now,
+                            UserId = userId,
+                            Description = $"Ticket Archive status changed: {newTicket?.Archived!.ToString()}"
+                        };
+                        await _context.TicketHistories.AddAsync(history);
+                    }
+
+                    //Check Ticket Developer
+                    if (oldTicket?.DeveloperUserId != newTicket?.DeveloperUserId)
+                    {
+                        TicketHistory? history = new()
+                        {
+                            TicketId = newTicket!.Id,
+                            PropertyName = "Developer",
+                            OldValue = oldTicket?.DeveloperUser?.FullName ?? "Not Assigned",
+                            NewValue = newTicket?.DeveloperUser?.FullName,
+                            CreatedDate = DateTimeOffset.Now,
+                            UserId = userId,
+                            Description = $"New ticket developer: {newTicket?.DeveloperUser?.FullName}"
+
+                        };
+                        await _context.TicketHistories.AddAsync(history);
+                    }
+
+                    //Check ticket comment count
+                    if (oldTicket?.Comments.Count != newTicket?.Comments.Count)
+                    {
+                        TicketHistory? history = new()
+                        {
+                            TicketId = newTicket!.Id,
+                            PropertyName = "Ticket Comment",
+                            OldValue = oldTicket?.Comments?.Count == 1 ? "1 Comment" : $"{oldTicket?.Comments.Count} comments",
+                            NewValue = $"Comment #{newTicket.Comments.Count} added by {newTicket.Comments.Last()!.User!.FullName}",
+                            CreatedDate = DateTimeOffset.Now,
+                            UserId = userId,
+                            Description = $"New Comment by {newTicket.Comments.Last()!.User!.FullName}"
+
+                        };
+                        await _context.TicketHistories.AddAsync(history);
+                    }
+
+                    if (oldTicket?.Attachments.Count < newTicket?.Attachments.Count)
+                    {
+                        TicketHistory? history = new()
+                        {
+                            TicketId = newTicket!.Id,
+                            PropertyName = "Ticket Attachment",
+                            OldValue = oldTicket?.Attachments?.Count == 1 ? "1 Attachment" : $"{oldTicket?.Attachments.Count} attachments",
+                            NewValue = $"Attachment #{newTicket.Attachments.Count} added by {newTicket.Attachments.Last()!.TTUser!.FullName}",
+                            CreatedDate = DateTimeOffset.Now,
+                            UserId = userId,
+                            Description = $"New Attachment by {newTicket.Attachments.Last()!.TTUser!.FullName}"
+
+                        };
+                        await _context.TicketHistories.AddAsync(history);
+                    }
+
+                    if (oldTicket?.Attachments.Count > newTicket?.Attachments.Count)
+                    {
+                        TicketHistory? history = new()
+                        {
+                            TicketId = newTicket!.Id,
+                            PropertyName = "Ticket Attachment Removed",
+                            OldValue = oldTicket?.Attachments?.Count == 1 ? "1 Attachment" : $"{oldTicket?.Attachments.Count} attachments",
+                            NewValue = $"Attachment #{oldTicket!.Attachments.Count} removed by {user!.FullName}",
+                            CreatedDate = DateTimeOffset.Now,
+                            UserId = userId,
+                            Description = $"Attachment removed by {user!.FullName}"
+
+                        };
+                        await _context.TicketHistories.AddAsync(history);
+                    }
+
+                    await _context.SaveChangesAsync();
                 }
             }
-            else
+            catch (Exception ex)
             {
-                //Check Ticket Title
-                if (oldTicket?.Title != newTicket?.Title)
-                {
-                    TicketHistory? history = new()
-                    {
-                        TicketId = newTicket!.Id,
-                        PropertyName = "Title",
-                        OldValue = oldTicket?.Title,
-                        NewValue = newTicket?.Title,
-                        CreatedDate = DateTimeOffset.Now,
-                        UserId = userId,
-                        Description = $"New ticket title: {newTicket?.Title}"
-                    };
-                    await _context.TicketHistories.AddAsync(history);
-                }
+                Console.WriteLine(ex.Message);
 
-                //Check Ticket Description
-                if (oldTicket?.Description != newTicket?.Description)
-                {
-                    TicketHistory? history = new()
-                    {
-                        TicketId = newTicket!.Id,
-                        PropertyName = "Description",
-                        OldValue = oldTicket?.Description,
-                        NewValue = newTicket?.Description,
-                        CreatedDate = DateTimeOffset.Now,
-                        UserId = userId,
-                        Description = $"New ticket description: {newTicket?.Description}"
-                    };
-                    await _context.TicketHistories.AddAsync(history);
-                }
-
-                //Check Ticket Priority
-                if (oldTicket?.TicketPriority != newTicket?.TicketPriority)
-                {
-                    TicketHistory? history = new()
-                    {
-                        TicketId = newTicket!.Id,
-                        PropertyName = "TicketPriority",
-                        OldValue = oldTicket?.TicketPriority.ToString(),
-                        NewValue = newTicket?.TicketPriority.ToString(),
-                        CreatedDate = DateTimeOffset.Now,
-                        UserId = userId,
-                        Description = $"New ticket priority: {newTicket?.TicketPriority!.ToString()}"
-                    };
-                    await _context.TicketHistories.AddAsync(history);
-                }
-
-                //Check Ticket Status
-                if (oldTicket?.TicketStatus != newTicket?.TicketStatus)
-                {
-                    TicketHistory? history = new()
-                    {
-                        TicketId = newTicket!.Id,
-                        PropertyName = "TicketStatus",
-                        OldValue = oldTicket?.TicketStatus!.ToString(),
-                        NewValue = newTicket?.TicketStatus!.ToString(),
-                        CreatedDate = DateTimeOffset.Now,
-                        UserId = userId,
-                        Description = $"New ticket Status: {newTicket?.TicketStatus!.ToString()}"
-                    };
-                    await _context.TicketHistories.AddAsync(history);
-                }
-
-                //Check Ticket Type
-                if (oldTicket?.TicketType != newTicket?.TicketType)
-                {
-                    TicketHistory? history = new()
-                    {
-                        TicketId = newTicket!.Id,
-                        PropertyName = "TicketTypeId",
-                        OldValue = oldTicket?.TicketType!.ToString(),
-                        NewValue = newTicket?.TicketType!.ToString(),
-                        CreatedDate = DateTimeOffset.Now,
-                        UserId = userId,
-                        Description = $"New ticket Type: {newTicket?.TicketType!.ToString()}"
-                    };
-                    await _context.TicketHistories.AddAsync(history);
-                }
-
-                //Check Ticket archival
-                if (oldTicket?.Archived != newTicket?.Archived)
-                {
-                    TicketHistory? history = new()
-                    {
-                        TicketId = newTicket!.Id,
-                        PropertyName = "Archive Status",
-                        OldValue = oldTicket!.Archived.ToString(),
-                        NewValue = newTicket.Archived.ToString(),
-                        CreatedDate = DateTimeOffset.Now,
-                        UserId = userId,
-                        Description = $"Ticket Archive status changed: {newTicket?.Archived!.ToString()}"
-                    };
-                    await _context.TicketHistories.AddAsync(history);
-                }
-
-                //Check Ticket Developer
-                if (oldTicket?.DeveloperUserId != newTicket?.DeveloperUserId)
-                {
-                    TicketHistory? history = new()
-                    {
-                        TicketId = newTicket!.Id,
-                        PropertyName = "Developer",
-                        OldValue = oldTicket?.DeveloperUser?.FullName ?? "Not Assigned",
-                        NewValue = newTicket?.DeveloperUser?.FullName,
-                        CreatedDate = DateTimeOffset.Now,
-                        UserId = userId,
-                        Description = $"New ticket developer: {newTicket?.DeveloperUser?.FullName}"
-
-                    };
-                    await _context.TicketHistories.AddAsync(history);
-                }
-
-                //Check ticket comment count
-                if (oldTicket?.Comments.Count != newTicket?.Comments.Count)
-                {
-                    TicketHistory? history = new()
-                    {
-                        TicketId = newTicket!.Id,
-                        PropertyName = "Ticket Comment",
-                        OldValue = oldTicket?.Comments?.Count == 1 ? "1 Comment" : $"{oldTicket?.Comments.Count} comments",
-                        NewValue = $"Comment #{newTicket.Comments.Count} added by {newTicket.Comments.Last()!.User!.FullName}",
-                        CreatedDate = DateTimeOffset.Now,
-                        UserId = userId,
-                        Description = $"New Comment by {newTicket.Comments.Last()!.User!.FullName}"
-
-                    };
-                    await _context.TicketHistories.AddAsync(history);
-                }
-
-                if (oldTicket?.Attachments.Count < newTicket?.Attachments.Count)
-                {
-                    TicketHistory? history = new()
-                    {
-                        TicketId = newTicket!.Id,
-                        PropertyName = "Ticket Attachment",
-                        OldValue = oldTicket?.Attachments?.Count == 1 ? "1 Attachment" : $"{oldTicket?.Attachments.Count} attachments",
-                        NewValue = $"Attachment #{newTicket.Attachments.Count} added by {newTicket.Attachments.Last()!.TTUser!.FullName}",
-                        CreatedDate = DateTimeOffset.Now,
-                        UserId = userId,
-                        Description = $"New Attachment by {newTicket.Attachments.Last()!.TTUser!.FullName}"
-
-                    };
-                    await _context.TicketHistories.AddAsync(history);
-                }
-
-                if (oldTicket?.Attachments.Count > newTicket?.Attachments.Count)
-                {
-                    TicketHistory? history = new()
-                    {
-                        TicketId = newTicket!.Id,
-                        PropertyName = "Ticket Attachment Removed",
-                        OldValue = oldTicket?.Attachments?.Count == 1 ? "1 Attachment" : $"{oldTicket?.Attachments.Count} attachments",
-                        NewValue = $"Attachment #{oldTicket!.Attachments.Count} removed by {user!.FullName}",
-                        CreatedDate = DateTimeOffset.Now,
-                        UserId = userId,
-                        Description = $"Attachment removed by {user!.FullName}"
-
-                    };
-                    await _context.TicketHistories.AddAsync(history);
-                }
-
-                try
-                {
-                    //Save the TicketHistory DataBaseSet to the database
-                    await _context.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
+                throw;
             }
         }
+
         #endregion
 
         #region Add history 2
-        public async Task AddHistoryAsync(int? ticketId, string? model, string? userId) {
+        public async Task AddHistoryAsync(int? ticketId, string? model, string? userId)
+        {
             try
             {
                 Ticket? ticket = await _context.Tickets.FindAsync(ticketId);
@@ -250,8 +246,9 @@ namespace TurboTicketsMVC.Services
                 await _context.SaveChangesAsync();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -259,7 +256,8 @@ namespace TurboTicketsMVC.Services
         #endregion
 
         #region get Project ticket histories
-        public async Task<IEnumerable<TicketHistory>> GetProjectTicketsHistoriesAsync(int? projectId, int? companyId) {
+        public async Task<IEnumerable<TicketHistory>> GetProjectTicketsHistoriesAsync(int? projectId, int? companyId)
+        {
             try
             {
                 Project? project = await _context.Projects.Where(p => p.CompanyId == companyId)
@@ -272,8 +270,9 @@ namespace TurboTicketsMVC.Services
 
                 return ticketHistory;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
@@ -281,7 +280,8 @@ namespace TurboTicketsMVC.Services
         #endregion
 
         #region get company ticket histories
-        public async Task<IEnumerable<TicketHistory>> GetCompanyTicketsHistoriesAsync(int? companyId) {
+        public async Task<IEnumerable<TicketHistory>> GetCompanyTicketsHistoriesAsync(int? companyId)
+        {
 
             try
             {
@@ -298,8 +298,9 @@ namespace TurboTicketsMVC.Services
                 IEnumerable<TicketHistory> sortedHistories = ticketHistories.OrderByDescending(h => h.CreatedDate);
                 return sortedHistories;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
 
                 throw;
             }
