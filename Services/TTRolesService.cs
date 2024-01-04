@@ -31,8 +31,9 @@ namespace TurboTicketsMVC.Services
 
 				return false;
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}
@@ -46,8 +47,9 @@ namespace TurboTicketsMVC.Services
 				allRoles = await _context.Roles.ToListAsync();
 				return allRoles;
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}
@@ -61,8 +63,9 @@ namespace TurboTicketsMVC.Services
 				IEnumerable<IdentityRole> roles = allRoles.Where(r => r.Name != "DemoUser");
 				return roles;
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}
@@ -78,8 +81,9 @@ namespace TurboTicketsMVC.Services
 				}
 				return userRoles;
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}
@@ -104,8 +108,9 @@ namespace TurboTicketsMVC.Services
 				}
 				return roleUsers;
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}
@@ -122,8 +127,9 @@ namespace TurboTicketsMVC.Services
 				}
 				return userRoles.Any(role => role == roleName);
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}
@@ -140,8 +146,9 @@ namespace TurboTicketsMVC.Services
 				}
 				return false;
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}
@@ -158,8 +165,9 @@ namespace TurboTicketsMVC.Services
 				}
 				return false;
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}
