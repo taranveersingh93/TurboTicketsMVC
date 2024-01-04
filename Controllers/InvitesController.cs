@@ -149,11 +149,6 @@ namespace TurboTicketsMVC.Controllers
                         string? swalMessage = "Invite failed, please try another email address";
                         return RedirectToAction(nameof(Index), new { swalMessage });
                     }
-
-
-
-                    // TODO: Possibly use SWAL message
-
                 }
                 catch (Exception ex)
                 {
@@ -196,7 +191,7 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
             }
@@ -212,7 +207,6 @@ namespace TurboTicketsMVC.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-
         public async Task<IActionResult> ResendInvite(int? id)
         {
 
@@ -276,7 +270,8 @@ namespace TurboTicketsMVC.Controllers
             }
             catch
             {
-                return NotFound();
+                return RedirectToAction("GenericError", "Home");
+
             }
 
         }
@@ -297,7 +292,7 @@ namespace TurboTicketsMVC.Controllers
         {
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(company))
             {
-                return NotFound();
+                return RedirectToAction("NotFoundError", "Home");
             }
 
             Guid companyToken = Guid.Parse(_protector.Unprotect(token));
@@ -320,7 +315,7 @@ namespace TurboTicketsMVC.Controllers
                     }
                 }
 
-                return NotFound();
+                return RedirectToAction("NotFoundError", "Home");
             }
             catch (Exception ex)
             {
