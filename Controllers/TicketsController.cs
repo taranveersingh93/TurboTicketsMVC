@@ -56,7 +56,6 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-
                 IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByUserIdAsync(_userId, _companyId);
                 return View(userTickets);
             }
@@ -76,13 +75,11 @@ namespace TurboTicketsMVC.Controllers
                 IEnumerable<Ticket> activeTickets = userTickets.Where(t => t.TicketStatus != TTTicketStatuses.Resolved).ToList();
 
                 return View(activeTickets);
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
         }
 
@@ -92,34 +89,27 @@ namespace TurboTicketsMVC.Controllers
             {
                 IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByCompanyIdAsync(_companyId);
                 IEnumerable<Ticket> resolvedTickets = userTickets.Where(t => t.TicketStatus == TTTicketStatuses.Resolved).ToList();
-
                 return View(resolvedTickets);
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
         }
 
         [Authorize(Roles = "Admin, ProjectManager")]
-
         public async Task<IActionResult> AllTickets()
         {
             try
             {
-
                 IEnumerable<Ticket> allTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
-
                 return View(allTickets);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
         }
 
@@ -128,17 +118,14 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-
                 IEnumerable<Ticket> allTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
                 IEnumerable<Ticket> archivedTickets = allTickets.Where(t => t.Archived || t.ArchivedByProject).ToList();
-
                 return View(archivedTickets);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
         }
 
@@ -147,17 +134,14 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-
                 IEnumerable<Ticket> allTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
                 IEnumerable<Ticket> unarchivedTickets = allTickets.Where(t => !t.Archived && !t.ArchivedByProject).ToList();
-
                 return View(unarchivedTickets);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
         }
 
@@ -168,15 +152,12 @@ namespace TurboTicketsMVC.Controllers
             {
                 IEnumerable<Ticket> allTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
                 IEnumerable<Ticket> unassignedTickets = allTickets.Where(t => t.DeveloperUserId == null).ToList();
-
                 return View(unassignedTickets);
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
         }
 
@@ -187,15 +168,12 @@ namespace TurboTicketsMVC.Controllers
             {
                 IEnumerable<Ticket> allTickets = await _ticketService.GetAllTicketsByCompanyIdAsync(_companyId);
                 IEnumerable<Ticket> assignedTickets = allTickets.Where(t => t.DeveloperUserId != null).ToList();
-
                 return View(assignedTickets);
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
         }
 
@@ -204,16 +182,16 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-                if (id == null || _context.Tickets == null)
+                if (id == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
                 Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
                 bool canViewTicket = User.IsInRole("ProjectManager");
                 bool canActOnTicket = await _ticketService.CanActOnTicket(_userId, ticket.Id, _companyId);
                 if (ticket == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
                 if (canActOnTicket || canViewTicket)
@@ -242,13 +220,12 @@ namespace TurboTicketsMVC.Controllers
                     ViewData["CompanySubmitters"] = new MultiSelectList(companySubmitters, "Id", "FullName", submitterIds);
                     return View(ticket);
                 }
-                return NotFound();
+                return RedirectToAction("AccessDeniedError", "Home");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
@@ -262,13 +239,11 @@ namespace TurboTicketsMVC.Controllers
                 IEnumerable<Project> userProjects = await _projectService.GetUserProjectsAsync(_userId);
                 ViewData["Projects"] = new SelectList(userProjects, "Id", "Name");
                 return View();
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
         }
 
@@ -282,11 +257,8 @@ namespace TurboTicketsMVC.Controllers
             try
             {
                 ModelState.Remove("SubmitterUserId");
-                bool canMakeTickets = false;
-                if (ticket.ProjectId != null)
-                {
-                    canMakeTickets = await _ticketService.CanMakeTickets(_userId, ticket.ProjectId, _companyId);
-                }
+                bool canMakeTickets =  await _ticketService.CanMakeTickets(_userId, ticket.ProjectId, _companyId);
+                
                 if (ModelState.IsValid && canMakeTickets)
                 {
                     ticket.CreatedDate = DateTimeOffset.Now;
@@ -302,7 +274,7 @@ namespace TurboTicketsMVC.Controllers
 
                     return RedirectToAction(nameof(Index));
                 }
-                IEnumerable<Project> userProjects = await _projectService.GetUserProjectsAsync(_userId);
+                IEnumerable<Project>? userProjects = await _projectService.GetUserProjectsAsync(_userId);
                 IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
                 ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
                 ViewData["Projects"] = new SelectList(userProjects, "Id", "Name");
@@ -312,7 +284,6 @@ namespace TurboTicketsMVC.Controllers
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
@@ -322,9 +293,9 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-                if (id == null || _context.Tickets == null)
+                if (id == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
                 bool canActOnTicket = await _ticketService.CanActOnTicket(_userId, id, _companyId);
@@ -334,7 +305,7 @@ namespace TurboTicketsMVC.Controllers
                     Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
                     if (ticket == null)
                     {
-                        return NotFound();
+                        return RedirectToAction("NotFoundError", "Home");
                     }
                     int companyId = User.Identity!.GetCompanyId();
                     IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
@@ -342,11 +313,10 @@ namespace TurboTicketsMVC.Controllers
                     ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
                     ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
                     return View(ticket);
-
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("AccessDeniedError", "Home");
                 }
             }
             catch (Exception ex)
@@ -359,8 +329,6 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // POST: Tickets/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,CreatedDate,Archived,ArchivedByProject,ProjectId,TicketType,TicketStatus,TicketPriority,DeveloperUserId,SubmitterUserId")] Ticket ticket)
@@ -369,7 +337,7 @@ namespace TurboTicketsMVC.Controllers
             {
                 if (id != ticket.Id)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
 
@@ -395,9 +363,7 @@ namespace TurboTicketsMVC.Controllers
                         }
                         catch (DbUpdateConcurrencyException)
                         {
-                       
-                                return NotFound();
-                        
+                            return RedirectToAction("NotFoundError", "Home");
                         }
 
                     }
@@ -427,11 +393,16 @@ namespace TurboTicketsMVC.Controllers
             {
                 if (id == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
                 Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
-                bool canAssignDeveloper = await _ticketService.CanAssignDeveloper(_userId, ticket.Id, _companyId);
+                
+                if (ticket == null)
+                {
+                    return RedirectToAction("NotFoundError", "Home");
+                }
 
+                bool canAssignDeveloper = await _ticketService.CanAssignDeveloper(_userId, ticket.Id, _companyId);
                 if (canAssignDeveloper)
                 {
                     IEnumerable<TTUser> availableDevelopers = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
@@ -470,13 +441,12 @@ namespace TurboTicketsMVC.Controllers
                     ViewData["Submitters"] = new MultiSelectList(submitters, "Id", "FullName", submitterIds);
                     return View(assignTicketViewModel);
                 }
-                return NotFound();
+                return RedirectToAction("AccessDeniedError", "Home");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
@@ -487,7 +457,6 @@ namespace TurboTicketsMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignTicket(AssignTicketViewModel assignTicketViewModel)
         {
-
             Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(assignTicketViewModel.Ticket!.Id, _companyId);
             bool canAssignDeveloper = await _ticketService.CanAssignDeveloper(_userId, oldTicket.Id, _companyId);
             try
@@ -574,20 +543,18 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("AccessDeniedError", "Home");
                 }
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
 
-        // GET: Tickets/Delete/5
+        // GET: Tickets/Archive/
         [Authorize(Roles = "Admin, ProjectManager")]
         //needs controller logic for PM
         public async Task<IActionResult> Archive(int? id)
@@ -595,28 +562,27 @@ namespace TurboTicketsMVC.Controllers
             try
             {
                 bool userAuthorized = await _ticketService.CanAssignDeveloper(_userId, id, _companyId);
-                if (id == null || _context.Tickets == null)
+                if (id == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
                 if (userAuthorized)
                 {
                     Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
                     if (ticket == null)
                     {
-                        return NotFound();
+                        return RedirectToAction("NotFoundError", "Home");
                     }
 
                     return View(ticket);
 
                 }
-                return NotFound();
+                return RedirectToAction("AccessDeniedError", "Home");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
@@ -649,46 +615,50 @@ namespace TurboTicketsMVC.Controllers
 
                     return RedirectToAction(nameof(Index));
                 }
-                return NotFound();
+                
+                if (!userAuthorized)
+                {
+                    return RedirectToAction("AccessDeniedError", "Home");
+                }
+
+                return RedirectToAction("NotFoundError", "Home");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
 
         // GET: Tickets/Restore/5
         [Authorize(Roles = "Admin, ProjectManager")]
-
         public async Task<IActionResult> Restore(int? id)
         {
             try
             {
                 bool userAuthorized = await _ticketService.CanAssignDeveloper(_userId, id, _companyId);
-                if (id == null || _context.Tickets == null)
+                if (id == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
                 if (userAuthorized)
                 {
                     Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
                     if (ticket == null)
                     {
-                        return NotFound();
+                        return RedirectToAction("NotFoundError", "Home");
                     }
 
                     return View(ticket);
                 }
-                return NotFound();
+                return RedirectToAction("AccessDeniedError", "Home");
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
@@ -696,12 +666,16 @@ namespace TurboTicketsMVC.Controllers
         // POST: Tickets/RestoreConfirmed/5
         [HttpPost, ActionName("RestoreConfirmed")]
         [Authorize(Roles = "Admin, ProjectManager")]
-
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RestoreConfirmed(int id)
+        public async Task<IActionResult> RestoreConfirmed(int? id)
         {
             try
             {
+                if (id == null)
+                {
+                    return RedirectToAction("NotFoundError", "Home");
+                }
+
                 bool userAuthorized = await _ticketService.CanAssignDeveloper(_userId, id, _companyId);
 
                 Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(id, _companyId);
@@ -721,13 +695,18 @@ namespace TurboTicketsMVC.Controllers
 
                     return RedirectToAction(nameof(Index));
                 }
-                return NotFound();
+                
+                if (!userAuthorized)
+                {
+                    return RedirectToAction("AccessDeniedError", "Home");
+                }
+
+                return RedirectToAction("NotFoundError", "Home");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
@@ -766,7 +745,6 @@ namespace TurboTicketsMVC.Controllers
                 else
                 {
                     statusMessage = "Error: Invalid data.";
-
                 }
 
                 return RedirectToAction("Details", new { id = ticketAttachment.TicketId, message = statusMessage });
@@ -775,7 +753,6 @@ namespace TurboTicketsMVC.Controllers
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
@@ -790,9 +767,10 @@ namespace TurboTicketsMVC.Controllers
                 {
                     ticketAttachment = await _ticketService.GetTicketAttachmentByIdAsync(Id);
                     canActOnTicket = await _ticketService.CanActOnTicket(_userId, ticketAttachment!.TicketId, _companyId);
+                } else
+                {
+                    return RedirectToAction("NotFoundError", "Home");
                 }
-
-
 
                 Ticket? oldTicket = new();
                 if (ticketAttachment != null && canActOnTicket)
@@ -810,13 +788,18 @@ namespace TurboTicketsMVC.Controllers
 
                     return RedirectToAction("Details", new { id = ticketAttachment!.TicketId });
                 }
+
+                if (!canActOnTicket)
+                {
+                    return RedirectToAction("AccessDeniedError", "Home");
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
@@ -826,22 +809,27 @@ namespace TurboTicketsMVC.Controllers
         public async Task<IActionResult> Resolve(int? id)
         {
             try
-            {
+            {           
                 if (id != null)
                 {
                     Ticket? ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
+                    if (ticket == null)
+                    {
+                        return RedirectToAction("NotFoundError", "Home");
+                    }
+
                     if (ticket.DeveloperUserId == _userId)
                     {
                         return View(ticket);
                     }
                     else
                     {
-                        return NotFound();
+                        return RedirectToAction("AccessDeniedError", "Home");
                     }
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
             }
             catch (Exception ex)
@@ -855,15 +843,17 @@ namespace TurboTicketsMVC.Controllers
 
         [HttpPost, ActionName("ResolveConfirmed")]
         [Authorize(Roles = "Developer")]
-
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResolveConfirmed(int id)
         {
             try
             {
                 Ticket? oldTicket = await _ticketService.GetTicketAsNoTrackingAsync(id, _companyId);
-
-                if (oldTicket != null && oldTicket.DeveloperUserId == _userId)
+                if (oldTicket == null)
+                {
+                    return RedirectToAction("NotFoundError", "Home");
+                } 
+                else if (oldTicket.DeveloperUserId == _userId)
                 {
                     Ticket? ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
 
@@ -878,15 +868,14 @@ namespace TurboTicketsMVC.Controllers
 
                     return RedirectToAction(nameof(Index));
                 }
-                return NotFound();
+
+                return RedirectToAction("NotFoundError", "Home");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
-
         }
 
 
@@ -921,7 +910,6 @@ namespace TurboTicketsMVC.Controllers
             {
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
-
             }
 
         }
@@ -951,7 +939,7 @@ namespace TurboTicketsMVC.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> MarkRead(int id)
+        public async Task<IActionResult> MarkRead(int? id)
         {
             try
             {
@@ -963,7 +951,7 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
             }
             catch (Exception ex)
