@@ -138,7 +138,7 @@ namespace TurboTicketsMVC.Controllers
 
                 if (company == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
                 if (!string.IsNullOrEmpty(swalMessage))
                 {
@@ -157,26 +157,18 @@ namespace TurboTicketsMVC.Controllers
 
         // GET: Companies/Edit
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int? id)
+        [HttpGet]
+        public async Task<IActionResult> Edit()
         {
             try
             {
-                if (id == null || _context.Companies == null)
-                {
-                    return NotFound();
-                }
-                if (id == _companyId)
-                {
-                    Company company = await _companyService.GetCompanyInfoAsync(_companyId);
+                Company? company = await _companyService.GetCompanyInfoAsync(_companyId);
 
-                    if (company == null)
-                    {
-                        return NotFound();
-                    }
-                    return View(company);
+                if (company == null)
+                {
+                    return RedirectToAction("NotFoundError", "Home");
                 }
-                return NotFound();
-
+                return View(company);
             }
             catch (Exception ex)
             {
@@ -187,8 +179,6 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // POST: Companies/Edit
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
@@ -199,18 +189,14 @@ namespace TurboTicketsMVC.Controllers
                 string? swalMessage = "Changes failed";
                 if (ModelState.IsValid && company != null)
                 {
-
                     try
                     {
                         await _companyService.UpdateCompanyAsync(company);
                         swalMessage = "Changes successful";
-
                     }
                     catch (DbUpdateConcurrencyException)
                     {
-
-                        return NotFound();
-
+                        return RedirectToAction("GenericError", "Home");
                     }
                 }
                 return RedirectToAction(nameof(Details), new { swalMessage });
@@ -231,11 +217,10 @@ namespace TurboTicketsMVC.Controllers
             {
                 if (email == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
                 TTUser? user = await _companyService.GetUserByEmail(email, _companyId);
                 return View(user);
-
             }
             catch (Exception ex)
             {
@@ -252,7 +237,7 @@ namespace TurboTicketsMVC.Controllers
             {
                 if (email == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
                 TTUser? user = await _companyService.GetUserByEmail(email, _companyId);
                 if (user != null && user.CompanyId == _companyId)
@@ -267,7 +252,7 @@ namespace TurboTicketsMVC.Controllers
                     return View(emailData);
 
                 }
-                return NotFound();
+                return RedirectToAction("NotFoundError", "Home");
 
             }
             catch (Exception ex)

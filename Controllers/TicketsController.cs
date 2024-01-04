@@ -395,15 +395,9 @@ namespace TurboTicketsMVC.Controllers
                         }
                         catch (DbUpdateConcurrencyException)
                         {
-                            if (!TicketExists(ticket.Id))
-                            {
+                       
                                 return NotFound();
-                            }
-                            else
-                            {
-                                return RedirectToAction("GenericError", "Home");
-
-                            }
+                        
                         }
 
                     }
