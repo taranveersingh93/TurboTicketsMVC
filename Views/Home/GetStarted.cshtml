@@ -37,9 +37,7 @@
                                 </figure>
                             </div>
                             <div>
-                                <h6 class="d-flex">
-                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
-                                </h6>
+                                <span class="badge rounded-pill danger-bg me-2">Admin</span>
                                 <div class="row no-gutters border card flex-row border-radius-1">
 
                                     <div class="col-12 px-5 py-4">
@@ -59,9 +57,8 @@
                                 </figure>
                             </div>
                             <div>
-                                <h6 class="d-flex">
-                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
-                                </h6>
+
+                                <span class="badge rounded-pill danger-bg me-2">Admin</span>
                                 <div class="row no-gutters border card flex-row border-radius-1">
 
                                     <div class="col-12 px-5 py-4">
@@ -70,13 +67,13 @@
                                             The only way to add a second member to the same company is if the admin of that company invites another user.
                                             Whenever the invitees join the company, they become a <strong>submitter</strong>.
                                         </p>
-                                            @if (isAdmin)
-                                            {
-                                                <div class="d-flex pt-3 justify-content-center">
-                                                    <a role="button" class="btn btn-primary" asp-controller="Invites" asp-action="Create">Create Invite</a>
+                                        @if (isAdmin)
+                                        {
+                                            <div class="d-flex pt-3 justify-content-center">
+                                                <a role="button" class="btn btn-primary" asp-controller="Invites" asp-action="Create">Create Invite</a>
 
-                                                </div>
-                                            }
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -88,9 +85,7 @@
                                 </figure>
                             </div>
                             <div>
-                                <h6 class="d-flex">
-                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
-                                </h6>
+                                <span class="badge rounded-pill danger-bg me-2">Admin</span>
                                 <div class="row no-gutters border card flex-row border-radius-1">
 
                                     <div class="col-12 px-5 py-4">
@@ -99,12 +94,12 @@
                                             Since any new user in a company starts off just as a submitter, an admin can reassign the roles for those users.
                                             All users in a company, given their roles, are available to be rostered in for that role in any project in the company.
                                         </p>
-                                            @if (isAdmin)
-                                            {
-                                                <div class="d-flex pt-3 justify-content-center">
-                                                    <a role="button" class="btn btn-primary" asp-controller="Companies" asp-action="ManageUserRoles">Manage User Roles</a>
-                                                </div>
-                                            }
+                                        @if (isAdmin)
+                                        {
+                                            <div class="d-flex pt-3 justify-content-center">
+                                                <a role="button" class="btn btn-primary" asp-controller="Companies" asp-action="ManageUserRoles">Manage User Roles</a>
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -116,27 +111,27 @@
                                 </figure>
                             </div>
                             <div>
-                                <h6 class="d-flex">
-                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
-                                    <span class="badge rounded-pill dark-bg me-2">Project Manager</span>
+                                <div class="d-flex flex-column flex-md-row">
+                                    <span class="badge rounded-pill m-1 danger-bg me-2" style="width:fit-content;">Admin</span>
+                                    <span class="badge rounded-pill m-1 dark-bg me-2" style="width:fit-content;">Project Manager</span>
+                                </div>
 
-                                </h6>
                                 <div class="row no-gutters border card flex-row border-radius-1">
 
                                     <div class="col-12 px-5 py-4">
                                         <h5 class="text-primary">Admin or Project Manager creates a project</h5>
                                         <p class="m-0">
                                             An admin or a project manager are the only roles that can create a project. While creating a project, a project manager can be assigned.
-                                             If an admin creates a project, they can select any of the available project managers to be the PM. If left unselected, the project 
-                                             is marked <strong>unassigned</strong>. However, if a PM creates a project, they are automatically assigned as the project PM.
-                                             Both admin and project manager can edit their projects and the team.
+                                            If an admin creates a project, they can select any of the available project managers to be the PM. If left unselected, the project
+                                            is marked <strong>unassigned</strong>. However, if a PM creates a project, they are automatically assigned as the project PM.
+                                            Both admin and project manager can edit their projects and the team.
                                         </p>
-                                            @if (isAdmin || isPM)
-                                            {
-                                                <div class="d-flex pt-3 justify-content-center">
-                                                    <a role="button" class="btn btn-primary" asp-controller="Projects" asp-action="Create">Create Project</a>
-                                                </div>
-                                            }
+                                        @if (isAdmin || isPM)
+                                        {
+                                            <div class="d-flex pt-3 justify-content-center">
+                                                <a role="button" class="btn btn-primary" asp-controller="Projects" asp-action="Create">Create Project</a>
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -148,26 +143,26 @@
                                 </figure>
                             </div>
                             <div>
-                                <h6 class="d-flex">
-                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
-                                    <span class="badge rounded-pill dark-bg me-2">Project Manager</span>
-                                    <span class="badge rounded-pill secondary-bg me-2">Developer</span>
-                                    <span class="badge rounded-pill warning-bg me-2">Submitter</span>
+                                <div class="d-flex flex-column flex-md-row">                      
+                                    <span class="badge rounded-pill m-1 danger-bg me-2" style="width:fit-content;">Admin</span>
+                                    <span class="badge rounded-pill m-1 dark-bg me-2" style="width:fit-content;">Project Manager</span>
+                                    <span class="badge rounded-pill m-1 secondary-bg me-2" style="width:fit-content;">Developer</span>
+                                    <span class="badge rounded-pill m-1 warning-bg me-2" style="width:fit-content;">Submitter</span>
+                                </div>
 
-                                </h6>
                                 <div class="row no-gutters border card flex-row border-radius-1">
 
                                     <div class="col-12 px-5 py-4">
                                         <h5 class="text-primary">Any member of the project creates a ticket</h5>
                                         <p class="m-0">
-                                           At this point, any user can create a ticket for a project they're a member of.
-                                           An admin does not need to be a part of the project to create a ticket.
+                                            At this point, any user can create a ticket for a project they're a member of.
+                                            An admin does not need to be a part of the project to create a ticket.
                                         </p>
-                                           
-                                                <div class="d-flex pt-3 justify-content-center">
-                                                    <a role="button" class="btn btn-primary" asp-controller="Tickets" asp-action="Create">Create Ticket</a>
-                                                </div>
-                                            
+
+                                        <div class="d-flex pt-3 justify-content-center">
+                                            <a role="button" class="btn btn-primary" asp-controller="Tickets" asp-action="Create">Create Ticket</a>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -179,26 +174,27 @@
                                 </figure>
                             </div>
                             <div>
-                                <h6 class="d-flex">
-                                    <span class="badge rounded-pill danger-bg me-2">Admin</span>
-                                    <span class="badge rounded-pill dark-bg me-2">Project Manager</span>
-                                    <span class="badge rounded-pill secondary-bg me-2">Developer</span>
-                                    <span class="badge rounded-pill warning-bg me-2">Submitter</span>
 
-                                </h6>
+                                <div class="d-flex flex-column flex-md-row">
+                                    <span class="badge rounded-pill m-1 danger-bg me-2" style="width:fit-content;">Admin</span>
+                                    <span class="badge rounded-pill m-1 dark-bg me-2" style="width:fit-content;">Project Manager</span>
+                                    <span class="badge rounded-pill m-1 secondary-bg me-2" style="width:fit-content;">Developer</span>
+                                    <span class="badge rounded-pill m-1 warning-bg me-2" style="width:fit-content;">Submitter</span>
+                                </div>
+
                                 <div class="row no-gutters border card flex-row border-radius-1">
 
                                     <div class="col-12 px-5 py-4">
                                         <h5 class="text-primary">Ticket owner actions</h5>
                                         <p class="m-0">
-                                           Any user who created the ticket, can edit their ticket, add a comment and add attachments.
-                                           A developer can edit all tickets they created or were assigned to.
-                                           A project manager can edit any ticket that belongs to their projects.
-                                           An admin can edit any ticket.
+                                            Any user who created the ticket, can edit their ticket, add a comment and add attachments.
+                                            A developer can edit all tickets they created or were assigned to.
+                                            A project manager can edit any ticket that belongs to their projects.
+                                            An admin can edit any ticket.
                                         </p>
-                                            <div class="d-flex pt-3 justify-content-center">
-                                                <a role="button" class="btn btn-primary" asp-controller="Tickets" asp-action="Index">Tickets</a>
-                                            </div>
+                                        <div class="d-flex pt-3 justify-content-center">
+                                            <a role="button" class="btn btn-primary" asp-controller="Tickets" asp-action="Index">Tickets</a>
+                                        </div>
 
                                     </div>
                                 </div>
