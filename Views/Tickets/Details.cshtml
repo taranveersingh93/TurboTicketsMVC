@@ -137,7 +137,9 @@
 
                                 } else if(Model.DeveloperUserId != null)
                                 {
-                                    <h6 class="text-muted">Assigned To: <span class="text-primary">@Model.DeveloperUser.FullName</span></h6>
+                                    <h6 class="text-muted">
+                                        Assigned To: <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(Model.DeveloperUser))" class="text-primary">@Model.DeveloperUser!.FullName</a>
+                                    </h6>
                                     <form method="post" asp-action="AssignTicketFromDetails" asp-controller="Tickets">
                                         <input name="ticketId" value="@Model.Id" hidden />
                                         <div class="form-group">
@@ -172,7 +174,7 @@
                                 <h5>Assigned Developer:</h5>
                                 @if (Model.DeveloperUserId != null)
                                 {
-                                    <p>@Model.DeveloperUser!.FullName</p>
+                                    <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(Model.DeveloperUser))" class="text-primary">@Model.DeveloperUser!.FullName</a>
                                 }
                                 else
                                 {
@@ -230,12 +232,18 @@
                             {
                                 @* <li>@comment.User!.FullName: @comment.Comment</li> *@
                                 <li class="list-group-item d-flex px-0 py-4">
+                                    <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(comment.User!))">
                                     <figure class="avatar mr-3">
                                         <img src="@_FileService.ConvertByteArrayToFile(comment.User!.ImageFileData, comment.User!.ImageFileType, DefaultImage.BTUserImage)" alt="image">
                                     </figure>
 
+                                    </a>
+
                                     <div class="flex-grow-1">
+                                        <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(comment.User!))">
                                             <h6>@comment.User.FullName</h6>
+
+                                        </a>
 
                  
                                         <p class="mb-0">
@@ -344,7 +352,7 @@
                             <div class="border border-bottom-gray p-3 m-3" style="border-radius: 5px;">
                                 <span class="date" style="font-weight:bold">@history.CreatedDate.ToString("dd MMM yyyy")</span>
                                 <h6 class="text-primary mt-2">@history.Description</h6>
-                                <span>By: <a href="" title="@history.User!.FullName">@history.User!.FullName</a></span>
+                                <span>By: <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(history.User!))" title="@history.User!.FullName">@history.User!.FullName</a></span>
                                 <div class="">
                                     @if (history.Description!.Contains("New Ticket Created"))
                                     {
