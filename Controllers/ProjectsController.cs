@@ -151,7 +151,7 @@ namespace TurboTicketsMVC.Controllers
 
                 if (id == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
                 Project? project = await _projectService.GetProjectByIdAsync(id, _companyId);
@@ -159,7 +159,7 @@ namespace TurboTicketsMVC.Controllers
 
                 if (project == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
                 if (canViewProject)
@@ -185,7 +185,7 @@ namespace TurboTicketsMVC.Controllers
                     ViewData["Submitters"] = new MultiSelectList(submitters, "Id", "FullName", submitterIds);
                     return View(project);
                 }
-                return NotFound();
+                return RedirectToAction("AccessDeniedError", "Home");
             }
             catch (Exception ex)
             {
@@ -324,7 +324,8 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("AccessDeniedError", "Home");
+
                 }
             }
             catch (Exception ex)
@@ -343,13 +344,13 @@ namespace TurboTicketsMVC.Controllers
             {
                 if (id == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
                 Project? project = await _projectService.GetProjectByIdAsync(id, _companyId);
                 if (project == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
                 bool isUserPm = false;
@@ -387,7 +388,7 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("AccessDeniedError", "Home");
                 }
             }
             catch (Exception ex)
@@ -411,7 +412,7 @@ namespace TurboTicketsMVC.Controllers
             {
                 if (id != project.Id)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
 
@@ -465,7 +466,7 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("AccessDeniedError", "Home");
                 }
             }
             catch (Exception ex)
@@ -473,7 +474,7 @@ namespace TurboTicketsMVC.Controllers
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
             }
-         
+
         }
 
         [HttpGet]
@@ -484,14 +485,16 @@ namespace TurboTicketsMVC.Controllers
             {
                 if (id == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
+
                 }
 
                 Project? project = await _projectService.GetProjectByIdAsync(id, _companyId);
 
                 if (project == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
+
                 }
 
                 //list of PMs for company
@@ -513,7 +516,7 @@ namespace TurboTicketsMVC.Controllers
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
             }
-           
+
         }
 
         [HttpPost]
@@ -547,7 +550,7 @@ namespace TurboTicketsMVC.Controllers
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
             }
-            
+
         }
         // GET: Projects/Archive/5
         [Authorize(Roles = "Admin, ProjectManager")]
@@ -556,9 +559,9 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-                if (id == null || _context.Projects == null)
+                if (id == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
                 Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
@@ -567,7 +570,7 @@ namespace TurboTicketsMVC.Controllers
                 bool isAdmin = await _roleService.IsUserInRoleAsync(user, "Admin");
                 if (project == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
                 if (isAdmin || isUserPm)
@@ -576,7 +579,7 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("AccessDeniedError", "Home");
                 }
             }
             catch (Exception ex)
@@ -584,7 +587,7 @@ namespace TurboTicketsMVC.Controllers
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
             }
-            
+
         }
 
         // POST: Projects/Delete/5
@@ -596,10 +599,6 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-                if (_context.Projects == null)
-                {
-                    return Problem("Entity set 'ApplicationDbContext.Projects'  is null.");
-                }
                 Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
                 bool isUserPm = await _projectService.IsUserPmAsync(project.Id, _userId!);
                 TTUser? user = await _userManager.GetUserAsync(User);
@@ -616,7 +615,7 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("AccessDeniedError", "Home");
                 }
             }
             catch (Exception ex)
@@ -624,7 +623,7 @@ namespace TurboTicketsMVC.Controllers
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
             }
-            
+
         }
 
 
@@ -635,9 +634,9 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-                if (id == null || _context.Projects == null)
+                if (id == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
                 Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
@@ -647,7 +646,7 @@ namespace TurboTicketsMVC.Controllers
 
                 if (project == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
 
                 if (isAdmin || isUserPm)
@@ -656,7 +655,7 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("AccessDeniedError", "Home");
                 }
             }
             catch (Exception ex)
@@ -664,7 +663,7 @@ namespace TurboTicketsMVC.Controllers
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
             }
-            
+
         }
 
         // POST: Projects/Delete/5
@@ -676,10 +675,6 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-                if (_context.Projects == null)
-                {
-                    return Problem("Entity set 'ApplicationDbContext.Projects'  is null.");
-                }
                 Project project = await _projectService.GetProjectByIdAsync(id, _companyId);
                 bool isUserPm = await _projectService.IsUserPmAsync(project.Id, _userId!);
                 TTUser? user = await _userManager.GetUserAsync(User);
@@ -696,7 +691,7 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("AccessDeniedError", "Home");
                 }
             }
             catch (Exception ex)
@@ -704,7 +699,7 @@ namespace TurboTicketsMVC.Controllers
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
             }
-            
+
 
         }
 
@@ -722,7 +717,7 @@ namespace TurboTicketsMVC.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFoundError", "Home");
                 }
             }
             catch (Exception ex)
@@ -730,7 +725,7 @@ namespace TurboTicketsMVC.Controllers
                 Console.WriteLine(ex.Message);
                 return RedirectToAction("GenericError", "Home");
             }
-           
+
         }
 
 
