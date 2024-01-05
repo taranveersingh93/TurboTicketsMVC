@@ -205,6 +205,7 @@ card-link {
 .enjoyhint_skip_btn {
     border: 2px solid white;
     color: white;
+    display: none;
 }
 
 .enjoyhint_skip_btn:hover {

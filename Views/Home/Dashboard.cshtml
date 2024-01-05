@@ -500,9 +500,11 @@
                 }
             }
         };
-
-        var chart = new ApexCharts(document.querySelector("#ticketsDevelopersChart"), options);
+        var chartElement = document.querySelector("#ticketsDevelopersChart");
+        if (chartElement) {
+        var chart = new ApexCharts(chartElement, options);
         chart.render();
+        }
     </script>
     <script>
         var options = {
@@ -546,9 +548,11 @@
                 show: false
             }
         };
-
-        var chart = new ApexCharts(document.querySelector("#ticketsAssignmentChart"), options);
-        chart.render();
+        var chartElement = document.querySelector("#ticketsAssignmentChart");
+        if (chartElement) {
+            var chart = new ApexCharts(chartElement, options);
+            chart.render();
+        }
     </script>
     <script>
         var options = {
@@ -592,9 +596,12 @@
                 show: false
             }
         };
+        var chartElement = document.querySelector("#ticketsStatusChart");
 
-        var chart = new ApexCharts(document.querySelector("#ticketsStatusChart"), options);
-        chart.render();
+        if (chartElement) {
+            var chart = new ApexCharts(chartElement, options);
+            chart.render();
+        }
     </script>
     <script src="~/gogi/vendors/dataTable/datatables.min.js"></script>
     <script src="~/gogi/assets/js/examples/datatable.js"></script>
