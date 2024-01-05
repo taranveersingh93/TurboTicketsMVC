@@ -157,10 +157,10 @@ https://templatemo.com/tm-538-digital-trend
   }
 
   .custom-btn.btn-bg {
-    background: var(--white-color);
-    color: var(--primary-color);
+    color: var(--white-color);
+    background: var(--primary-color);
     border-color: transparent;
-	transition: all .1s ease;
+	transition:all ease-in-out 0.03s;
   }
   
   .custom-btn:hover,
@@ -170,7 +170,7 @@ https://templatemo.com/tm-538-digital-trend
     border-color: transparent;
   }
 
-  .text-primary-light {
+  .text-secondary-light {
       color: var(--color-secondary-light);
   }
   /*---------------------------------------
@@ -356,25 +356,36 @@ https://templatemo.com/tm-538-digital-trend
     overflow: hidden;
   }
 
-  .hero-bg {
-    background: linear-gradient(170deg, var(--color-primary-light) 64%, var(--white-color) 30%);
+  .text-primary-light {
+      color: var(--color-primary-light);
   }
+
+.hero-bg {
+    background: linear-gradient(170deg, var(--white-color) 64%, var(--color-primary-light) 30%);
+}
 
   .hero-image {
     position: relative;
     top: 2em;
   }
 
+.features {
+    background: var(--color-primary-light);
+}
 
 .testimonial {
 
     background: var(--color-primary-light);
 }
-  /*---------------------------------------
+
+.accordion-button:not(.collapsed) {
+    background-color: #d1d7df;
+}
+    /*---------------------------------------
      PROJECT              
   -----------------------------------------*/
 
-  .project {
+    .project {
     /*background: var(--project-bg);*/
     background: var(--white-color);
   }
