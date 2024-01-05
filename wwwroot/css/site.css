@@ -1,5 +1,5 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 :root {
@@ -18,29 +18,29 @@ html {
 
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
 
 .history-container {
     border-bottom: black;
 }
 
-.list-group-flush>.list-group-item {
+.list-group-flush > .list-group-item {
     border-width: 1px;
 }
 
@@ -79,7 +79,7 @@ body {
 }
 
 .warning-bg {
-    color:var(--color-dark);
+    color: var(--color-dark);
     background-color: var(--color-warning);
 }
 
@@ -108,12 +108,12 @@ body {
     border-radius: 5px;
 }
 
-.primary-button a {
-    color:white;
-}
+    .primary-button a {
+        color: white;
+    }
 
     .primary-button:hover {
-        filter:brightness(1.2);
+        filter: brightness(1.2);
         cursor: pointer;
     }
 
@@ -121,10 +121,10 @@ card-link {
     transition: all 0.1s ease-in-out;
 }
 
-card-link:hover {
-    cursor: pointer;
-    border: 1px solid var(--color-primary);
-}
+    card-link:hover {
+        cursor: pointer;
+        border: 1px solid var(--color-primary);
+    }
 
 .badge {
     --bs-badge-color: none;
@@ -141,9 +141,10 @@ card-link:hover {
 .glow-link {
     transition: 0.05s all ease-in-out;
 }
-.glow-link:hover {
-    color:white;
-}
+
+    .glow-link:hover {
+        color: white;
+    }
 
 .custom-tooltip {
     --bs-tooltip-bg: var(--color-primary);
@@ -157,7 +158,7 @@ card-link:hover {
     background-color: white;
     color: var(--color-primary);
     text-decoration: none;
-    font-size:14px;
+    font-size: 14px;
     width: auto;
     padding: 10px 15px;
     line-height: 14px;
@@ -169,4 +170,54 @@ card-link:hover {
 
 .btn.btn-light {
     background: white;
+}
+
+.enjoyhint_skip_btn {
+    border: 2px solid white;
+    color: white;
+}
+
+    .enjoyhint_skip_btn:hover {
+        background: white;
+        color: var(--color-dark);
+    }
+
+.enjoyhint_next_btn {
+    border: 2px solid white;
+    color: white;
+}
+
+    .enjoyhint_next_btn:hover {
+        background: white;
+        color: var(--color-dark);
+    }
+
+.enjoyhint_close_btn {
+    border: 2px solid white;
+}
+
+.enjoyhint_close_btn:hover {
+    background:white;
+    color:var(--color-dark);
+}
+
+
+.enjoyhint_skip_btn {
+    border: 2px solid white;
+    color: white;
+}
+
+.enjoyhint_skip_btn:hover {
+    background:white;
+    color: var(--color-dark);
+}
+
+.enjoyhint_close_btn:hover:after {
+    color: var(--color-dark);
+    background: var(--color-dark);
+}
+
+.enjoyhint_close_btn:hover:before {
+    color: var(--color-dark);
+    background: var(--color-dark);
 }

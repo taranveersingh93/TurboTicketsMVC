@@ -35,6 +35,8 @@
     <link rel="shortcut icon" href="~/img/turbotickets_square_primary.svg" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/gogi/vendors/enjoyhint/enjoyhint.css" type="text/css">
+
     <!-- Main css -->
     <link rel="stylesheet" href="~/gogi/vendors/bundle.css" type="text/css">
 
@@ -200,7 +202,7 @@
             <div class="header-container">
                 <div class="header-left">
                     <div class="navigation-toggler">
-                        <a href="#" data-action="navigation-toggler">
+                        <a href="#" data-action="navigation-toggler" id="navigationToggler">
                             <i data-feather="menu"></i>
                         </a>
                     </div>
@@ -215,8 +217,10 @@
                 <div class="header-body">
                     <div class="header-body-left">
                         <ul class="navbar-nav">
-                            <li class="nav-item dropdown d-none d-md-block">
-                                <a href"#" class="btn btn-light" role="button" title="Roles Guide" data-toggle="dropdown">Roles Guide</a>
+                            <li class="nav-item dropdown">
+                                <a href="#" role="button" class="btn btn-light tour d-xl-inline d-none">Quick Tour</a>
+                                <a href"#" id="rolesGuide" class="btn btn-light d-xl-inline" role="button" title="Roles Guide" data-toggle="dropdown">Roles Guide</a>
+
                                 <div class="dropdown-menu dropdown-menu-big">
                                     <div class="border-bottom px-4 py-3 text-center d-flex justify-content-between">
                                         <h5 class="mb-0">Roles</h5>
@@ -291,7 +295,7 @@
                             @if (unreadNotifications)
                             {
                                 <li class="nav-item dropdown">
-                                    <a href="#" class="nav-link nav-link-notify" title="My Notifications" data-sidebar-target="#my-notifications">
+                                    <a id="notificationsIcon" href="#" class="nav-link nav-link-notify" title="My Notifications" data-sidebar-target="#my-notifications">
                                         <i data-feather="bell"></i>
                                     </a>
                                 </li>
@@ -300,7 +304,7 @@
                             else
                             {
                                 <li class="nav-item dropdown">
-                                    <a href="#" class="nav-link" title="My Notifications" data-sidebar-target="#my-notifications">
+                                    <a id="notificationsIcon" href="#" class="nav-link" title="My Notifications" data-sidebar-target="#my-notifications">
                                         <i data-feather="bell"></i>
                                     </a>
                                 </li>
@@ -310,7 +314,7 @@
 
 
                             <li class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" title="User menu" data-toggle="dropdown">
+                                <a id="userProfile" href="#" class="nav-link dropdown-toggle" title="User menu" data-toggle="dropdown">
                                     <figure class="avatar avatar-sm">
                                         <img src="@_fileService.ConvertByteArrayToFile(user.ImageFileData, user.ImageFileType, DefaultImage.BTUserImage)"
                                              class="rounded-circle"
@@ -677,8 +681,59 @@
     <!-- DataTable -->
     <script src="~/gogi/vendors/dataTable/datatables.min.js"></script>
 
-    <!-- Dashboard scripts -->
-    @* <script src="~/gogi/assets/js/examples/pages/dashboard.js"></script>  *@
+    <!-- Tour -->
+    <script src="~/gogi/vendors/enjoyhint/enjoyhint.min.js"></script>
+    <script>
+        $(document).on('click', 'a.small-tour', function () {
+            var enjoyhint_instance = new EnjoyHint({});
+
+            enjoyhint_instance.set([
+                {
+                    'next #navigationToggler': 'Main navigation menu',
+                },
+                {
+                    'next #userProfile': 'User profile management.',
+                },
+                {
+                    'next #rolesGuide': 'A guide summarizing the authorized actions for each role.',
+                },
+                {
+                    'next #notificationsIcon': 'Notifications.',
+                }
+
+            ]);
+            enjoyhint_instance.run();
+
+            return false;
+        });
+    </script>
+    <script>
+        $(document).on('click', 'a.tour', function () {
+            var enjoyhint_instance = new EnjoyHint({});
+
+            enjoyhint_instance.set([
+                {
+                    'next #nav-GetStarted': 'The typical chronology of how to use Turbo Tickets',
+                },
+                {
+                    'next #userProfile': 'User profile management.',
+                },
+                {
+                    'next #rolesGuide': 'A guide summarizing the authorized actions for each role.',
+                },
+                {
+                    'next #notificationsIcon': 'Notifications.',
+                },
+                {
+                    'next #nav-Companies': 'Company details and user profiles of all members.',
+                }
+  
+            ]);
+            enjoyhint_instance.run();
+
+            return false;
+        });
+    </script>
 
     <!-- App scripts -->
     <script>
