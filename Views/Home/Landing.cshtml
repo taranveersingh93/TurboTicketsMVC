@@ -100,7 +100,7 @@
                             Turbo Tickets is a centralized issue tracker. It enables you to achieve a streamlined workflow by letting you create, update, archive and track work tickets.
                             Turbo Tickets connects all the layers and stakeholders behind the scenes so that you can enjoy noise free navigation of a user friendly interface.
                         </p>
-                        <a href="#about" class="custom-btn btn-bg btn mt-3 mx-2" data-aos="fade-up" data-aos-delay="100" style="scroll-behavior:smooth;">All Features</a>
+                        <a href="#features" class="custom-btn btn-bg btn mt-3 mx-2" data-aos="fade-up" data-aos-delay="100" style="scroll-behavior:smooth;">All Features</a>
 
                     </div>
                     <div class="about-image" data-aos="fade-up"
@@ -221,7 +221,7 @@
             <div class="row">
                 <div class="col-lg-7 mx-auto col-md-10 col-12">
                     <h2 class="text-light" data-aos="fade-up">All Features</h2>
-                    <div class="accordion" id="accordion">
+                    <div class="accordion" id="accordion" data-aos="fade-up">
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingOne">
                                 <button class="accordion-button collapsed text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
@@ -252,11 +252,11 @@
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    Edit user profile.
+                                                    Interface to edit user profile.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    Change password.
+                                                    Password changes.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
@@ -283,7 +283,7 @@
                                             <ul class="my-4 list-group list-group-flush">
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                     Interface for admins to send invites to new users to join the company.
+                                                     Interface for admins to send invites for new users to join the company.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
@@ -291,23 +291,27 @@
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                     Invalidation of all existing invites for an email if a new invite is sent.
+                                                    Automatic invalidation of invites that are older than 7 days.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                     Automatic blocking of an invite if the invitee email is assigned to any existing user.
+                                                     Invalidation of any prior invite if a duplicate invite is sent to the same email.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                     Automatic blocking of an invite if an invite to the same invitee exists in another company.
+                                                     Automatic failing of an invite if the invitee email matches any existing user's email.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                     Option for admin to invalidate a valid invite.
+                                                     Automatic failing of an invite if an invite to the same email exists in another company.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                     Option for admin to recreate and resend a currently invallid invite.
+                                                     Option for admins to invalidate a valid invite.
+                                                </li>
+                                                <li class="px-0 list-group-item d-flex align-items-center">
+                                                    <i class="bi bi-check-circle-fill text-primary me-3"></i>
+                                                     Option for admins to resend a currently invallid invite.
                                                 </li>
                                             </ul>
                                             <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">Try it out</a>
@@ -342,11 +346,11 @@
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    Option for admins and project managers to archive and restore projects.
+                                                    Authorization for admins and project managers to archive and restore projects.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    Functionality for admins and project managers to assign members to the project.
+                                                    Authorization for admins and project managers to assign members to the project.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
@@ -389,19 +393,19 @@
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    Functionality for admins or project managers to assign a ticket to an available developer on the project team.
+                                                    Authorization for admins or project managers to assign a ticket to an available developer on the project team.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    Functionality for developers to mark tickets resolved.
+                                                    Authorization for developers to mark tickets resolved.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    Functionality for admins or project managers to archive or restore a ticket.
+                                                    Authorization for admins or project managers to archive or restore a ticket.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    Ticket history that tracks all ticket actions.
+                                                    Ticket history stream that tracks all ticket actions.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
@@ -469,13 +473,14 @@
                                         <div class="card-body">
                                             <h4 class="text-muted text-center">Significant Pages</h4>
                                             <ul class="my-4 list-group list-group-flush">
-                                                <li class="px-0 list-group-item d-flex align-items-center">
-                                                    <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    A landing page with helpful and intuitive links.
-                                                </li>
+                            
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
                                                     A "Getting Started" page informing users of the typical timeline of actions.
+                                                </li>
+                                                <li class="px-0 list-group-item d-flex align-items-center">
+                                                    <i class="bi bi-check-circle-fill text-primary me-3"></i>
+                                                    A "Roles guide" to inform users of role-based permitted actions.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
@@ -487,11 +492,11 @@
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    An email page to contact the company members.
+                                                    An email-user page to contact any company member.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    Email notifications sent to assigned developer of a ticket that sees any activity.
+                                                    Email notifications of any ticket actions sent to the assigned developer of the ticket.
                                                 </li>
                                             </ul>
                                             <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">Try it out</a>
@@ -500,7 +505,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -508,45 +512,7 @@
         </div>
     </section>
 
-    <!-- TESTIMONIAL -->
-    @*     <section class="testimonial section-padding">
-    <div class="container">
-    <div class="row">
-
-    <div class="col-lg-6 col-md-5 col-12">
-    <div class="contact-image" data-aos="fade-up">
-    <a href="https://storyset.com/web"
-    target="_blank"
-    data-bs-toggle="tooltip"
-    data-bs-title="Web Illustrations by Storyset">
-
-    <img src="~/img/workdesk.svg" class="img-fluid" alt="website">
-    </a>
-    </div>
-    </div>
-
-    <div class="col-lg-6 col-md-7 col-12">
-    <h4 class="my-5 pt-3" data-aos="fade-up" data-aos-delay="100">Technical Summary</h4>
-
-    <div class="quote" data-aos="fade-up" data-aos-delay="200"></div>
-
-    <h2 class="mb-4 text-secondary" data-aos="fade-up" data-aos-delay="300">
-    This app was built using C# .NET with the MVC pattern. The app has both authentication and role based authorization. I implemented a service layer that handles all the database operations and injected different services in my controllers where needed.
-    </h2>
-
-    <p data-aos="fade-up" data-aos-delay="400">
-    <strong>Taranveer Singh</strong>
-
-    <span class="mx-1">/</span>
-
-    <small>Fullstack Developer</small>
-    </p>
-    </div>
-
-    </div>
-    </div>
-    </section>
-    *@
+    
     <footer class="content-footer p-4">
         <div>© 2024 Taranveer Singh</div>
         <div>
