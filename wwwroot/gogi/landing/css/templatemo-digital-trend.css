@@ -170,7 +170,9 @@ https://templatemo.com/tm-538-digital-trend
     border-color: transparent;
   }
 
-
+  .text-primary-light {
+      color: var(--color-secondary-light);
+  }
   /*---------------------------------------
      GENERAL               
   -----------------------------------------*/
@@ -364,14 +366,17 @@ https://templatemo.com/tm-538-digital-trend
   }
 
 
+.testimonial {
 
+    background: var(--color-primary-light);
+}
   /*---------------------------------------
      PROJECT              
   -----------------------------------------*/
 
   .project {
     /*background: var(--project-bg);*/
-    background: var(--color-primary-light);
+    background: var(--white-color);
   }
 
   .project-wrapper {
@@ -481,6 +486,7 @@ https://templatemo.com/tm-538-digital-trend
   .about {
     position: relative;
     overflow: hidden;
+    background-color: var(--color-primary-light)
   }
 
   .about-image img {
