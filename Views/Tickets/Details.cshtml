@@ -351,7 +351,7 @@
 
                             <div class="border border-bottom-gray p-3 m-3" style="border-radius: 5px;">
                                 <span class="date" style="font-weight:bold">@history.CreatedDate.ToString("dd MMM yyyy")</span>
-                                <h6 class="text-primary mt-2">@history.Description</h6>
+                                <h6 class="text-primary mt-2">@Html.Raw(history.PropertyName)</h6>
                                 <span>By: <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(history.User!))" title="@history.User!.FullName">@history.User!.FullName</a></span>
                                 <div class="">
                                     @if (history.Description!.Contains("New Ticket Created"))
@@ -374,15 +374,34 @@
                                         {
                                             <p>The ticket was restored by <b>@history.User.FullName</b></p>
 
-                                        }
-
-                                        
+                                        }               
+                                    } else if(history.PropertyName.Equals("Ticket Priority"))
+                                    {
+                                        <p>Ticket Priority was changed by <b>@history.User.FullName</b></p>
+                                        <p class="mb-1">@($"Previous {history.PropertyName}: ") <span style="color:#B80000">@Html.Raw(history.OldValue)</span></p>
+                                        <p class="mt-1">@($"Current {history.PropertyName}: ") <span style="color:#5F8670">@Html.Raw(history.NewValue)</span></p>
+                                    }
+                                    else if (history.PropertyName.Equals("Ticket Status"))
+                                    {
+                                        <p>Ticket Status was changed by <b>@history.User.FullName</b></p>
+                                        <p class="mb-1">@($"Previous {history.PropertyName}: ") <span style="color:#B80000">@Html.Raw(history.OldValue)</span></p>
+                                        <p class="mt-1">@($"Current {history.PropertyName}: ") <span style="color:#5F8670">@Html.Raw(history.NewValue)</span></p>
+                                    }
+                                    else if (history.PropertyName.Equals("Ticket Type"))
+                                    {
+                                        <p>Ticket Type was changed by <b>@history.User.FullName</b></p>
+                                        <p class="mb-1">@($"Previous {history.PropertyName}: ") <span style="color:#B80000">@Html.Raw(history.OldValue)</span></p>
+                                        <p class="mt-1">@($"Current {history.PropertyName}: ") <span style="color:#5F8670">@Html.Raw(history.NewValue)</span></p>
+                                    }
+                                    else if (history.PropertyName.Equals("Developer"))
+                                    {
+                                        <p>@history.Description</p>
                                     }
                                     else
                                     {
                                         <p>The ticket <b>@history.PropertyName</b> was edited.</p>
-                                        <p class="mb-1">@($"Previous {history.PropertyName}: ") <span style="color:#B80000">@history.OldValue</span></p>
-                                        <p class="mt-1">@($"Current {history.PropertyName}: ") <span style="color:#5F8670">@history.NewValue</span></p>
+                                        <p class="mb-1">@($"Previous {history.PropertyName}: ") <span style="color:#B80000">@Html.Raw(history.OldValue)</span></p>
+                                        <p class="mt-1">@($"Current {history.PropertyName}: ") <span style="color:#5F8670">@Html.Raw(history.NewValue)</span></p>
                                     }
 
                                 </div>

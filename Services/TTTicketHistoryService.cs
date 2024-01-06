@@ -33,7 +33,7 @@ namespace TurboTicketsMVC.Services
                     TicketHistory history = new()
                     {
                         TicketId = newTicket.Id,
-                        PropertyName = "",
+                        PropertyName = "New Ticket",
                         OldValue = "",
                         NewValue = "",
                         CreatedDate = DateTimeOffset.Now,
@@ -73,7 +73,7 @@ namespace TurboTicketsMVC.Services
                             NewValue = newTicket?.Description,
                             CreatedDate = DateTimeOffset.Now,
                             UserId = userId,
-                            Description = $"New ticket description: {newTicket?.Description}"
+                            Description = $"New ticket description"
                         };
                         await _context.TicketHistories.AddAsync(history);
                     }
@@ -84,7 +84,7 @@ namespace TurboTicketsMVC.Services
                         TicketHistory? history = new()
                         {
                             TicketId = newTicket!.Id,
-                            PropertyName = "TicketPriority",
+                            PropertyName = "Ticket Priority",
                             OldValue = oldTicket?.TicketPriority.ToString(),
                             NewValue = newTicket?.TicketPriority.ToString(),
                             CreatedDate = DateTimeOffset.Now,
@@ -100,7 +100,7 @@ namespace TurboTicketsMVC.Services
                         TicketHistory? history = new()
                         {
                             TicketId = newTicket!.Id,
-                            PropertyName = "TicketStatus",
+                            PropertyName = "Ticket Status",
                             OldValue = oldTicket?.TicketStatus!.ToString(),
                             NewValue = newTicket?.TicketStatus!.ToString(),
                             CreatedDate = DateTimeOffset.Now,
@@ -116,7 +116,7 @@ namespace TurboTicketsMVC.Services
                         TicketHistory? history = new()
                         {
                             TicketId = newTicket!.Id,
-                            PropertyName = "TicketTypeId",
+                            PropertyName = "Ticket Type",
                             OldValue = oldTicket?.TicketType!.ToString(),
                             NewValue = newTicket?.TicketType!.ToString(),
                             CreatedDate = DateTimeOffset.Now,

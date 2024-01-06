@@ -173,16 +173,51 @@
                             </div>
                         </div>
                         <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingSeven">
+                                <button class="accordion-button collapsed text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="true" aria-controls="collapseSeven">
+                                    Company
+                                </button>
+                            </h2>
+                            <div id="collapseSeven" class="accordion-collapse collapse" aria-labelledby="headingSeven" data-bs-parent="#accordion">
+                                <div class="accordion-body">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h4 class="text-muted text-center">Company</h4>
+                                            <ul class="my-4 list-group list-group-flush">
+                                                <li class="px-0 list-group-item d-flex align-items-center">
+                                                    <i class="bi bi-check-circle-fill text-primary me-3"></i>
+                                                    Automatic registration of a new company when a user registers without an invite.
+                                                </li>
+                                                <li class="px-0 list-group-item d-flex align-items-center">
+                                                    <i class="bi bi-check-circle-fill text-primary me-3"></i>
+                                                    Company specific data presentation.
+                                                </li>
+                                                <li class="px-0 list-group-item d-flex align-items-center">
+                                                    <i class="bi bi-check-circle-fill text-primary me-3"></i>
+                                                    User profiles for all members in a company.
+                                                </li>
+                                                <li class="px-0 list-group-item d-flex align-items-center">
+                                                    <i class="bi bi-check-circle-fill text-primary me-3"></i>
+                                                    Interface to email company members.
+                                                </li>   
+                                            </ul>
+                                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">Try it out</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
                             <h2 class="accordion-header" id="headingTwo">
                                 <button class="accordion-button collapsed text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-                                    Company Invites
+                                    Invites
                                 </button>
                             </h2>
                             <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordion">
                                 <div class="accordion-body">
                                     <div class="card">
                                         <div class="card-body">
-                                            <h4 class="text-muted text-center">Company Invites</h4>
+                                            <h4 class="text-muted text-center">Invites</h4>
                                             <ul class="my-4 list-group list-group-flush">
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
@@ -190,7 +225,7 @@
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                     A page to view all the company invites.
+                                                     Page to view all the company invites.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
@@ -357,6 +392,7 @@
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
                                                     Marking all notifications read or unread.
                                                 </li>
+
                                             </ul>
                                             <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">Try it out</a>
                                         </div>
@@ -379,32 +415,21 @@
                             
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    A "Getting Started" page informing users of the typical timeline of actions.
+                                                    "Getting Started" page informing users of the typical timeline of actions.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    A "Roles guide" to inform users of role-based permitted actions.
+                                                    "Roles guide" to inform users of role-based permitted actions.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    A dashboard displaying user specific relevant info.
+                                                    "Dashboard" displaying user specific relevant info.
                                                 </li>
                                                 <li class="px-0 list-group-item d-flex align-items-center">
                                                     <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    A company info page listing all company members and their roles.
+                                                    "Company Info" page listing all company members and their roles.
                                                 </li>
-                                                <li class="px-0 list-group-item d-flex align-items-center">
-                                                    <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    User profile pages for each company member.
-                                                </li>
-                                                <li class="px-0 list-group-item d-flex align-items-center">
-                                                    <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    An email-user page to contact any company member.
-                                                </li>
-                                                <li class="px-0 list-group-item d-flex align-items-center">
-                                                    <i class="bi bi-check-circle-fill text-primary me-3"></i>
-                                                    Email notifications of any ticket actions sent to the assigned developer of the ticket.
-                                                </li>
+               
                                             </ul>
                                             <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">Try it out</a>
                                         </div>
