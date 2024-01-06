@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using TurboTicketsMVC.Data;
 using TurboTicketsMVC.Models;
+using TurboTicketsMVC.Models.Enums;
 using TurboTicketsMVC.Services.Interfaces;
 
 namespace TurboTicketsMVC.Services
@@ -12,12 +13,15 @@ namespace TurboTicketsMVC.Services
         #region Injection
         private readonly ApplicationDbContext _context;
         private readonly UserManager<TTUser> _userManager;
+        private readonly ITTRolesService _rolesService;
 
         public TTTicketHistoryService(ApplicationDbContext context,
-                                        UserManager<TTUser> userManager)
+                                        UserManager<TTUser> userManager,
+                                        ITTRolesService rolesService)
         {
             _context = context;
             _userManager = userManager;
+            _rolesService = rolesService;
         }
         #endregion
 
@@ -221,40 +225,6 @@ namespace TurboTicketsMVC.Services
 
         #endregion
 
-        #region Add history 2
-        public async Task AddHistoryAsync(int? ticketId, string? model, string? userId)
-        {
-            try
-            {
-                Ticket? ticket = await _context.Tickets.FindAsync(ticketId);
-                string description = model.ToLower().Replace("ticket", "");
-                description = $"New description:'{description}' added to ticket: {ticket!.Title}";
-
-
-                TicketHistory? history = new()
-                {
-                    TicketId = ticket.Id,
-                    PropertyName = model,
-                    OldValue = "",
-                    NewValue = "",
-                    CreatedDate = DateTime.Now,
-                    UserId = userId,
-                    Description = description
-                };
-
-                await _context.TicketHistories.AddAsync(history);
-                await _context.SaveChangesAsync();
-
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-
-                throw;
-            }
-        }
-        #endregion
-
         #region get Project ticket histories
         public async Task<IEnumerable<TicketHistory>> GetProjectTicketsHistoriesAsync(int? projectId, int? companyId)
         {
@@ -295,6 +265,61 @@ namespace TurboTicketsMVC.Services
                 IEnumerable<Ticket> tickets = projects.SelectMany(p => p.Tickets.Where(t => t.Archived == false && t.ArchivedByProject == false)).ToList();
 
                 IEnumerable<TicketHistory> ticketHistories = tickets.SelectMany(t => t.History).ToList();
+                IEnumerable<TicketHistory> sortedHistories = ticketHistories.OrderByDescending(h => h.CreatedDate);
+                return sortedHistories;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                throw;
+            }
+        }
+        #endregion
+
+        #region get company ticket histories
+        public async Task<IEnumerable<TicketHistory>> GetUserTicketsHistoriesAsync(int? companyId, string? userId)
+        {
+
+            try
+            {
+                TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                IEnumerable<Ticket> userTickets = Enumerable.Empty<Ticket>();
+
+                IEnumerable<Ticket> companyTickets = await _context.Tickets.AsNoTracking()
+                            .Include(t => t.DeveloperUser)
+                            .Include(t => t.History)
+                                .ThenInclude(h => h.User)
+                            .Include(t => t.Project)
+                                .ThenInclude(p => p!.Members)
+                            .Include(t => t.SubmitterUser)
+                            .Where(t => t.Project!.CompanyId == companyId && t.ArchivedByProject == false && t.Archived == false).ToListAsync();
+
+                bool isAdmin = await _rolesService.IsUserInRoleAsync(user, nameof(TTRoles.Admin));
+                bool isProjectManager = await _rolesService.IsUserInRoleAsync(user, nameof(TTRoles.ProjectManager));
+                bool isDeveloper = await _rolesService.IsUserInRoleAsync(user, nameof(TTRoles.Developer));
+                bool isSubmitter = await _rolesService.IsUserInRoleAsync(user, nameof(TTRoles.Submitter));
+
+                if (isAdmin)
+                {
+                    userTickets = companyTickets;
+                }
+                else if (isProjectManager)
+                {
+                    userTickets = companyTickets.Where(t => t.Project!.Members.Any(m => m.Id == userId)).ToList();
+                }
+                else if (isDeveloper)
+                {
+                    userTickets = companyTickets.Where(t => t.DeveloperUserId == userId || t.SubmitterUserId == userId).ToList();
+                }
+                else if (isSubmitter)
+                {
+                    userTickets = companyTickets.Where(t => t.SubmitterUserId == userId).ToList();
+                }
+
+
+                IEnumerable<TicketHistory> ticketHistories = userTickets.SelectMany(t => t.History).ToList();
                 IEnumerable<TicketHistory> sortedHistories = ticketHistories.OrderByDescending(h => h.CreatedDate);
                 return sortedHistories;
             }

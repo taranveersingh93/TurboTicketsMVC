@@ -18,6 +18,7 @@
     ViewData["Title"] = "Dashboard";
     TTUser user = (await _UserManager.GetUserAsync(User))!;
     string? userEmail = await _UserManager.GetEmailAsync(user);
+    IEnumerable<TicketHistory> userTicketHistory = await _HistoryService.GetUserTicketsHistoriesAsync(user.CompanyId, user.Id);
     IEnumerable<TicketHistory> companyTicketHistory = await _HistoryService.GetCompanyTicketsHistoriesAsync(user.CompanyId);
     IEnumerable<Project> companyProjects = await _ProjectService.GetAllProjectsByCompanyIdAsync(user.CompanyId);
     IEnumerable<Ticket> companyTickets = await _TicketService.GetAllTicketsByCompanyIdAsync(user.CompanyId);
@@ -406,11 +407,11 @@
                             <a asp-controller="Tickets" asp-action="Index" class="link-1">View Tickets</a>
                         }
                     </div>
-                    @if (userTickets.Count() > 0 && companyTicketHistory.Count() > 0)
+                    @if (userTickets.Count() > 0 && userTicketHistory.Count() > 0)
                     {
                         <div class="card-scroll">
                             <ul class="list-group list-group-flush">
-                                @foreach (TicketHistory historyItem in companyTicketHistory.Take(15))
+                                @foreach (TicketHistory historyItem in userTicketHistory.Take(15))
                                 {
 
                                     <li class="list-group-item d-flex px-0 py-4 history-container">
