@@ -9,15 +9,18 @@
 
 @{
     ViewData["Title"] = "Details";
+   
     TTUser? projectManager = await _projectService.GetProjectManagerAsync(Model.Id);
     bool isAdmin = User.IsInRole("Admin");
     bool isPm = false;
     if (projectManager != null) {
         isPm = _UserManager.GetUserId(User) == projectManager.Id;
     }
+
     bool pmAvailable = Enumerable.Count(ViewBag.ProjectManagers) > 0;
     bool developersAvailable = Enumerable.Count(ViewBag.Developers) > 0;
     bool submittersAvailable = Enumerable.Count(ViewBag.Submitters) > 0;
+    bool isMember = Model!.Members.Any(m => m.Id == _UserManager.GetUserId(User));
 }
 
 <link rel="stylesheet" href="~/gogi/vendors/dataTable/datatables.min.css" type="text/css">
@@ -201,8 +204,12 @@
         </div>
         <div class="col-12 mt-5">
             <div class="border border-dark card m-1 p-2">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h2>Tickets</h2>
+                    @if(isMember || isAdmin)
+                    {
+                        <a class="btn btn-primary" role="button" asp-controller="Tickets" asp-action="Create">Create Ticket</a>
+                    }
                 </div>
                 <div class="card-body">
                     @if(Model.Tickets.Count() > 0)
