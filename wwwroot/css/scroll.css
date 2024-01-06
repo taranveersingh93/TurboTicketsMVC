@@ -1,0 +1,9 @@
+body {
+    overflow: auto !important;
+}
+
+@media (min-width:1200px) {
+   body {
+       overflow: hidden !important;
+   }
+}

@@ -49,7 +49,7 @@
     <!-- App css -->
     <link rel="stylesheet" href="~/gogi/assets/css/app.css" type="text/css">
     <link rel="stylesheet" href="~/css/site.css" type="text/css">
-    <link rel="stylesheet" href="~/css/site.css" type="text/css">
+    <link rel="stylesheet" href="~/css/scroll.css" type="text/css">
 
 
     <!--[if lt IE 9]>
@@ -685,30 +685,6 @@
     <!-- Tour -->
     <script src="~/gogi/vendors/enjoyhint/enjoyhint.min.js"></script>
     <script>
-        $(document).on('click', 'a.small-tour', function () {
-            var enjoyhint_instance = new EnjoyHint({});
-
-            enjoyhint_instance.set([
-                {
-                    'next #navigationToggler': 'Main navigation menu',
-                },
-                {
-                    'next #userProfile': 'User profile management.',
-                },
-                {
-                    'next #rolesGuide': 'A guide summarizing the authorized actions for each role.',
-                },
-                {
-                    'next #notificationsIcon': 'Notifications.',
-                }
-
-            ]);
-            enjoyhint_instance.run();
-
-            return false;
-        });
-    </script>
-    <script>
         $(document).on('click', 'a.tour', function () {
             var enjoyhint_instance = new EnjoyHint({});
 
@@ -724,9 +700,6 @@
                 },
                 {
                     'next #notificationsIcon': 'Notifications.',
-                },
-                {
-                    'next #nav-Companies': 'Company details and user profiles of all members.',
                 }
   
             ]);
