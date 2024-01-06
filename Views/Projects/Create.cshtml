@@ -85,6 +85,8 @@
                 </div>
                 <div class="form-group">
                     <input type="submit" value="Create" class="btn btn-primary" />
+                    <a class="btn btn-danger" role="button" asp-controller="Projects" asp-action="Index">Cancel</a>
+
                 </div>
             </form>
         </div>
@@ -101,7 +103,14 @@
             ClassicEditor
                 .create(document.querySelector('#editor'), {
                     toolbar: {
-                        shouldNotGroupWhenFull: true
+                        shouldNotGroupWhenFull: true,
+                        item: [
+                            'bold', 'italic', '|', 'undo', 'redo', '|', 'numberedList'
+                        ],
+                        removeItems: ["bulletedList"]
+                    },
+                    removePlugins: {
+                        "bulletedList"
                     }
                 })
                 .catch(error => {
