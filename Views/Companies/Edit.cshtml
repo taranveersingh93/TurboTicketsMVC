@@ -39,13 +39,10 @@
                         <input type="hidden" asp-for="Invites" value="@Model.Invites" />
 
                         <div class="form-group">
-                            @* <label asp-for="Input.ImageData" style="width: 100%;"></label> *@
 
                             <img id="userImage" class="img-fluid img-thumbnail rounded" src="@_fileService.ConvertByteArrayToFile(Model.ImageFormData,Model.ImageFormType,DefaultImage.CompanyImage)" />
 
-                            <input type="file" asp-for="@Model.ImageFormFile" class="form-control" accept=".png,.jpg,.jpeg,.gif,.tif"
-                                   style="border:0px!important;padding: 0px;padding-top: 10px;padding-bottom: 30px;"
-                                   onchange="document.getElementById('userImage').src = window.URL.createObjectURL(this.files[0])" />
+                            <input type="file" asp-for="@Model.ImageFormFile" accept=".png,.jpg,.jpeg,.gif,.tif" onchange="document.getElementById('userImage').src = window.URL.createObjectURL(this.files[0])" />
 
                             <span asp-validation-for="@Model.ImageFormFile" class="text-danger"></span>
                         </div>
@@ -63,6 +60,7 @@
 
                         <div class="form-group">
                             <input type="submit" value="Save" class="btn btn-primary" />
+                            <a role="button" class="btn btn-danger" asp-controller="Companies" asp-action="Details">Cancel</a>
                         </div>
                     </form>
                 </div>

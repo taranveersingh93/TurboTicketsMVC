@@ -223,3 +223,20 @@ card-link {
     color: var(--color-dark);
     background: var(--color-dark);
 }
+
+input[type=file]::file-selector-button {
+    height: calc(100% - 1rem);
+    margin: 0.5rem;
+    background: var(--color-primary);
+    color: white;
+    border: 2px solid var(--color-primary);
+    border-radius: 2px;
+    font-size: var(--font-size-b2);
+    font-weight: var(--p-medium);
+    transition: all linear 0.1s;
+}
+
+input[type=file]::file-selector-button:hover {
+    cursor: pointer;
+    background: #2540d9;
+}
