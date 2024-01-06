@@ -225,7 +225,7 @@ namespace TurboTicketsMVC.Services
                 {
 				ticket = await _context.Tickets
 	                            .Include(t => t.DeveloperUser)
-	                            .Include(t => t.Project)
+                                .Include(t => t.Project)
 								.Include(t => t.History.OrderByDescending(h => h.CreatedDate))
                                     .ThenInclude(h => h.User)
 								.Include(t => t.SubmitterUser)
