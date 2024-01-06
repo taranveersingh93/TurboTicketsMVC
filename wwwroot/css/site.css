@@ -197,10 +197,10 @@ card-link {
     border: 2px solid white;
 }
 
-.enjoyhint_close_btn:hover {
-    background:white;
-    color:var(--color-dark);
-}
+    .enjoyhint_close_btn:hover {
+        background: white;
+        color: var(--color-dark);
+    }
 
 
 .enjoyhint_skip_btn {
@@ -209,10 +209,10 @@ card-link {
     display: none;
 }
 
-.enjoyhint_skip_btn:hover {
-    background:white;
-    color: var(--color-dark);
-}
+    .enjoyhint_skip_btn:hover {
+        background: white;
+        color: var(--color-dark);
+    }
 
 .enjoyhint_close_btn:hover:after {
     color: var(--color-dark);
@@ -236,7 +236,30 @@ input[type=file]::file-selector-button {
     transition: all linear 0.1s;
 }
 
-input[type=file]::file-selector-button:hover {
-    cursor: pointer;
-    background: #2540d9;
+    input[type=file]::file-selector-button:hover {
+        cursor: pointer;
+        background: #2540d9;
+    }
+
+.glow-button.btn.btn-light {
+    --box-shadow-color: var(--color-gray);
+    animation: glowing-button 2s ease-in-out infinite;
 }
+
+@keyframes glowing-button {
+    0% {
+        filter: brightness(1);
+        box-shadow: 0 0 10px var(--box-shadow-color);
+    }
+
+    50% {
+        filter: brightness(1.1);
+        box-shadow: 0 0 60px var(--box-shadow-color);
+    }
+
+    100% {
+        filter: brightness(1);
+        box-shadow: 0 0 10px var(--box-shadow-color);
+    }
+}
+

@@ -21,6 +21,7 @@
     }
     bool isAdmin = User.IsInRole("Admin");
     bool isPM = User.IsInRole("ProjectManager");
+    bool hasToured = false;
 }
 
 <!doctype html>
@@ -219,7 +220,7 @@
                     <div class="header-body-left">
                         <ul class="navbar-nav">
                             <li class="nav-item dropdown">
-                                <a href="#" role="button" class="btn btn-light tour d-xl-inline d-none">Quick Tour</a>
+                                <button id="tourButton" onclick="removeGlow()" class="btn btn-light glow-button tour d-xl-inline d-none">Quick Tour</button>
                                 <a href"#" id="rolesGuide" class="btn btn-light d-xl-inline" role="button" title="Roles Guide" data-toggle="dropdown">Roles Guide</a>
 
                                 <div class="dropdown-menu dropdown-menu-big">
@@ -685,7 +686,7 @@
     <!-- Tour -->
     <script src="~/gogi/vendors/enjoyhint/enjoyhint.min.js"></script>
     <script>
-        $(document).on('click', 'a.tour', function () {
+        $(document).on('click', 'button.tour', function () {
             var enjoyhint_instance = new EnjoyHint({});
 
             enjoyhint_instance.set([
@@ -708,7 +709,12 @@
             return false;
         });
     </script>
-
+    <script>
+        function removeGlow() {
+            var tourButton = document.querySelector("#tourButton");
+            tourButton.classList.remove("glow-button");
+        }
+    </script>
     <!-- App scripts -->
     <script>
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
