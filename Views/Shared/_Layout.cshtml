@@ -463,9 +463,12 @@
                                         <a asp-controller="Projects" asp-action="UnassignedProjects">Unassigned Projects</a>
                                     </li>
                                 }
+                                @if(!isAdmin)
+                                {
                                 <li>
                                     <a asp-controller="Projects" asp-action="Index">My Projects</a>
                                 </li>
+                                }
 
                             </ul>
                         </li>
