@@ -51,8 +51,10 @@
                                 {
                                     <tr>
                                         <td>
-                                                <p>@viewModel.TTUser!.FullName<p>
-
+                                            <a asp-controller="Companies" asp-action="EmailUser" asp-route-email="@(await _UserManager.GetEmailAsync(viewModel.TTUser))">
+                                                @viewModel.TTUser!.FullName
+                                            </a>
+                                            <br/>
                                             @if (viewModel.SelectedRole == "Admin")
                                             {
                                                 <div class="badge rounded-pill danger-bg">@viewModel.SelectedRole</div>
