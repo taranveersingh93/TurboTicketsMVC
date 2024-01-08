@@ -406,7 +406,7 @@ namespace TurboTicketsMVC.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin, ProjectManager")]
 
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CompanyId,Name,Description,CreatedDate,StartDate,EndDate,ProjectPriority,ImageFormFile,Archived")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CompanyId,Name,Description,CreatedDate,StartDate,EndDate,ProjectPriority, ImageFileData, ImageFileType,ImageFormFile,Archived")] Project project)
         {
             try
             {

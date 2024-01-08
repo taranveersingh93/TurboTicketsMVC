@@ -33,11 +33,12 @@
                 <div class="card-body">
                     <form asp-action="Edit" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <input type="hidden" asp-for="Id" value="@Model.Id" />
-                        <input type="hidden" asp-for="Members" value="@Model.Members" />
-                        <input type="hidden" asp-for="Projects" value="@Model.Projects" />
-                        <input type="hidden" asp-for="Invites" value="@Model.Invites" />
-
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="Members" />
+                        <input type="hidden" asp-for="Projects"/>
+                        <input type="hidden" asp-for="Invites"  />
+                        <input type="hidden" asp-for="ImageFormType"  />
+                        <input type="hidden" asp-for="ImageFormData" />
                         <div class="form-group">
 
                             <img id="userImage" class="img-fluid img-thumbnail rounded" src="@_fileService.ConvertByteArrayToFile(Model.ImageFormData,Model.ImageFormType,DefaultImage.CompanyImage)" />

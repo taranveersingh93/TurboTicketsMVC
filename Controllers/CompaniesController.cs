@@ -23,12 +23,14 @@ namespace TurboTicketsMVC.Controllers
         private readonly ITTCompanyService _companyService;
         private readonly ITTRolesService _rolesService;
         private readonly IEmailSender _emailService;
+        private readonly ITTFileService _fileService;
         private readonly UserManager<TTUser> _userManager;
         public CompaniesController(ApplicationDbContext context,
                                    ITTCompanyService companyService,
                                    ITTRolesService rolesService,
                                    IEmailSender emailService,
-                                   UserManager<TTUser> userManager
+                                   UserManager<TTUser> userManager,
+                                   ITTFileService fileService
                                   )
         {
             _context = context;
@@ -36,6 +38,7 @@ namespace TurboTicketsMVC.Controllers
             _rolesService = rolesService;
             _emailService = emailService;
             _userManager = userManager;
+            _fileService = fileService;
         }
 
         [HttpGet]
@@ -182,7 +185,7 @@ namespace TurboTicketsMVC.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Company? company)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Members,Projects,Invites,ImageFormData,ImageFormFile,ImageFormType,Name, Description")] Company company)
         {
             try
             {
@@ -191,6 +194,11 @@ namespace TurboTicketsMVC.Controllers
                 {
                     try
                     {
+                        if (company.ImageFormFile != null)
+                        {
+                            company.ImageFormData = await _fileService.ConvertFileToByteArrayAsync(company.ImageFormFile);
+                            company.ImageFormType = company.ImageFormFile.ContentType;
+                        }
                         await _companyService.UpdateCompanyAsync(company);
                         swalMessage = "Changes successful";
                     }
