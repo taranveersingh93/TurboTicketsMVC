@@ -426,7 +426,7 @@
                                     <li>
                                         <a asp-controller="Tickets" asp-action="UnassignedTickets">Unassigned Tickets</a>
                                     </li>
-                                  
+
                                 }
                                 else
                                 {
@@ -457,6 +457,12 @@
                                     <li>
                                         <a asp-controller="Projects" asp-action="AllProjects">All Projects</a>
                                     </li>
+                                    @if(isPM)
+                                    {
+                                        <li>
+                                            <a asp-controller="Projects" asp-action="Index">My Projects</a>
+                                        </li>
+                                    }
                                     <li>
                                         <a asp-controller="Projects" asp-action="ArchivedProjects">Archived Projects</a>
                                     </li>
@@ -470,11 +476,11 @@
                                         <a asp-controller="Projects" asp-action="UnassignedProjects">Unassigned Projects</a>
                                     </li>
                                 }
-                                @if(!isAdmin)
+                                else
                                 {
-                                <li>
-                                    <a asp-controller="Projects" asp-action="Index">My Projects</a>
-                                </li>
+                                    <li>
+                                        <a asp-controller="Projects" asp-action="Index">My Projects</a>
+                                    </li>
                                 }
 
                             </ul>
@@ -713,7 +719,7 @@
                 {
                     'next #notificationsIcon': 'Notifications.',
                 }
-  
+
             ]);
             enjoyhint_instance.run();
 
