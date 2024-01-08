@@ -88,7 +88,7 @@ namespace TurboTicketsMVC.Controllers
             try
             {
 
-                IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByUserIdAsync(_userId,_companyId);
+                IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByUserIdAsync(_userId, _companyId);
                 IEnumerable<Ticket> resolvedTickets = userTickets.Where(t => t.TicketStatus == TTTicketStatuses.Resolved).ToList();
                 return View(resolvedTickets);
             }
@@ -179,7 +179,7 @@ namespace TurboTicketsMVC.Controllers
         }
 
         // GET: Tickets/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? message)
         {
             try
             {
@@ -219,6 +219,10 @@ namespace TurboTicketsMVC.Controllers
                     ViewData["CompanyManagers"] = new SelectList(companyManagers, "Id", "FullName", projectManagerId);
                     ViewData["CompanyDevelopers"] = new MultiSelectList(companyDevelopers, "Id", "FullName", developerIds);
                     ViewData["CompanySubmitters"] = new MultiSelectList(companySubmitters, "Id", "FullName", submitterIds);
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        ViewData["SwalMessage"] = message;
+                    }
                     return View(ticket);
                 }
                 return RedirectToAction("AccessDeniedError", "Home");
@@ -241,7 +245,8 @@ namespace TurboTicketsMVC.Controllers
                 if (projectId != null)
                 {
                     ViewData["Projects"] = new SelectList(userProjects, "Id", "Name", projectId);
-                } else
+                }
+                else
                 {
                     ViewData["Projects"] = new SelectList(userProjects, "Id", "Name");
                 }
@@ -264,8 +269,8 @@ namespace TurboTicketsMVC.Controllers
             try
             {
                 ModelState.Remove("SubmitterUserId");
-                bool canMakeTickets =  await _ticketService.CanMakeTickets(_userId, ticket.ProjectId, _companyId);
-                
+                bool canMakeTickets = await _ticketService.CanMakeTickets(_userId, ticket.ProjectId, _companyId);
+
                 if (ModelState.IsValid && canMakeTickets)
                 {
                     ticket.CreatedDate = DateTimeOffset.Now;
@@ -403,7 +408,7 @@ namespace TurboTicketsMVC.Controllers
                     return RedirectToAction("NotFoundError", "Home");
                 }
                 Ticket ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
-                
+
                 if (ticket == null)
                 {
                     return RedirectToAction("NotFoundError", "Home");
@@ -622,7 +627,7 @@ namespace TurboTicketsMVC.Controllers
 
                     return RedirectToAction(nameof(Index));
                 }
-                
+
                 if (!userAuthorized)
                 {
                     return RedirectToAction("AccessDeniedError", "Home");
@@ -702,7 +707,7 @@ namespace TurboTicketsMVC.Controllers
 
                     return RedirectToAction(nameof(Index));
                 }
-                
+
                 if (!userAuthorized)
                 {
                     return RedirectToAction("AccessDeniedError", "Home");
@@ -730,31 +735,40 @@ namespace TurboTicketsMVC.Controllers
 
                 string statusMessage;
                 ModelState.Remove("TTUserId");
-                if (ModelState.IsValid && ticketAttachment.ImageFormFile != null && canActOnTicket)
-
+                if (canActOnTicket)
                 {
-                    ticketAttachment.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(ticketAttachment.ImageFormFile);
-                    ticketAttachment.ImageFileName = ticketAttachment.ImageFormFile.FileName;
-                    ticketAttachment.ImageFileType = ticketAttachment.ImageFormFile.ContentType;
-                    ticketAttachment.TTUserId = _userId;
-                    ticketAttachment.CreatedDate = DateTimeOffset.Now;
 
-                    await _ticketService.AddTicketAttachmentAsync(ticketAttachment);
-                    statusMessage = "Success: New attachment added to Ticket.";
+                    if (ModelState.IsValid && ticketAttachment.ImageFormFile != null)
 
-                    //Add History
-                    Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketAttachment.TicketId, _companyId);
-                    await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+                    {
+                        ticketAttachment.ImageFileData = await _fileService.ConvertFileToByteArrayAsync(ticketAttachment.ImageFormFile);
+                        ticketAttachment.ImageFileName = ticketAttachment.ImageFormFile.FileName;
+                        ticketAttachment.ImageFileType = ticketAttachment.ImageFormFile.ContentType;
+                        ticketAttachment.TTUserId = _userId;
+                        ticketAttachment.CreatedDate = DateTimeOffset.Now;
 
-                    //Notify
-                    await _notificationService.TicketUpdateNotificationAsync(ticketAttachment.TicketId, _userId, nameof(TTTicketNotificationTypes.AttachmentAdded), _userId);
+                        await _ticketService.AddTicketAttachmentAsync(ticketAttachment);
+
+                        statusMessage = "Success: New attachment added to Ticket.";
+
+                        //Add History
+                        Ticket? newTicket = await _ticketService.GetTicketAsNoTrackingAsync(ticketAttachment.TicketId, _companyId);
+                        await _ticketHistoryService.AddHistoryAsync(oldTicket, newTicket, _userId);
+
+                        //Notify
+                        await _notificationService.TicketUpdateNotificationAsync(ticketAttachment.TicketId, _userId, nameof(TTTicketNotificationTypes.AttachmentAdded), _userId);
+                    }
+                    else
+                    {
+                        statusMessage = "Error: Max File Size is 1 MB.";
+                    }
+                    return RedirectToAction("Details", new { id = ticketAttachment.TicketId, message = statusMessage });
+
                 }
                 else
                 {
-                    statusMessage = "Error: Invalid data.";
+                    return RedirectToAction("AccessDeniedError", "Home");
                 }
-
-                return RedirectToAction("Details", new { id = ticketAttachment.TicketId, message = statusMessage });
             }
             catch (Exception ex)
             {
@@ -774,7 +788,8 @@ namespace TurboTicketsMVC.Controllers
                 {
                     ticketAttachment = await _ticketService.GetTicketAttachmentByIdAsync(Id);
                     canActOnTicket = await _ticketService.CanActOnTicket(_userId, ticketAttachment!.TicketId, _companyId);
-                } else
+                }
+                else
                 {
                     return RedirectToAction("NotFoundError", "Home");
                 }
@@ -816,7 +831,7 @@ namespace TurboTicketsMVC.Controllers
         public async Task<IActionResult> Resolve(int? id)
         {
             try
-            {           
+            {
                 if (id != null)
                 {
                     Ticket? ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);
@@ -859,7 +874,7 @@ namespace TurboTicketsMVC.Controllers
                 if (oldTicket == null)
                 {
                     return RedirectToAction("NotFoundError", "Home");
-                } 
+                }
                 else if (oldTicket.DeveloperUserId == _userId)
                 {
                     Ticket? ticket = await _ticketService.GetTicketByIdAsync(id, _companyId);

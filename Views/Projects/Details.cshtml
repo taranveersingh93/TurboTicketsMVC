@@ -17,7 +17,6 @@
     {
         isPm = _UserManager.GetUserId(User) == projectManager.Id;
     }
-
     bool pmAvailable = Enumerable.Count(ViewBag.ProjectManagers) > 0;
     bool developersAvailable = Enumerable.Count(ViewBag.Developers) > 0;
     bool submittersAvailable = Enumerable.Count(ViewBag.Submitters) > 0;
@@ -387,8 +386,9 @@
     </div>
 }
 
-@section scripts {
+@section Scripts {
     <!-- DataTable -->
     <script src="~/gogi/vendors/dataTable/datatables.min.js"></script>
     <script src="~/gogi/assets/js/examples/datatable.js"></script>
+
 }

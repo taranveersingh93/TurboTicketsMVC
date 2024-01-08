@@ -17,6 +17,8 @@
     var start = Model.Project.StartDate;
     var end = Model.Project.EndDate;
     var today = DateTimeOffset.Now;
+    string? swalMessage = ViewBag.SwalMessage;
+
     var progressPercent = today >= end ? 100 : today < start ? 0 : Math.Round((today.Subtract(start)) / (end.Subtract(start)) * 100);
     bool projectDevelopersAvailable = Enumerable.Count(ViewBag.ProjectDevelopers) > 0;
 
@@ -489,8 +491,40 @@
 }
 
 
-@section scripts {
+@section Scripts {
     <!-- DataTable -->
     <script src="~/gogi/vendors/dataTable/datatables.min.js"></script>
     <script src="~/gogi/assets/js/examples/datatable.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        var swalMessage = "@swalMessage";
+        console.log(swalMessage, "swalmsg");
+        if (swalMessage) {
+            if (swalMessage.includes("Success")) {
+                Swal.fire(
+                    {
+                        title: 'Success',
+                        text: '@swalMessage',
+                        icon: 'success',
+                        confirmButtonText: 'ok',
+                        color: '#5066e1'
+                    }
+                )
+            }
+
+            if (swalMessage.includes("Error")) {
+                Swal.fire(
+                    {
+                        title: 'Sorry',
+                        text: '@swalMessage',
+                        icon: 'error',
+                        confirmButtonText: 'ok',
+                        color: '#820300'
+                    }
+                )
+            }
+
+        }
+    </script>
 }
