@@ -87,6 +87,7 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
+
                 IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByUserIdAsync(_userId,_companyId);
                 IEnumerable<Ticket> resolvedTickets = userTickets.Where(t => t.TicketStatus == TTTicketStatuses.Resolved).ToList();
                 return View(resolvedTickets);
