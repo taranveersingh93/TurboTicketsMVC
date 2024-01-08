@@ -85,7 +85,7 @@
                                             <td class="text-center">
                                                 <div class="badge bg-success" style="width:fit-content;">
                                                     Joined
-                                                </div>  
+                                                </div>
 
                                             </td>
                                         }
@@ -117,17 +117,20 @@
                                         @if (isAdmin)
                                         {
                                             <td class="text-center">
-                                                <form asp-controller="Invites" asp-action="ResendInvite" method="post">
-                                                    <input type="hidden" name="id" value="@item.Id" />
-                                                    <button class="btn-sm btn btn-primary" type="submit">Resend Invite</button>
-                                                </form>                                                 
-                                                @if(item.IsValid)
+                                                @if (!item.IsValid && item.JoinDate == null)
                                                 {
-                                                <form asp-controller="Invites" asp-action="InvalidateInvite">
-                                                    <input type="hidden" name="id" value="@item.Id"/>
-                                                    <button class="btn-sm btn btn-warning mt-2" type="submit">Invalidate Invite</button>
+                                                    <form asp-controller="Invites" asp-action="ResendInvite" method="post">
+                                                        <input type="hidden" name="id" value="@item.Id" />
+                                                        <button class="btn-sm btn btn-primary" type="submit">Resend Invite</button>
+                                                    </form>
+                                                }
+                                                @if (item.IsValid)
+                                                {
+                                                    <form asp-controller="Invites" asp-action="InvalidateInvite">
+                                                        <input type="hidden" name="id" value="@item.Id" />
+                                                        <button class="btn-sm btn btn-warning mt-2" type="submit">Invalidate Invite</button>
 
-                                                </form>
+                                                    </form>
                                                 }
                                                 @* <a class="btn btn-sm btn-warning" asp-action="InvalidateInvite" asp-route-id="@item.Id">Invalidate</a> *@
 
