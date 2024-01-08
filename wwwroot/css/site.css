@@ -241,10 +241,56 @@ input[type=file]::file-selector-button {
         background: #2540d9;
     }
 
-.glow-button.btn.btn-light {
+.glow-button.btn {
     --box-shadow-color: var(--color-gray);
     animation: glowing-button 2s ease-in-out infinite;
 }
+
+.flashing-icon {
+    position: relative;
+}
+
+    .flashing-icon:before {
+        content: "";
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        right: 3px;
+        border-radius: 50%;
+        top: 3px;
+        background-color: var(--color-primary);
+        -webkit-animation: pulsate 1s infinite;
+    }
+
+.gps_ring {
+    border: 3px solid #999;
+    -webkit-border-radius: 30px;
+    height: 18px;
+    width: 18px;
+    position: absolute;
+    left: 20px;
+    top: 214px;
+    -webkit-animation: pulsate 1s ease-out;
+    -webkit-animation-iteration-count: infinite;
+    opacity: 0.0
+}
+
+@-webkit-keyframes pulsate {
+    0% {
+        -webkit-transform: scale(0.1, 0.1);
+        opacity: 0.0;
+    }
+
+    50% {
+        opacity: 1.0;
+    }
+
+    100% {
+        -webkit-transform: scale(1.2, 1.2);
+        opacity: 0.0;
+    }
+}
+
 
 @keyframes glowing-button {
     0% {

@@ -7360,6 +7360,7 @@ body.rtl.small-navigation.scrollable-layout .navigation:hover ul li a .nav-link-
   position: relative;
 }
 
+
 .header ul.navbar-nav li.nav-item a.nav-link.nav-link-notify:before {
   content: "";
   position: absolute;
@@ -7371,6 +7372,7 @@ body.rtl.small-navigation.scrollable-layout .navigation:hover ul li a .nav-link-
   background-color: white;
   -webkit-animation: notify-pulse 1s infinite;
 }
+
 
 .header ul.navbar-nav li.nav-item a.nav-link:hover,
 .header ul.navbar-nav li.nav-item a.nav-link:focus {

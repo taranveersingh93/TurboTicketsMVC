@@ -219,8 +219,8 @@
                     <div class="header-body-left">
                         <ul class="navbar-nav">
                             <li class="nav-item dropdown">
-                                <button id="tourButton" onclick="removeGlow()" class="btn btn-light glow-button tour d-xl-inline d-none">Quick Tour</button>
-                                <a href"#" id="rolesGuide" class="btn btn-light d-xl-inline" role="button" title="Roles Guide" data-toggle="dropdown">Roles Guide</a>
+                                <button id="tourButton" onclick="removeGlow()" class="btn btn-light flashing-icon tour d-xl-inline d-none">Quick Tour</button>
+                                <button id="rolesGuide" class="btn btn-light d-xl-inline" role="button" title="Roles Guide" data-toggle="dropdown">Roles Guide</button>
 
                                 <div class="dropdown-menu dropdown-menu-big">
                                     <div class="border-bottom px-4 py-3 text-center d-flex justify-content-between">
@@ -717,6 +717,8 @@
         function removeGlow() {
             var tourButton = document.querySelector("#tourButton");
             tourButton.classList.remove("glow-button");
+            tourButton.classList.remove("flashing-icon");
+
         }
     </script>
     <!-- App scripts -->
