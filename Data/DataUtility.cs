@@ -25,7 +25,10 @@ namespace TurboTicketsMVC.Data
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
             var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-            return string.IsNullOrEmpty(databaseUrl) ? connectionString : BuildConnectionString(databaseUrl);
+            var privateDatabaseUrl = Environment.GetEnvironmentVariable("DATABASE_PRIVATE_URL");
+            //return string.IsNullOrEmpty(databaseUrl) ? connectionString : BuildConnectionString(databaseUrl);
+            return string.IsNullOrEmpty(privateDatabaseUrl) ? connectionString : BuildConnectionString(privateDatabaseUrl);
+
         }
 
         private static string BuildConnectionString(string databaseUrl)
