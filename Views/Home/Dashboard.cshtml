@@ -242,76 +242,79 @@
                     <div class="card-body">
                         @if (userTickets.Any(t => t.TicketPriority == TTTicketPriorities.High || t.TicketPriority == TTTicketPriorities.Urgent))
                         {
-                        <h6 class="card-title card-secondary mb-2">High priority tickets</h6>
-                        <table id="example1" class="table table-striped table-bordered" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        Title
-                                    </th>
-                                    <th>
-                                        Created
-                                    </th>
-                                    <th>
-                                        Project
-                                    </th>
+                            <h6 class="card-title card-secondary mb-2">High priority tickets</h6>
+                            <table id="example1" class="table table-striped table-bordered" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Title
+                                        </th>
+                                        <th>
+                                            Created
+                                        </th>
+                                        <th>
+                                            Project
+                                        </th>
 
-                                    <th>
-                                        Developer
-                                    </th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (Ticket item in userTickets)
-                                {
-                                    @if (item.TicketPriority == TTTicketPriorities.High || item.TicketPriority == TTTicketPriorities.Urgent)
+                                        <th>
+                                            Developer
+                                        </th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (Ticket item in userTickets)
                                     {
-                                        <tr>
-                                            <td>
-                                                @Html.DisplayFor(modelItem => item.Title)
-                                            </td>
-                                            <td>
-                                                @item.CreatedDate.ToString("dd, MMM, yyyy")
-                                            </td>
-                                            <td>
-                                                @Html.DisplayFor(modelItem => item.Project.Name)
-                                            </td>
-                                            @if (item.DeveloperUser != null)
-                                            {
+                                        @if (item.TicketPriority == TTTicketPriorities.High || item.TicketPriority == TTTicketPriorities.Urgent)
+                                        {
+                                            <tr>
                                                 <td>
-                                                    @item.DeveloperUser!.FullName
+                                                    @Html.DisplayFor(modelItem => item.Title)
                                                 </td>
-
-                                            }
-                                            else
-                                            {
-                                                <td class="text-center">
-                                                    <a asp-controller="Tickets" asp-action="AssignTicket" asp-route-id="@item.Id">
-                                                        <div class="btn btn-warning">
-                                                            Assign
-                                                        </div>
-                                                    </a>
+                                                <td>
+                                                    @item.CreatedDate.ToString("dd, MMM, yyyy")
                                                 </td>
-                                            }
-                                            <td class="text-center">
-                                                <a asp-controller="Tickets" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary" role="button">Details</a>
-                                                    @if (await _TicketService.CanActOnTicket(userId, item.Id, item.Project!.CompanyId))
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Project.Name)
+                                                </td>
+                                                @if (item.DeveloperUser != null)
                                                 {
-                                                    <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary" role="button">Edit</a>
+                                                    <td class="text-center">
+                                                        <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(@item.DeveloperUser))">
+                                                            @item.DeveloperUser!.FullName
+                                                        </a>
+                                                    </td>
+
+                                                }
+                                                else
+                                                {
+                                                    <td class="text-center">
+                                                        <a asp-controller="Tickets" asp-action="AssignTicket" asp-route-id="@item.Id">
+                                                            <div class="btn btn-warning">
+                                                                Assign
+                                                            </div>
+                                                        </a>
+                                                    </td>
+                                                }
+                                                <td class="text-center">
+                                                    <a asp-controller="Tickets" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary" role="button">Details</a>
+                                                    @if (await _TicketService.CanActOnTicket(userId, item.Id, item.Project!.CompanyId))
+                                                    {
+                                                        <a asp-controller="Tickets" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-secondary" role="button">Edit</a>
                                                         @if (await _TicketService.CanAssignDeveloper(userId, item.Id, item.Project!.CompanyId))
                                                         {
-                                                        <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id" class="btn btn-sm btn-danger" role="button">Archive</a>
-                                                          
+                                                            <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id" class="btn btn-sm btn-danger" role="button">Archive</a>
+
                                                         }
-                                                }
-                                            </td>
-                                        </tr>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
                                     }
-                                }
-                            </tbody>
+                                </tbody>
                             </table>
-                        } else
+                        }
+                        else
                         {
                             <h4 class="text-muted">No High Priority Tickets</h4>
                         }
@@ -503,8 +506,8 @@
         };
         var chartElement = document.querySelector("#ticketsDevelopersChart");
         if (chartElement) {
-        var chart = new ApexCharts(chartElement, options);
-        chart.render();
+            var chart = new ApexCharts(chartElement, options);
+            chart.render();
         }
     </script>
     <script>

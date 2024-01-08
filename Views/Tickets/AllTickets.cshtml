@@ -56,14 +56,14 @@
                                         Project
                                     </th>
                                     <th>
-                                        @Html.DisplayNameFor(model => model.CreatedDate)
+                                        Created Date
                                     </th>
 
                                     <th>
-                                        @Html.DisplayNameFor(model => model.TicketStatus)
+                                        Ticket Status
                                     </th>
                                     <th>
-                                        @Html.DisplayNameFor(model => model.TicketPriority)
+                                        Ticket Priority
                                     </th>
 
                                     <th>
@@ -154,8 +154,11 @@
                                         }
                                         @if (item.DeveloperUser != null)
                                         {
-                                            <td>
+                                            <td class="text-center">
+                                                <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(@item.DeveloperUser))">
+
                                                 @item.DeveloperUser!.FullName
+                                                </a>
                                             </td>
 
                                         }

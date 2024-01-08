@@ -56,14 +56,14 @@
                                         Project
                                     </th>
                                     <th>
-                                        @Html.DisplayNameFor(model => model.CreatedDate)
+                                        Created Date
                                     </th>
 
                                     <th>
-                                        @Html.DisplayNameFor(model => model.TicketStatus)
+                                        Ticket Status
                                     </th>
                                     <th>
-                                        @Html.DisplayNameFor(model => model.TicketPriority)
+                                        Ticket Priority
                                     </th>
 
                                     <th>
@@ -154,14 +154,16 @@
                                         }
                                         @if (item.DeveloperUser != null)
                                         {
-                                            <td>
-                                                @item.DeveloperUser!.FullName
+                                            <td class="text-center">
+                                                <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(@item.DeveloperUser))">
+
+                                                    @item.DeveloperUser!.FullName
+                                                </a>
                                             </td>
 
                                         }
                                         else
                                         {
-
                                             <td class="text-center">
                                                 @if (await _TicketService.CanAssignDeveloper(userId, item.Id, companyId))
                                                 {
@@ -190,11 +192,6 @@
                                                 @if (!item.Archived && await _TicketService.CanAssignDeveloper(userId, item.Id, item.Project!.CompanyId))
                                                 {
                                                     <a asp-controller="Tickets" asp-action="Archive" asp-route-id="@item.Id" class="btn btn-sm btn-danger" role="button">Archive</a>
-                                                }
-                                                @if(User.IsInRole("Developer") && item.TicketStatus != TTTicketStatuses.Resolved )
-                                                {
-                                                    <a asp-controller="Tickets" asp-action="Resolve" asp-route-id="@item.Id" class="btn btn-sm btn-success text-dark" role="button">Resolve</a>
-
                                                 }
                                             }
                                         </td>
