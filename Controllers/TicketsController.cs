@@ -231,14 +231,20 @@ namespace TurboTicketsMVC.Controllers
 
         }
 
-        // GET: Tickets/Create
-        public async Task<IActionResult> Create()
+
+        [HttpGet]
+        public async Task<IActionResult> Create(int? projectId)
         {
             try
             {
-                int companyId = User.Identity!.GetCompanyId();
                 IEnumerable<Project> userProjects = await _projectService.GetUserProjectsAsync(_userId);
-                ViewData["Projects"] = new SelectList(userProjects, "Id", "Name");
+                if (projectId != null)
+                {
+                    ViewData["Projects"] = new SelectList(userProjects, "Id", "Name", projectId);
+                } else
+                {
+                    ViewData["Projects"] = new SelectList(userProjects, "Id", "Name");
+                }
                 return View();
             }
             catch (Exception ex)

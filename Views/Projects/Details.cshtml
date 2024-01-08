@@ -219,7 +219,7 @@
                     <h2>Tickets</h2>
                     @if (isMember || isAdmin)
                     {
-                        <a class="btn btn-primary" role="button" asp-controller="Tickets" asp-action="Create">Create Ticket</a>
+                        <a class="btn btn-primary" role="button" asp-controller="Tickets" asp-action="Create" asp-route-projectId="@Model.Id">Create Ticket</a>
                     }
                 </div>
                 <div class="card-body">
