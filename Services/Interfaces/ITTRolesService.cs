@@ -18,5 +18,7 @@ namespace TurboTicketsMVC.Services.Interfaces
         public Task<bool> RemoveUserFromRoleAsync(TTUser? user, string? roleName);
 
         public Task<bool> RemoveUserFromRolesAsync(TTUser? user, IEnumerable<string>? roleNames);
+        public Task<TTUser> GetUserByIdAsync(string? userId);
+
     }
 }

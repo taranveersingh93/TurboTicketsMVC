@@ -172,5 +172,19 @@ namespace TurboTicketsMVC.Services
 				throw;
 			}
 		}
+		public async Task<TTUser> GetUserByIdAsync(string? userId)
+		{
+			try
+			{
+				TTUser? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+				return user!;
+			}
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                throw;
+            }
+        }
 	}
 }

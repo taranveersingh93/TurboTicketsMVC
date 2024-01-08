@@ -76,7 +76,7 @@ namespace TurboTicketsMVC.Controllers
             try
             {
                 int? companyId = User.Identity!.GetCompanyId();
-                IEnumerable<Models.Project> companyProjects = await _projectService.GetProjectsByCompanyIdAsync(companyId);
+                IEnumerable<Models.Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
 
                 ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
                 return View();

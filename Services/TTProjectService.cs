@@ -54,7 +54,7 @@ namespace TurboTicketsMVC.Services
                         if (!isOnProject)
                         {
                             project.Members.Add(member);
-                            await _context.SaveChangesAsync();
+                            await UpdateProjectAsync(project);
                             return true;
                         }
                     }

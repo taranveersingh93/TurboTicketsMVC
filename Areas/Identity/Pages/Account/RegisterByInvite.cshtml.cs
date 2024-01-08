@@ -22,6 +22,7 @@ public class RegisterByInviteModel : PageModel
     private readonly IEmailSender _emailSender;
     private readonly ITTProjectService _projectService;
     private readonly ITTInviteService _inviteService;
+    private readonly ITTRolesService _roleService;
 
     public RegisterByInviteModel(
         UserManager<TTUser> userManager,
@@ -30,7 +31,8 @@ public class RegisterByInviteModel : PageModel
         ILogger<RegisterModel> logger,
         IEmailSender emailSender,
         ITTProjectService projectService,
-        ITTInviteService inviteService)
+        ITTInviteService inviteService,
+        ITTRolesService roleService)
     {
         _userManager = userManager;
         _userStore = userStore;
@@ -40,6 +42,7 @@ public class RegisterByInviteModel : PageModel
         _emailSender = emailSender;
         _projectService = projectService;
         _inviteService = inviteService;
+        _roleService = roleService;
     }
 
     /// <summary>
@@ -178,7 +181,8 @@ public class RegisterByInviteModel : PageModel
 
                 var userId = await _userManager.GetUserIdAsync(user);
                 // Add new user to the designated project
-                TTUser? member = await _userManager.GetUserAsync(User);
+                //TTUser? member = await _userManager.GetUserAsync(User);
+                TTUser? member = await _roleService.GetUserByIdAsync(userId);
                 await _projectService.AddMemberToProjectAsync(member, Input.ProjectId);
 
                 // Add user to default role
