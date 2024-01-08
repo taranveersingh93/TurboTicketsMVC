@@ -408,6 +408,12 @@
                                     <li>
                                         <a asp-controller="Tickets" asp-action="AllTickets">All Tickets</a>
                                     </li>
+                                    @if (isPM)
+                                    {
+                                        <li>
+                                            <a asp-controller="Tickets" asp-action="Index">My Tickets</a>
+                                        </li>
+                                    }
                                     <li>
                                         <a asp-controller="Tickets" asp-action="ArchivedTickets">Archived Tickets</a>
                                     </li>
@@ -420,6 +426,7 @@
                                     <li>
                                         <a asp-controller="Tickets" asp-action="UnassignedTickets">Unassigned Tickets</a>
                                     </li>
+                                  
                                 }
                                 else
                                 {
