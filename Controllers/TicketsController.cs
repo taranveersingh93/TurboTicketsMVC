@@ -319,11 +319,11 @@ namespace TurboTicketsMVC.Controllers
                     {
                         return RedirectToAction("NotFoundError", "Home");
                     }
-                    int companyId = User.Identity!.GetCompanyId();
-                    IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
-                    IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
-                    ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
-                    ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
+                    IEnumerable<Project>? userProjects = await _projectService.GetUserProjectsAsync(_userId);
+                    IEnumerable<TTUser> projectDevs = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
+
+                    ViewData["DeveloperUsers"] = new SelectList(projectDevs, "Id", "FullName");
+                    ViewData["Projects"] = new SelectList(userProjects, "Id", "Name");
                     return View(ticket);
                 }
                 else
@@ -381,11 +381,11 @@ namespace TurboTicketsMVC.Controllers
                     }
                     return RedirectToAction(nameof(Details), new { id = ticket.Id });
                 }
-                int companyId = User.Identity!.GetCompanyId();
-                IEnumerable<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(companyId);
-                IEnumerable<TTUser> companyDevs = await _roleService.GetUsersInRoleAsync(nameof(TTRoles.Developer), _companyId);
-                ViewData["DeveloperUsers"] = new SelectList(companyDevs, "Id", "FullName");
-                ViewData["Projects"] = new SelectList(companyProjects, "Id", "Name");
+                IEnumerable<Project>? userProjects = await _projectService.GetUserProjectsAsync(_userId);
+                IEnumerable<TTUser> projectDevs = await _projectService.GetProjectMembersByRoleAsync(ticket.ProjectId, nameof(TTRoles.Developer), _companyId);
+
+                ViewData["DeveloperUsers"] = new SelectList(projectDevs, "Id", "FullName");
+                ViewData["Projects"] = new SelectList(userProjects, "Id", "Name");
                 return View(ticket);
             }
             catch (Exception ex)
