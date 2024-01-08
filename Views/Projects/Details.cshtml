@@ -9,11 +9,12 @@
 
 @{
     ViewData["Title"] = "Details";
-   
+
     TTUser? projectManager = await _projectService.GetProjectManagerAsync(Model.Id);
     bool isAdmin = User.IsInRole("Admin");
     bool isPm = false;
-    if (projectManager != null) {
+    if (projectManager != null)
+    {
         isPm = _UserManager.GetUserId(User) == projectManager.Id;
     }
 
@@ -45,7 +46,8 @@
 
             </div>
         </div>
-        @if(isPm || isAdmin) {
+        @if (isPm || isAdmin)
+        {
             <a asp-controller="Projects" asp-action="Edit" asp-route-id="@Model.Id" role="button" class="btn btn-primary">Edit Project</a>
         }
     </div>
@@ -69,7 +71,7 @@
                                 var today = DateTimeOffset.Now;
                                 var percent = today >= end ? 100 : today < start ? 0 : Math.Round((today.Subtract(start)) / (end.Subtract(start)) * 100);
                             }
-                            <div class="progress-bar" role="progressbar" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100" style="width:@percent%;" >
+                            <div class="progress-bar" role="progressbar" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100" style="width:@percent%;">
                                 @* Use Progress Bar code variable here *@
                                 <span class="progress-value">@percent%</span>
                             </div>
@@ -106,51 +108,57 @@
             <div class="border border-bottom-gray card h-100 m-1 p-2">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5>Project Team</h5>
-                    @if (isAdmin || isPm) {
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editTeamModal">
-                        Edit Team
-                    </button>
-                    } 
+                    @if (isAdmin || isPm)
+                    {
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editTeamModal">
+                            Edit Team
+                        </button>
+                    }
                 </div>
                 <div class="card-body list-group list-group-flush" style="overflow-y:auto;height:300px;">
-                    @if(Model.Members.Count() > 0)
+                    @if (Model.Members.Count() > 0)
                     {
                         @foreach (TTUser member in Model.Members)
-                    {
-                        <div class="list-group-item d-flex px-0 align-items-start">
-                            <div class="pr-3">
-                                <span class="avatar">
-                                    <img src="@_fileService.ConvertByteArrayToFile(member.ImageFileData!, member.ImageFileType!, DefaultImage.BTUserImage)"
-                                         class="rounded-circle"
-                                         alt="image">
-                                </span>
-                            </div>
-                            <div class="flex-grow- 1">
-                                <h6 class="mb-1">@member.FullName</h6>
-                                @foreach (string? role in await _roleService.GetUserRolesAsync(member))
-                                {
-                                    if (role == "Admin" || role == "ProjectManager")
+                        {
+                            <div class="list-group-item d-flex px-0 align-items-start">
+                                <div class="pr-3">
+                                    <span class="avatar">
+                                        <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                            <img src="@_fileService.ConvertByteArrayToFile(member.ImageFileData!, member.ImageFileType!, DefaultImage.BTUserImage)"
+                                                 class="rounded-circle"
+                                                 alt="image">
+                                        </a>
+                                    </span>
+                                </div>
+                                <div class="flex-grow- 1">
+                                    <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(member))">
+                                        <h6 class="mb-1">@member.FullName</h6>
+                                    </a>
+                                    @foreach (string? role in await _roleService.GetUserRolesAsync(member))
                                     {
-                                        <span class="badge rounded-pill dark-bg">@role</span>
-                                    }
-                                    else if (role == "Developer")
-                                    {
-                                        <span class="badge rounded-pill bg-primary">@role</span>
-                                    }
-                                    else if (role == "Submitter")
-                                    {
-                                        <span class="badge rounded-pill bg-secondary">@role</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge rounded-pill bg-warning">@role</span>
+                                        if (role == "Admin" || role == "ProjectManager")
+                                        {
+                                            <span class="badge rounded-pill dark-bg">@role</span>
+                                        }
+                                        else if (role == "Developer")
+                                        {
+                                            <span class="badge rounded-pill bg-primary">@role</span>
+                                        }
+                                        else if (role == "Submitter")
+                                        {
+                                            <span class="badge rounded-pill bg-secondary">@role</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge rounded-pill bg-warning">@role</span>
 
+                                        }
                                     }
-                                }
+                                </div>
                             </div>
-                        </div>
                         }
-                    } else
+                    }
+                    else
                     {
                         <h4 class="text-muted">No Team Members</h4>
                     }
@@ -165,36 +173,39 @@
                 </div>
                 <div class="card-body" style="overflow-y:auto;height:300px;">
                     @* Project Activity loop *@
-                    @if(Model.Tickets.SelectMany(t => t.History).Count() > 0)
+                    @if (Model.Tickets.SelectMany(t => t.History).Count() > 0)
                     {
-                        
-                    @foreach (TicketHistory history in Model.Tickets.SelectMany(t => t.History).OrderBy(h => h.CreatedDate))
-                    {
-                        <div class="border border-bottom-gray p-3 m-3" style="border-radius: 5px;">
-                            <span class="date" style="font-weight:bold">@history.CreatedDate.ToString("dd MMM yyyy")</span>
-                            <h6 class="text-primary mt-2">@history.Description</h6>
-                            <span>By: 
-                                <img class="rounded-circle avatar-sm avatar mr-3" src="@_fileService.ConvertByteArrayToFile(history.User.ImageFileData, history.User.ImageFileType, DefaultImage.BTUserImage)"/><a href="" title="@history.User!.FullName">@history.User.FullName</a></span>
-                            <div class="">
-                                @if (history.Description!.Contains("New Ticket Created"))
-                                {
-                                    <p>A ticket was added.</p>
-                                }
-                                else if (history.PropertyName!.Equals("Ticket Comment") || history.PropertyName.Equals("Ticket Attachment"))
-                                {
-                                    <p>A <b>@history.PropertyName</b> was added.</p>
-                                }
-                                else
-                                {
-                                    <p>The ticket <b>@history.PropertyName</b> was edited.</p>
-                                    <p class="mb-1">@($"Previous {history.PropertyName}: ") <span style="color:#B80000">@history.OldValue</span></p>
-                                    <p class="mt-1">@($"Current {history.PropertyName}: ") <span style="color:#5F8670">@history.NewValue</span></p>
-                                }
+
+                        @foreach (TicketHistory history in Model.Tickets.SelectMany(t => t.History).OrderBy(h => h.CreatedDate))
+                        {
+                            <div class="border border-bottom-gray p-3 m-3" style="border-radius: 5px;">
+                                <span class="date" style="font-weight:bold">@history.CreatedDate.ToString("dd MMM yyyy")</span>
+                                <h6 class="text-primary mt-2">@history.Description</h6>
+                                <span>
+                                    By:
+                                    <img class="rounded-circle avatar-sm avatar mr-3" src="@_fileService.ConvertByteArrayToFile(history.User.ImageFileData, history.User.ImageFileType, DefaultImage.BTUserImage)" /><a href="" title="@history.User!.FullName">@history.User.FullName</a>
+                                </span>
+                                <div class="">
+                                    @if (history.Description!.Contains("New Ticket Created"))
+                                    {
+                                        <p>A ticket was added.</p>
+                                    }
+                                    else if (history.PropertyName!.Equals("Ticket Comment") || history.PropertyName.Equals("Ticket Attachment"))
+                                    {
+                                        <p>A <b>@history.PropertyName</b> was added.</p>
+                                    }
+                                    else
+                                    {
+                                        <p>The ticket <b>@history.PropertyName</b> was edited.</p>
+                                        <p class="mb-1">@($"Previous {history.PropertyName}: ") <span style="color:#B80000">@history.OldValue</span></p>
+                                        <p class="mt-1">@($"Current {history.PropertyName}: ") <span style="color:#5F8670">@history.NewValue</span></p>
+                                    }
+                                </div>
                             </div>
-                        </div>
-                        <hr />
+                            <hr />
                         }
-                    } else
+                    }
+                    else
                     {
                         <h4 class="text-muted">No Project Activity</h4>
                     }
@@ -206,15 +217,15 @@
             <div class="border border-bottom-gray card m-1 p-2">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2>Tickets</h2>
-                    @if(isMember || isAdmin)
+                    @if (isMember || isAdmin)
                     {
                         <a class="btn btn-primary" role="button" asp-controller="Tickets" asp-action="Create">Create Ticket</a>
                     }
                 </div>
                 <div class="card-body">
-                    @if(Model.Tickets.Count() > 0)
+                    @if (Model.Tickets.Count() > 0)
                     {
-                    <table id="example1" class="table table-striped table-bordered" style="width: 100%;">
+                        <table id="example1" class="table table-striped table-bordered" style="width: 100%;">
                             <thead class="">
                                 <tr>
                                     @* Table header *@
@@ -231,7 +242,11 @@
                                 {
                                     <tr>
                                         <td>@ticket.Title</td>
-                                        <td>@ticket.SubmitterUser?.FullName</td>
+                                        <td class="text-center">
+                                            <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(ticket.SubmitterUser))">
+                                                @ticket.SubmitterUser?.FullName
+                                            </a>
+                                        </td>
                                         @if (string.IsNullOrEmpty(ticket.DeveloperUser?.FullName))
                                         {
                                             <td class="text-center">
@@ -242,38 +257,45 @@
                                         }
                                         else
                                         {
-                                            <td class="text-center">@ticket.DeveloperUser?.FullName</td>
+                                            <td class="text-center">
+                                                <a asp-controller="Companies" asp-action="UserProfile" asp-route-email="@(await _UserManager.GetEmailAsync(@ticket.DeveloperUser))">
+                                                    @ticket.DeveloperUser?.FullName
+
+                                                </a>
+                                            </td>
                                         }
-                                    @if(ticket.TicketStatus == TTTicketStatuses.New)
-                                    {
-                                        <td class="text-center">
-                                            <div class="badge rounded-pill bg-info">
-                                                @ticket.TicketStatus
-                                            </div>
-                                        </td>
-                                    } else if(ticket.TicketStatus == TTTicketStatuses.Testing)
-                                    {
-                                        <td class="text-center">
-                                            <div class="badge rounded-pill bg-primary">
-                                                @ticket.TicketStatus
-                                            </div>
-                                        </td>
-                                    }
-                                    else if (ticket.TicketStatus == TTTicketStatuses.Resolved)
-                                    {
-                                        <td class="text-center">
-                                            <div class="badge rounded-pill bg-success">
-                                                @ticket.TicketStatus
-                                            </div>
-                                        </td>
-                                    } else
-                                    {
-                                        <td class="text-center">
-                                            <div class="badge rounded-pill bg-dark">
-                                                @ticket.TicketStatus
-                                            </div>
-                                        </td>
-                                    }
+                                        @if (ticket.TicketStatus == TTTicketStatuses.New)
+                                        {
+                                            <td class="text-center">
+                                                <div class="badge rounded-pill bg-info">
+                                                    @ticket.TicketStatus
+                                                </div>
+                                            </td>
+                                        }
+                                        else if (ticket.TicketStatus == TTTicketStatuses.Testing)
+                                        {
+                                            <td class="text-center">
+                                                <div class="badge rounded-pill bg-primary">
+                                                    @ticket.TicketStatus
+                                                </div>
+                                            </td>
+                                        }
+                                        else if (ticket.TicketStatus == TTTicketStatuses.Resolved)
+                                        {
+                                            <td class="text-center">
+                                                <div class="badge rounded-pill bg-success">
+                                                    @ticket.TicketStatus
+                                                </div>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="text-center">
+                                                <div class="badge rounded-pill bg-dark">
+                                                    @ticket.TicketStatus
+                                                </div>
+                                            </td>
+                                        }
                                         <td>
                                             <a asp-controller="Tickets" asp-action="Details" asp-route-id="@ticket.Id" class="btn btn-sm btn-primary d-flex justify-content-center" role="button">Details</a>
                                         </td>
@@ -281,10 +303,11 @@
                                 }
                             </tbody>
                         </table>
-                    } else
+                    }
+                    else
                     {
-                     <h4 class="text-muted">No Tickets to show</h4>
-                     <a asp-controller="Tickets" asp-action="Create" class="btn btn-primary" role="button">Create Ticket</a>
+                        <h4 class="text-muted">No Tickets to show</h4>
+                        <a asp-controller="Tickets" asp-action="Create" class="btn btn-primary" role="button">Create Ticket</a>
                     }
 
                 </div>
@@ -295,67 +318,73 @@
 </div>
 
 
-@if(isAdmin || isPm)
+@if (isAdmin || isPm)
 {
-<div class="modal fade" id="editTeamModal" tabindex="-1" aria-labelledby="editTeamModal" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="EditTeam" asp-controller="Projects" method="Post">
-                <input type="hidden" value="@Model.Id" name="ProjectId" />
-                <input type="hidden" value="Details" name="redirect" />
+    <div class="modal fade" id="editTeamModal" tabindex="-1" aria-labelledby="editTeamModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="EditTeam" asp-controller="Projects" method="Post">
+                    <input type="hidden" value="@Model.Id" name="ProjectId" />
+                    <input type="hidden" value="Details" name="redirect" />
 
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Team</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    @if (isAdmin)
-                    {
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Team</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if (isAdmin)
+                        {
+                            <div class="form-group">
+                                <label for="projectManagerSelect" class="control-label">Project Manager</label>
+                                @if (pmAvailable)
+                                {
+                                    <select name="projectManagerId" id="projectManagerSelect" class="form-control dropdown-toggle" asp-items="ViewBag.ProjectManagers"></select>
+                                }
+                                else
+                                {
+                                    <h6 class="text-muted text-center">No company member, with a PM role, available.</h6>
+                                }
+                            </div>
+                        }
+                        @if (isPm)
+                        {
+                            <input type="hidden" name="ProjectManagerId" value="@projectManager.Id" />
+                        }
                         <div class="form-group">
-                            <label for="projectManagerSelect" class="control-label">Project Manager</label>
-                        @if(pmAvailable) {
-                                <select name="projectManagerId" id="projectManagerSelect" class="form-control dropdown-toggle" asp-items="ViewBag.ProjectManagers"></select>
-                            } else
+                            <label for="developerTeamSelect" class="control-label">Developers</label>
+                            @if (developersAvailable)
                             {
-                                <h6 class="text-muted text-center">No company member, with a PM role, available.</h6>
-                            } 
+                                <select name="DeveloperIds" id="developerTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Developers" multiple></select>
+                            }
+                            else
+                            {
+                                <h6 class="text-muted text-center">No company member, with a developer role, available.</h6>
+                            }
                         </div>
-                    }
-                    @if(isPm)
-                    {
-                        <input type="hidden" name="ProjectManagerId" value="@projectManager.Id" />
-                    }
-                    <div class="form-group">
-                        <label for="developerTeamSelect" class="control-label">Developers</label>
-                        @if(developersAvailable) {
-                            <select name="DeveloperIds" id="developerTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Developers" multiple></select>
-                        } else
-                        {
-                         <h6 class="text-muted text-center">No company member, with a developer role, available.</h6>                   
-                        }
+                        <div class="form-group">
+                            <label for="submitterTeamSelect" class="control-label">Submitters</label>
+                            @if (submittersAvailable)
+                            {
+                                <select name="SubmitterIds" id="submitterTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Submitters" multiple></select>
+                            }
+                            else
+                            {
+                                <h6 class="text-muted text-center">No company member, with a submitter role, available.</h6>
+                            }
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="submitterTeamSelect" class="control-label">Submitters</label>
-                        @if(submittersAvailable) {
-                            <select name="SubmitterIds" id="submitterTeamSelect" class="form-control" style="height: 100px;" asp-items="ViewBag.Submitters" multiple></select>
-                        } else
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        @if (isAdmin)
                         {
-                            <h6 class="text-muted text-center">No company member, with a submitter role, available.</h6>
+                            <a role="button" class="btn btn-secondary" asp-controller="Companies" asp-action="ManageUserRoles">Manage Roles</a>
                         }
+                        <button type="submit" class="btn btn-primary">Save changes</button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                    @if (isAdmin)
-                    {
-                        <a role="button" class="btn btn-secondary" asp-controller="Companies" asp-action="ManageUserRoles">Manage Roles</a>
-                    }
-                    <button type="submit" class="btn btn-primary">Save changes</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 }
 
 @section scripts {
