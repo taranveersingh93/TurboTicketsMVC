@@ -71,7 +71,7 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-                IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByCompanyIdAsync(_companyId);
+                IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByUserIdAsync(_userId, _companyId);
                 IEnumerable<Ticket> activeTickets = userTickets.Where(t => t.TicketStatus != TTTicketStatuses.Resolved).ToList();
 
                 return View(activeTickets);
@@ -87,7 +87,7 @@ namespace TurboTicketsMVC.Controllers
         {
             try
             {
-                IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByCompanyIdAsync(_companyId);
+                IEnumerable<Ticket> userTickets = await _ticketService.GetTicketsByUserIdAsync(_userId,_companyId);
                 IEnumerable<Ticket> resolvedTickets = userTickets.Where(t => t.TicketStatus == TTTicketStatuses.Resolved).ToList();
                 return View(resolvedTickets);
             }
